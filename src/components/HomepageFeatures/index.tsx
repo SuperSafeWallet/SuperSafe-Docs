@@ -10,46 +10,59 @@ type FeatureItem = {
   description: ReactNode;
 };
 
-// Updated FeatureList with SuperSafe key features
+// Updated FeatureList with SuperSafe v3.0.0+ key features
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Ultra-Secure Connection',
-    // Svg: require('@site/static/img/logo.svg').default, // Placeholder if we want a generic logo later
+    title: 'MetaMask-Style Architecture',
     description: (
       <>
-        Connect to dApps with confidence. We use EIP-6963 and AES-GCM encryption to protect your assets.
+        Built with Service Worker architecture for reliability. 25K+ lines of code with military-grade security
+        and MetaMask-compatible APIs.
       </>
     ),
   },
   {
-    title: 'Full Control in Your Hands',
+    title: 'Smart Native Connection',
     description: (
       <>
-        Your private keys never leave your device. Simple and secure multi-account management.
+        Real chainIds, no compatibility hacks. Connect to dApps with confidence using EIP-6963 and
+        automatic framework detection.
       </>
     ),
   },
   {
-    title: 'Seamless dApp Experience',
+    title: 'Gasless Token Swaps',
     description: (
       <>
-        Transparent interaction with dApps. Clear permissions and instant management of connected sites.
+        Swap tokens without paying gas fees. Integrated with Bebop JAM protocol for MEV protection
+        and competitive pricing across SuperSeed and Optimism.
       </>
     ),
   },
   {
-    title: 'Your Wallet, Your Rules',
+    title: 'AES-256-GCM Encryption',
     description: (
       <>
-        Multi-network support (SuperSeed, Sepolia) and easily add any ERC-20 token.
+        Military-grade encryption with PBKDF2 key derivation. Security score of 96/100 with
+        AllowList system for trusted dApps only.
       </>
     ),
   },
   {
-    title: 'Always Protected',
+    title: 'Multi-Chain Ready',
     description: (
       <>
-        Automatic dApp disconnection when switching wallets and clear prompts for every action.
+        2 active networks (SuperSeed, Optimism) with 5+ planned. Seamless network switching with
+        automatic dApp compatibility detection.
+      </>
+    ),
+  },
+  {
+    title: 'Developer-First Approach',
+    description: (
+      <>
+        Complete EIP-1193 implementation with framework support for RainbowKit, Wagmi, Web3-React,
+        and Dynamic. Comprehensive API documentation.
       </>
     ),
   },
