@@ -1,0 +1,94 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #00C49A; /* SUPERsafeTeal */
+  --ifm-color-primary-dark: #00b08a;
+  --ifm-color-primary-darker: #00a17e;
+  --ifm-color-primary-darkest: #008568;
+  --ifm-color-primary-light: #1ad0a8;
+  --ifm-color-primary-lighter: #2dd8b0;
+  --ifm-color-primary-lightest: #4fe0b9;
+
+  --ifm-background-color: #FAF3E0; /* SUPERsafeBeige for light mode background */
+  --ifm-font-color-base: #2D3748; /* SUPERsafeDarkText for base font color in light mode */
+  --ifm-font-color-secondary: #525f7f; /* Adjusted for light mode if needed */
+  --ifm-font-family-base: 'Inter', sans-serif;
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.07);
+
+  /* Custom Navbar styles */
+  --ifm-navbar-background-color: var(--ifm-color-primary);
+  --ifm-navbar-link-color: #ffffff;
+  --ifm-navbar-link-hover-color: #f0f0f0;
+  --ifm-navbar-search-input-background-color: rgba(255, 255, 255, 0.15);
+  --ifm-navbar-search-input-color: #ffffff;
+  --ifm-navbar-search-placeholder-color: rgba(255, 255, 255, 0.7);
+
+  /* Custom Button styles */
+  --ifm-button-border-radius: 8px;
+
+  /* Card variables (Docusaurus often uses these or similar for card-like components) */
+  --ifm-card-background-color: #ffffff;
+  --ifm-card-border-radius: 12px;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #12d8ad;
+  --ifm-color-primary-dark: #10c09a;
+  --ifm-color-primary-darker: #0fb18d;
+  --ifm-color-primary-darkest: #0d9274;
+  --ifm-color-primary-light: #23e0b7;
+  --ifm-color-primary-lighter: #34e4bc;
+  --ifm-color-primary-lightest: #55e9c8;
+
+  --ifm-background-color: #1A1A1A; /* Darker background for better contrast */
+  --ifm-font-color-base: #e0e0e0;    /* Much lighter base font color for dark mode */
+  --ifm-font-color-secondary: #b0b0b0; /* Lighter secondary font color for dark mode */
+  --ifm-font-family-base: 'Inter', sans-serif;
+
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  /* Custom Navbar styles for Dark Mode */
+  --ifm-navbar-background-color: var(--ifm-color-primary-darker);
+  --ifm-navbar-link-color: #ffffff;
+  --ifm-navbar-link-hover-color: #e0e0e0;
+  --ifm-navbar-search-input-background-color: rgba(0, 0, 0, 0.2);
+  --ifm-navbar-search-input-color: #ffffff;
+  --ifm-navbar-search-placeholder-color: rgba(255, 255, 255, 0.7);
+
+  /* Card variables for dark mode */
+  --ifm-card-background-color: #262728;
+}
+
+/* Additional global styles */
+.button {
+  border-radius: var(--ifm-button-border-radius);
+}
+
+.footer {
+  background-color: var(--ifm-color-primary-darkest);
+  color: #ffffff;
+}
+
+.footer a {
+  color: #f0f0f0;
+}
+
+.footer a:hover {
+  color: #ffffff;
+}
+
+.navbar__brand .navbar__logo img {
+  /* max-height: 32px; */
+}
+
+.navbar__title {
+    color: #ffffff;
+}
