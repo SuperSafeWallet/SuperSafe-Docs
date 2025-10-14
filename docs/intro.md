@@ -14,7 +14,7 @@ SuperSafe is more than just a wallet; it's your gateway to the **SuperSeed ecosy
 - **Manage Assets**: Easily send, receive, and manage ETH and various ERC-20 compatible tokens across multiple networks
 - **Connect to dApps**: Interact with dApps using the latest EIP-1193 standard with **Smart Native Connection** for secure and straightforward connection
 - **Swap Tokens**: Enjoy gasless, MEV-protected token swaps via **Bebop integration** with partner fee sharing
-- **Prioritize Security**: With military-grade AES-256-GCM encryption, clear transaction/connection prompts, and user-controlled security settings
+- **Prioritize Security**: With enterprise-grade AES-256-GCM encryption, clear transaction/connection prompts, and user-controlled security settings
 - **Use Multiple Networks**: Switch between **SuperSeed** and **Optimism** (with 5 more networks planned)
 
 ## Key Features at a Glance
@@ -43,7 +43,7 @@ SuperSafe is more than just a wallet; it's your gateway to the **SuperSeed ecosy
 - **Permit2 Integration**: Only pay for token approval
 - **Partner Fee System**: 1% configurable revenue sharing
 
-### 🛡️ **Military-Grade Security**
+### 🛡️ **Enterprise-Grade Security**
 - **Security Score**: 96/100
 - **AES-256-GCM Encryption** with PBKDF2 key derivation (10,000 iterations)
 - **Unified Vault System**: All sensitive data encrypted locally
@@ -62,9 +62,9 @@ SuperSafe is more than just a wallet; it's your gateway to the **SuperSeed ecosy
 Total Project Files: 145 JavaScript/JSX files
 Total Lines of Code: ~25,000 lines
 Architecture Pattern: MetaMask-style Service Worker
-Security Level: Military-grade encryption
+Security Level: Enterprise-grade encryption
 Supported Networks: 2 active networks (7 total planned)
-Response Time: <150ms average
+Response Time: &lt;150ms average
 Vault Encryption: AES-256-GCM + PBKDF2
 Bundle Sizes: Popup 2.1MB, Background 1.8MB
 ```
@@ -150,7 +150,7 @@ Built-in **Bebop integration** provides gasless, MEV-protected token swaps with 
 Advanced **AllowList system** whitelists trusted dApps, preventing phishing attacks and malicious connections while maintaining ease of use.
 
 ### ⚡ **Performance Optimized**
-- **<150ms average response time**
+- **&lt;150ms average response time**
 - Stream-based communication eliminates handshake overhead
 - Pre-decrypted keys cached in memory during sessions
 - Event-driven architecture with zero polling

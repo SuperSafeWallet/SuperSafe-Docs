@@ -16,7 +16,7 @@ const FeatureList: FeatureItem[] = [
     title: 'MetaMask-Style Architecture',
     description: (
       <>
-        Built with Service Worker architecture for reliability. 25K+ lines of code with military-grade security
+        Built with Service Worker architecture for reliability. 25K+ lines of code with enterprise-grade security
         and MetaMask-compatible APIs.
       </>
     ),
@@ -43,7 +43,7 @@ const FeatureList: FeatureItem[] = [
     title: 'AES-256-GCM Encryption',
     description: (
       <>
-        Military-grade encryption with PBKDF2 key derivation. Security score of 96/100 with
+        Enterprise-grade encryption with PBKDF2 key derivation. Security score of 96/100 with
         AllowList system for trusted dApps only.
       </>
     ),

@@ -45,7 +45,7 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 ## 🔒 Security Documentation
 
 ### [SECURITY.md](./SECURITY.md)
-**Military-grade security implementation**
+**Enterprise-grade security implementation**
 
 - Security model and principles
 - Cryptographic implementation (AES-256-GCM, PBKDF2)

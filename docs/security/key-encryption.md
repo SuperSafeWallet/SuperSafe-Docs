@@ -4,11 +4,11 @@ sidebar_position: 3
 
 # 🔐 Key Encryption
 
-Understand the military-grade encryption system that protects your private keys and sensitive data in SuperSafe Wallet.
+Understand the enterprise-grade encryption system that protects your private keys and sensitive data in SuperSafe Wallet.
 
 ## Encryption Overview
 
-SuperSafe Wallet implements **military-grade encryption** using industry-standard cryptographic algorithms to ensure maximum security for your private keys and sensitive data.
+SuperSafe Wallet implements **enterprise-grade encryption** using industry-standard cryptographic algorithms to ensure maximum security for your private keys and sensitive data.
 
 ### Security Score: **98/100**
 
@@ -28,14 +28,14 @@ Encryption Security:
 
 #### Algorithm Details
 - **Algorithm**: Advanced Encryption Standard (AES)
-- **Key Size**: 256-bit keys (military-grade)
+- **Key Size**: 256-bit keys (enterprise-grade)
 - **Mode**: Galois/Counter Mode (GCM)
 - **Authentication**: Built-in authentication
 - **Performance**: Hardware-accelerated encryption
 
 #### Why AES-256-GCM?
 - **Industry Standard**: Widely adopted encryption standard
-- **Military Grade**: Approved for classified information
+- **Enterprise Grade**: Approved for classified information
 - **Authenticated Encryption**: Prevents tampering
 - **Hardware Support**: Optimized for modern processors
 - **Future Proof**: Resistant to quantum attacks (for now)
@@ -238,7 +238,7 @@ During active sessions, sensitive data is stored only in memory:
 - **Salt Protection**: Prevents rainbow table attacks
 - **Iteration Count**: 10,000 iterations (industry standard)
 - **Hash Function**: SHA-256 (cryptographically secure)
-- **Key Length**: 256 bits (military-grade)
+- **Key Length**: 256 bits (enterprise-grade)
 
 ### Private Key Encryption
 

@@ -32,8 +32,7 @@ function HomepageHeader() {
               🛡️ SuperSafe Wallet
             </Heading>
             <p className={styles.heroSubtitle}>
-              MetaMask-style Service Worker architecture with Smart Native Connection,
-              Multi-chain support, and Gasless swaps
+              A next-generation secure Chrome Extension wallet with enterprise-grade security for managing digital assets across multiple EVM-compatible networks and seamlessly interacting with Decentralized Applications (dApps).
             </p>
 
             {/* Key Features Grid */}
@@ -66,7 +65,7 @@ function HomepageHeader() {
             </Link>
             <Link
               className={clsx("button button--outline button--lg", styles.secondaryButton)}
-              to="https://github.com/SuperSafeWallet/SuperSafe">
+              to="https://github.com/SuperSafeWallet/SuperSafe-Docs">
               💻 View on GitHub
             </Link>
           </div>
@@ -127,7 +126,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="SuperSafe Wallet - MetaMask-style Service Worker Architecture"
-      description="Secure Ethereum-compatible browser extension with Smart Native Connection, Multi-chain support, and Gasless swaps via Bebop JAM protocol">
+      description="Secure web3 browser wallet extension with Smart Native Connection, Multi-chain support, and Gasless swaps via Bebop JAM protocol">
       <HomepageHeader />
       <StatsSection />
       <main className={styles.mainContent}>

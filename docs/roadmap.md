@@ -20,7 +20,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Zero Frontend Crypto**: No cryptographic operations in frontend
 
 #### 🔐 Security Enhancements
-- **Military-Grade Encryption**: AES-256-GCM with PBKDF2
+- **Enterprise-Grade Encryption**: AES-256-GCM with PBKDF2
 - **Security Score**: 96/100 (up from 85/100)
 - **AllowList System**: Whitelist-based dApp security
 - **Memory-First Security**: Sensitive data in memory only
@@ -212,7 +212,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **1M Users**: 1 million active users by end of 2024
 - **100 dApps**: 100 integrated dApps by end of 2024
 - **99.9% Uptime**: 99.9% service uptime
-- **<100ms Response**: Sub-100ms response times
+- **&lt;100ms Response**: Sub-100ms response times
 - **Zero Security Incidents**: Zero major security incidents
 
 ## Feedback & Contributions
@@ -232,7 +232,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Community**: Community management
 
 ### 📞 Contact
-- **Email**: roadmap@supersafe.wallet
+- **Email**: roadmap@suersafe.cool
 - **GitHub**: [SuperSafe Roadmap](https://github.com/SuperSafeWallet/SuperSafe/discussions)
 - **Discord**: [SuperSafe Discord](https://discord.gg/supersafe)
 - **Twitter**: [@SuperSafeWallet](https://twitter.com/SuperSafeWallet)

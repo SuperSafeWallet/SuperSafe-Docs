@@ -168,7 +168,7 @@ Each wallet displays:
 All wallets are protected by the same vault:
 
 - **Single Password**: One password for all wallets
-- **AES-256-GCM Encryption**: Military-grade encryption
+- **AES-256-GCM Encryption**: Enterprise-grade encryption
 - **Local Storage**: All data stored locally
 - **No Cloud Sync**: No data transmitted to servers
 

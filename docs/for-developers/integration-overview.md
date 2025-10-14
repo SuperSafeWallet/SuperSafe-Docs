@@ -354,7 +354,7 @@ SuperSafe uses an AllowList system to whitelist trusted dApps:
 ### Adding Your dApp
 
 #### Request AllowList Addition
-1. **Contact Security Team**: Email security@supersafe.wallet
+1. **Contact Security Team**: Email security@suersafe.cool
 2. **Provide Information**: dApp URL, description, supported networks
 3. **Security Review**: Security team reviews your dApp
 4. **AllowList Update**: dApp added to AllowList

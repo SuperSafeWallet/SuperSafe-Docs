@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # 🛡️ Security Overview
 
-SuperSafe Wallet implements a **defense-in-depth security model** with military-grade encryption, zero-knowledge architecture, and comprehensive protection against various attack vectors.
+SuperSafe Wallet implements a **defense-in-depth security model** with enterprise-grade encryption, zero-knowledge architecture, and comprehensive protection against various attack vectors.
 
 ## Security Scorecard
 

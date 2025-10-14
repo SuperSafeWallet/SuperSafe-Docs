@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # ✨ Creating a New Wallet
 
-Learn how to create your first SuperSafe wallet with military-grade security and multi-wallet support.
+Learn how to create your first SuperSafe wallet with enterprise-grade security and multi-wallet support.
 
 ## Before You Begin
 
@@ -122,7 +122,7 @@ SuperSafe supports multiple wallets in one vault:
 
 ### Vault Encryption
 
-Your wallet uses **military-grade encryption**:
+Your wallet uses **enterprise-grade encryption**:
 
 - **Algorithm**: AES-256-GCM (Galois/Counter Mode)
 - **Key Derivation**: PBKDF2 with 10,000 iterations

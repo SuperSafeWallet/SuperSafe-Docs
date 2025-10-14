@@ -31,7 +31,7 @@ SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implem
 - **✅ Smart Native Connection**: Real chainIds only, zero compatibility hacks
 - **✅ Multichain Support**: 2 active networks (SuperSeed, Optimism) + 5 planned networks
 - **✅ Stream-Based Communication**: Native Chrome long-lived connections
-- **✅ Unified Vault System**: Military-grade AES-256-GCM encryption
+- **✅ Unified Vault System**: Enterprise-grade AES-256-GCM encryption
 - **✅ Thin Client Pattern**: Frontend as lightweight presentation layer
 - **✅ Enterprise Signing System**: Robust request management and recovery
 - **✅ Bebop Integration**: Native swap support with partner fees
@@ -44,7 +44,7 @@ SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implem
 Total Project Files: 145 JavaScript/JSX files
 Total Lines of Code: ~25,000 lines
 Architecture Pattern: MetaMask-style Service Worker
-Security Level: Military-grade encryption
+Security Level: Enterprise-grade encryption
 Supported Networks: 2 active networks (7 total planned)
 Response Time: <150ms average
 Vault Encryption: AES-256-GCM + PBKDF2

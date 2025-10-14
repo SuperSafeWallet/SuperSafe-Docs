@@ -285,10 +285,10 @@ Network Switch Flow:
 ### Performance Metrics
 
 #### Response Times
-- **Average Response**: <150ms
-- **Connection Time**: <200ms
-- **Transaction Signing**: <300ms
-- **Network Switch**: <250ms
+- **Average Response**: &lt;150ms
+- **Connection Time**: &lt;200ms
+- **Transaction Signing**: &lt;300ms
+- **Network Switch**: &lt;250ms
 
 #### Bundle Sizes
 - **Popup Bundle**: 2.1MB

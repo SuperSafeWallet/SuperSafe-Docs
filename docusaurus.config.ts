@@ -10,7 +10,7 @@ const config: Config = {
   favicon: 'img/favicon.png',
 
   // Set the production url of your site here
-  url: 'https://docs.supersafe.wallet',
+  url: 'https://docs.suersafe.cool',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
@@ -70,12 +70,12 @@ const config: Config = {
           label: 'Documentation',
         },
         {
-          href: 'https://github.com/SuperSafeWallet/SuperSafe',
+          href: 'https://github.com/SuperSafeWallet/SuperSafe-Docs',
           label: 'GitHub',
           position: 'right',
         },
         {
-          href: 'https://supersafe.wallet',
+          href: 'https://suersafe.cool',
           label: 'Website',
           position: 'right',
         },
@@ -118,7 +118,7 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/SuperSafeWallet/SuperSafe',
+              href: 'https://github.com/SuperSafeWallet/SuperSafe-Docs',
             },
           ],
         },
@@ -127,15 +127,15 @@ const config: Config = {
           items: [
             {
               label: 'Website',
-              href: 'https://supersafe.wallet',
+              href: 'https://www.supersafe.cool',
             },
             {
               label: 'Chrome Web Store',
-              href: 'https://chrome.google.com/webstore/detail/supersafe-wallet',
+              href: 'https://www.supersafe.cool',
             },
             {
               label: 'Support',
-              href: 'mailto:support@supersafe.wallet',
+              href: 'mailto:supersafewallet@gmail.com',
             },
           ],
         },

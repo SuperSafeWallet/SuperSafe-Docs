@@ -10,14 +10,14 @@ Common questions and answers about SuperSafe Wallet.
 
 ### What is SuperSafe Wallet?
 
-SuperSafe Wallet is a **MetaMask-style Chrome extension** that provides secure, efficient Web3 wallet functionality with advanced features like gasless swaps, multi-chain support, and military-grade security.
+SuperSafe Wallet is a **MetaMask-style Chrome extension** that provides secure, efficient Web3 wallet functionality with advanced features like gasless swaps, multi-chain support, and enterprise-grade security.
 
 **Key Features**:
 - MetaMask-style Service Worker architecture
 - Smart Native Connection for dApps
 - Multi-chain support (SuperSeed, Optimism, and more)
 - Gasless token swaps via Bebop integration
-- Military-grade security (AES-256-GCM encryption)
+- Enterprise-grade security (AES-256-GCM encryption)
 - AllowList-based dApp security
 
 ### How is SuperSafe different from other wallets?
@@ -30,7 +30,7 @@ SuperSafe Wallet offers several unique advantages:
 - **Thin Client Pattern**: Frontend focuses on UI, backend handles logic
 
 **Security**:
-- **Military-grade encryption**: AES-256-GCM with PBKDF2
+- **Enterprise-grade encryption**: AES-256-GCM with PBKDF2
 - **AllowList system**: Whitelist-based dApp security
 - **Memory-first security**: Sensitive data in memory only
 - **Security score**: 96/100
@@ -119,10 +119,10 @@ SuperSafe Wallet requires the following permissions:
 
 ### How secure is SuperSafe Wallet?
 
-SuperSafe Wallet implements **military-grade security** with a security score of **96/100**:
+SuperSafe Wallet implements **enterprise-grade security** with a security score of **96/100**:
 
 **Security Features**:
-- **AES-256-GCM Encryption**: Military-grade encryption
+- **AES-256-GCM Encryption**: Enterprise-grade encryption
 - **PBKDF2 Key Derivation**: 10,000 iterations
 - **Unified Vault System**: All data encrypted together
 - **Memory-First Security**: Sensitive data in memory only
@@ -338,7 +338,7 @@ SuperSafe Wallet supports popular Web3 frameworks:
 4. **Check Status**: Check if dApp is being reviewed
 
 **Adding dApp to AllowList**:
-1. **Contact Support**: Email security@supersafe.wallet
+1. **Contact Support**: Email security@suersafe.cool
 2. **Provide Details**: Provide dApp URL and description
 3. **Security Review**: Security team reviews dApp
 4. **AllowList Update**: dApp added to AllowList if approved
@@ -400,7 +400,7 @@ SuperSafe Wallet supports popular Web3 frameworks:
 ### How can I get help?
 
 **Support Channels**:
-- **Email**: support@supersafe.wallet
+- **Email**: support@suersafe.cool
 - **GitHub**: [SuperSafe Issues](https://github.com/SuperSafeWallet/SuperSafe/issues)
 - **Discord**: [SuperSafe Discord](https://discord.gg/supersafe)
 - **Twitter**: [@SuperSafeWallet](https://twitter.com/SuperSafeWallet)
@@ -446,4 +446,4 @@ SuperSafe Wallet supports popular Web3 frameworks:
 
 ---
 
-**Still have questions?** Check out our [Troubleshooting Guide](./troubleshooting.md) or [contact support](mailto:support@supersafe.wallet)!
+**Still have questions?** Check out our [Troubleshooting Guide](./troubleshooting.md) or [contact support](mailto:support@suersafe.cool)!

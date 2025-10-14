@@ -657,16 +657,16 @@ const useSwapLogic = () => {
 ### Performance Metrics
 
 #### Response Times
-- **Average Response**: <150ms
-- **Connection Time**: <200ms
-- **Transaction Signing**: <300ms
-- **Network Switch**: <250ms
+- **Average Response**: &lt;150ms
+- **Connection Time**: &lt;200ms
+- **Transaction Signing**: &lt;300ms
+- **Network Switch**: &lt;250ms
 
 #### Resource Usage
-- **Memory Usage**: <50MB
-- **CPU Usage**: <5%
-- **Network Usage**: <1MB/min
-- **Storage Usage**: <10MB
+- **Memory Usage**: &lt;50MB
+- **CPU Usage**: &lt;5%
+- **Network Usage**: &lt;1MB/min
+- **Storage Usage**: &lt;10MB
 
 ## Development Architecture
 
