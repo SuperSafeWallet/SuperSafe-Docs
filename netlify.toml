@@ -1,0 +1,50 @@
+[build]
+  # Directorio donde se encuentra el código fuente
+  base = "."
+  # Comando para construir el proyecto
+  command = "npm run build"
+  # Directorio donde se generan los archivos estáticos
+  publish = "build"
+
+[build.environment]
+  # Versión de Node.js
+  NODE_VERSION = "18"
+
+[[redirects]]
+  # Redireccionar todas las rutas a index.html para SPA
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.processing]
+  # Procesar archivos HTML
+  skip_processing = false
+
+[build.processing.css]
+  # Optimizar CSS
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  # Optimizar JavaScript
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  # Optimizar HTML
+  pretty_urls = true
+
+# Headers de seguridad
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Headers específicos para archivos estáticos
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
