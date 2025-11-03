@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Welcome to SuperSafe Wallet v3.0.0+
 
-SuperSafe Wallet is a **modern Ethereum-compatible browser extension wallet** implementing a **MetaMask-style Service Worker architecture** with **Smart Native Connection** for seamless multichain dApp integration. Built with React 18, ethers.js v6, and Chrome Extension Manifest V3.
+SuperSafe Wallet is a **modern EVM-compatible browser extension wallet** implementing a **industry-standard Service Worker architecture** with **Smart Native Connection** for seamless multichain dApp integration. Built with React 18, ethers.js v6, and Chrome Extension Manifest V3.
 
 ## What is SuperSafe?
 
