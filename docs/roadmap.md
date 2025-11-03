@@ -27,8 +27,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Defense-in-Depth**: Multiple security layers
 
 #### 🌐 Multi-Chain Support
-- **Active Networks**: SuperSeed (5330), Optimism (10)
-- **Planned Networks**: Ethereum, Base, BSC, Sepolia testnets
+- **Active Networks**: Ethereum, Base, Arbitrum One, Optimism, Binance Smart Chain, SuperSeed
 - **Smart Native Connection**: Seamless dApp integration
 - **Network Switching**: Easy network switching
 - **Cross-Chain Support**: Future cross-chain functionality
@@ -47,7 +46,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **API Reference**: Detailed API documentation
 - **Code Examples**: Practical integration examples
 
-## Short-Term Roadmap (Q1 2024)
+## Short-Term Roadmap (Q4 2025)
 
 ### 🔧 Bug Fixes & Improvements
 - **Performance Optimization**: Improve response times
@@ -60,8 +59,8 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Ethereum Mainnet**: Full Ethereum support
 - **Base Network**: Base layer 2 support
 - **BSC Integration**: Binance Smart Chain support
+- **Arbitrum One Integration**: Binance Smart Chain support
 - **Testnet Support**: Sepolia testnets for testing
-- **Network Switching**: Improved network switching
 
 ### 🔄 Swap Enhancements
 - **More Tokens**: Support for additional tokens
@@ -77,7 +76,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Penetration Testing**: Regular penetration testing
 - **Security Monitoring**: Enhanced security monitoring
 
-## Medium-Term Roadmap (Q2-Q3 2024)
+## Medium-Term Roadmap (Q2-Q3 2026)
 
 ### 📱 Mobile Support
 - **WalletConnect V2**: Enhanced mobile connectivity
@@ -107,7 +106,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Animations**: Smooth animations and transitions
 - **Responsive Design**: Better mobile responsiveness
 
-## Long-Term Roadmap (Q4 2024+)
+## Long-Term Roadmap (Q4 2026+)
 
 ### 🌍 Global Expansion
 - **Multi-Language**: Internationalization support
@@ -122,13 +121,6 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Smart Contracts**: Built-in smart contract interaction
 - **NFT Support**: Enhanced NFT functionality
 - **Gaming Integration**: Web3 gaming features
-
-### 🏢 Enterprise Features
-- **Enterprise Dashboard**: Business management tools
-- **Team Wallets**: Multi-user wallet management
-- **Compliance Tools**: Regulatory compliance features
-- **API Access**: Enterprise API access
-- **White-Label**: White-label solutions
 
 ### 🔗 Interoperability
 - **Cross-Chain Bridges**: Native cross-chain functionality
@@ -209,8 +201,8 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Performance Metrics**: Response time and reliability
 
 ### 🎯 Goals
-- **1M Users**: 1 million active users by end of 2024
-- **100 dApps**: 100 integrated dApps by end of 2024
+- **1k Users**: 1000 active daily users by end of 2025
+- **100 dApps**: 100 integrated dApps by end of 2025
 - **99.9% Uptime**: 99.9% service uptime
 - **&lt;100ms Response**: Sub-100ms response times
 - **Zero Security Incidents**: Zero major security incidents
@@ -232,11 +224,9 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Community**: Community management
 
 ### 📞 Contact
-- **Email**: roadmap@suersafe.cool
-- **GitHub**: [SuperSafe Roadmap](https://github.com/SuperSafeWallet/SuperSafe/discussions)
-- **Discord**: [SuperSafe Discord](https://discord.gg/supersafe)
-- **Twitter**: [@SuperSafeWallet](https://twitter.com/SuperSafeWallet)
+- **Email**: contact@suersafe.cool
+- **GitHub**: [SuperSafe Docs GitHub](https://github.com/SuperSafeWallet/SuperSafe-Docs)
+- **x**: [@SuperSafeWallet](https://x.com/SuperSafeWallet)
 
 ---
 
-**Want to contribute?** Check out our [GitHub repository](https://github.com/SuperSafeWallet/SuperSafe) or [join our Discord](https://discord.gg/supersafe)!

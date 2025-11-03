@@ -38,7 +38,7 @@ SuperSafe Wallet offers several unique advantages:
 **Features**:
 - **Gasless swaps**: No gas fees for token swaps
 - **MEV protection**: Protection against Maximal Extractable Value
-- **Multi-chain ready**: 2 active networks, 5 planned
+- **Multi-chain ready**: 6 active networks
 - **Partner fees**: 1% configurable partner fee
 
 ### Is SuperSafe Wallet free to use?
