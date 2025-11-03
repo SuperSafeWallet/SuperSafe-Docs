@@ -32,8 +32,8 @@ SuperSafe is more than just a wallet; it's your gateway to the **SuperSeed ecosy
 - WalletConnect V2/Reown integration
 
 ### 🌐 **Multi-Chain Support**
-- **Active Networks**: SuperSeed (Chain ID: 5330), Optimism (Chain ID: 10)
-- **Planned Networks**: Ethereum, Base, BSC, Ethereum Sepolia, SuperSeed Sepolia
+- **Active Networks**: Ethereum, Base, Arbitrum One, Optimism, Binance Smart Chain, SuperSeed
+- **Testnet Networks**: Ethereum Sepolia, SuperSeed Sepolia
 - Network-specific features and swap support
 - Context-aware network switching
 
