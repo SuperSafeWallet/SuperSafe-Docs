@@ -3,11 +3,11 @@
   align-items: center;
   padding: 4rem 0;
   width: 100%;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: #ffffff;
 }
 
 [data-theme='dark'] .features {
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+  background: transparent;
 }
 
 .featureSvg {
@@ -40,7 +40,7 @@
 .featureCard {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 255, 136, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.15);
   border-radius: 20px;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -60,32 +60,33 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #00ff88, #ff6b6b, #4ecdc4);
+  background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
   border-radius: 20px 20px 0 0;
 }
 
 .featureCard:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 255, 136, 0.15);
-  border-color: rgba(0, 255, 136, 0.4);
+  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 [data-theme='dark'] .featureCard {
   background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(15, 15, 35, 0.9) 100%);
-  border-color: rgba(0, 255, 136, 0.3);
+  border-color: rgba(16, 185, 129, 0.25);
 }
 
 [data-theme='dark'] .featureCard:hover {
-  box-shadow: 0 20px 40px rgba(0, 255, 136, 0.25);
-  border-color: rgba(0, 255, 136, 0.6);
+  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .featureCardTitle {
-  color: #00ff88;
+  color: #10b981;
   font-size: 1.4rem;
   margin-bottom: 1rem;
   font-weight: 700;
-  background: linear-gradient(45deg, #00ff88, #00d4aa);
+  text-align: left;
+  background: linear-gradient(45deg, #10b981, #059669);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -94,7 +95,7 @@
 }
 
 [data-theme='dark'] .featureCardTitle {
-  background: linear-gradient(45deg, #00ff88, #4ecdc4);
+  background: linear-gradient(45deg, #10b981, #34d399);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -106,6 +107,7 @@
   color: #555555;
   flex-grow: 1;
   margin-bottom: 0;
+  text-align: justify;
 }
 
 [data-theme='dark'] .featureCardDescription {

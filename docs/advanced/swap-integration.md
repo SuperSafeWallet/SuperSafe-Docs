@@ -1,849 +1,562 @@
 ---
-sidebar_position: 6
+sidebar_position: 4
 ---
 
 # 🔄 Swap Integration
 
-Learn how SuperSafe Wallet integrates with Bebop's JAM protocol to provide gasless, MEV-protected token swaps across multiple networks.
+SuperSafe Wallet integrates **Bebop's JAM (Just Another Market) protocol** and **Relay.link** for gasless, MEV-protected token swaps and cross-chain swaps across multiple EVM networks.
 
-## Swap Integration Overview
-
-SuperSafe Wallet integrates with **Bebop's JAM protocol** to provide users with gasless, MEV-protected token swaps across multiple supported networks.
+## Swap Overview
 
 ### Key Features
 
-- **Gasless Swaps**: No gas fees for users
-- **MEV Protection**: Protection against Maximal Extractable Value attacks
-- **Multi-Chain Support**: Swaps across multiple networks
-- **Partner Fees**: 1% configurable partner fee
-- **Best Prices**: Competitive pricing through Bebop's aggregation
+- **✅ Gasless Swaps**: Only pay for token approval (Permit2) via Bebop
+- **✅ MEV Protection**: Protected from frontrunning and sandwich attacks
+- **✅ Multi-Chain**: Currently supports **6 active networks** for Bebop (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum)
+- **✅ Cross-Chain Swaps**: Relay.link supports swaps across 85+ blockchains
+- **✅ Partner Fees**: Configurable revenue sharing (1% default)
+- **✅ Best Prices**: Aggregated liquidity sources
+
+---
+
+## Unified Panel Architecture
+
+**Version:** 2.0.0  
+**Refactored:** November 13, 2025
+
+### Design Philosophy
+
+SuperSafe Wallet implements a **unified panel architecture** for swap providers, ensuring consistency, maintainability, and scalability across all swap implementations.
+
+### Before (v1.0.0 - Monolithic)
+
+```
+Swap.jsx (2,206 lines)
+  ├─ ALL Bebop logic inline
+  ├─ ALL Relay logic inline
+  ├─ Massive state management
+  ├─ Duplicate components
+  └─ Difficult to maintain
+```
+
+**Problems:**
+- ❌ 2,206 lines in single file
+- ❌ Mixed concerns (Bebop + Relay + routing)
+- ❌ Hard to test independently
+- ❌ Difficult to add new providers
+- ❌ Code duplication between providers
+
+### After (v2.0.0 - Unified Panels)
+
+```
+Swap.jsx (~115 lines)                    # Container/Orchestrator
+  ├─ SwapProviderSelector                # Tab selector
+  ├─ SlippageControl (shared)            # Slippage configuration
+  └─ Conditional Rendering:
+      ├─ BebopSwapPanel.jsx (~1,400 lines)
+      └─ RelaySwapPanel.jsx (~1,288 lines)
+```
+
+**Benefits:**
+- ✅ **Maintainability**: Each panel is self-contained (~1,300 lines each)
+- ✅ **Testability**: Independent unit testing per provider
+- ✅ **Scalability**: Add providers without touching existing code
+- ✅ **Consistency**: Both panels follow same architectural pattern
+- ✅ **Separation of Concerns**: Clear responsibilities
+
+### Component Structure
+
+#### 1. Swap.jsx (~115 lines)
+
+**Responsibility:** Container/Orchestrator only
+
+```javascript
+const Swap = ({ 
+  onTransactionComplete, 
+  preselectedToken,
+  onClearPreselection,
+  walletTokensWithBalance,
+  nativeTokenBalance 
+}) => {
+  const [swapProvider, setSwapProvider] = useState('bebop');
+  const [slippage, setSlippage] = useState(0.5);
+  
+  return (
+    <>
+      <SwapProviderSelector selected={swapProvider} onChange={setSwapProvider} />
+      <SlippageControl slippage={slippage} onChange={setSlippage} />
+      
+      {swapProvider === 'relay' ? (
+        <RelaySwapPanel {...props} slippage={slippage} />
+      ) : (
+        <BebopSwapPanel {...props} slippage={slippage} />
+      )}
+    </>
+  );
+};
+```
+
+**Key Points:**
+- Single responsibility: provider selection and routing
+- No swap business logic
+- Minimal state (provider + slippage)
+- Clean, readable, maintainable
+
+#### 2. BebopSwapPanel.jsx (~1,400 lines)
+
+**Responsibility:** Complete Bebop swap implementation
+
+**Internal Components:**
+- `LoadingDots` - Loading animation
+- `PriceDeviationTooltip` - USD deviation warnings
+- `SwapDetails` - Fee breakdown accordion
+
+**Key Features:**
+- Gasless swaps via Bebop JAM
+- Permit2 approvals (one-time)
+- EIP-712 order signing
+- Status polling
+- Balance validation
+- USD price calculations
+
+**Architecture Compliance:**
+- ✅ NO ethers imports
+- ✅ Uses `SwapAdapter` only
+- ✅ Thin client pattern
+- ✅ All crypto in background
+
+#### 3. RelaySwapPanel.jsx (~1,288 lines)
+
+**Responsibility:** Complete Relay.link swap implementation
+
+**Internal Components:**
+- `UsdBalanceDisplay` - Balance with USD value
+- `formatTokenAmount` - Helper function
+
+**Key Features:**
+- Cross-chain swaps
+- Network selection (origin: active, destination: selectable)
+- Route visualization
+- Gas estimation
+- Bridge time estimation
+- Multi-hop support
+
+**Architecture Compliance:**
+- ✅ NO ethers imports
+- ✅ Uses `RelayAdapter` only
+- ✅ Thin client pattern
+- ✅ All crypto in background
+
+### Shared Components (`src/components/swap/`)
+
+These components are used by both panels:
+
+| Component | Purpose | Used By |
+|-----------|---------|---------|
+| `CompactNetworkSelector.jsx` | Network dropdown | Relay (cross-chain) |
+| `RouteVisualization.jsx` | Visual route display | Relay (multi-hop) |
+| `BridgeTimeDisplay.jsx` | Bridge time estimation | Relay (cross-chain) |
+| `GasEstimateDisplay.jsx` | Gas cost display | Relay (all swaps) |
+| `LoadingDots.jsx` | Loading animation | Both (separate versions) |
+
+### Performance Metrics
+
+| Metric | Before (v1.0) | After (v2.0) | Improvement |
+|--------|---------------|--------------|-------------|
+| **File Size** | 2,206 lines | 115 lines | **95% reduction** |
+| **Build Time** | 6.8s | 6.5s | 4% faster |
+| **Bundle Size** | Same | Same | No change |
+| **Maintainability** | Low | High | ✅ Significantly improved |
+| **Testability** | Hard | Easy | ✅ Unit tests possible |
+
+---
 
 ## Bebop Integration
 
-### Bebop JAM Protocol
+### Active Network Support
 
-#### Protocol Overview
-```
-Bebop JAM Protocol:
-├── Quote Request
-│   ├── Token Selection
-│   ├── Amount Input
-│   ├── Slippage Settings
-│   └── Network Selection
-├── Quote Response
-│   ├── Price Information
-│   ├── Fee Breakdown
-│   ├── Execution Time
-│   └── MEV Protection
-├── Order Signing
-│   ├── EIP-712 Signature
-│   ├── Permit2 Approval
-│   ├── Order Validation
-│   └── Signature Verification
-└── Order Execution
-    ├── Order Submission
-    ├── Transaction Broadcasting
-    ├── Status Monitoring
-    └── Completion Confirmation
-```
+| Network | Chain ID | Bebop API | Swap Enabled | Contracts |
+|---------|----------|-----------|--------------|-----------|
+| **SuperSeed** | 5330 | JAM v2 | ✅ Active | Custom deployment |
+| **Ethereum** | 1 | JAM v2 + RFQ v3 | ✅ Active | Standard EVM |
+| **Optimism** | 10 | JAM v2 + RFQ v3 | ✅ Active | Standard EVM |
+| **Base** | 8453 | JAM v2 + RFQ v3 | ✅ Active | Standard EVM |
+| **BNB Chain** | 56 | JAM v2 + RFQ v3 | ✅ Active | Standard EVM |
+| **Arbitrum One** | 42161 | JAM v2 + RFQ v3 | ✅ Active | Standard EVM |
 
-#### Supported Networks
+**Note:** All active networks support Bebop swaps except Shardeum (chainId: 8118), which does not have swap support enabled.
+
+### Bebop Contracts
+
 ```javascript
-const BEBOP_NETWORKS = {
-  '0x14a2': { // SuperSeed
-    protocol: 'JAM',
-    apiUrl: 'https://api.bebop.xyz/jam/superseed/v2/',
-    contracts: {
-      BEBOP_CONTRACT: '0x...',
-      PERMIT2_CONTRACT: '0x...'
-    }
+// Location: src/utils/networks.js
+export const BEBOP_CONTRACTS = {
+  // Standard EVM chains
+  STANDARD_EVM: {
+    JAM_SETTLEMENT_ADDRESS: "0xbEbEbEb035351f58602E0C1C8B59ECBfF5d5f47b",
+    BALANCE_MANAGER_ADDRESS: "0xfE96910cF84318d1B8a5e2a6962774711467C0be"
   },
-  '0xa': { // Optimism
-    protocol: 'JAM + RFQ',
-    apiUrl: 'https://api.bebop.xyz/jam/optimism/v2/',
-    contracts: {
-      BEBOP_CONTRACT: '0x...',
-      PERMIT2_CONTRACT: '0x...'
-    }
+  
+  // SuperSeed (custom deployment)
+  SUPERSEED: {
+    JAM_SETTLEMENT_ADDRESS: "0xbeb0b0623f66bE8cE162EbDfA2ec543A522F4ea6",
+    BALANCE_MANAGER_ADDRESS: "0xC5a350853E4e36b73EB0C24aaA4b8816C9A3579a"
   },
-  '0x1': { // Ethereum
-    protocol: 'JAM + RFQ',
-    apiUrl: 'https://api.bebop.xyz/jam/ethereum/v2/',
-    contracts: {
-      BEBOP_CONTRACT: '0x...',
-      PERMIT2_CONTRACT: '0x...'
-    }
+  
+  // Universal Permit2
+  PERMIT2: {
+    CONTRACT_ADDRESS: "0x000000000022D473030F116dDEE9F6B43aC78BA3"
   }
 };
 ```
 
-### Swap Service Architecture
+---
 
-#### Swap Service Structure
+## Relay.link Integration
+
+### Overview
+
+As of November 4, 2025, SuperSafe Wallet now integrates **Relay.link** as an alternative swap provider, enabling **cross-chain swaps** and **bridge functionality** across 85+ blockchains.
+
+### Key Features
+
+- **✅ Cross-Chain Swaps**: Swap tokens between different networks in one transaction
+- **✅ AppFees Support**: Configurable partner fees (1% default) collected in stablecoins
+- **✅ Meta-Aggregation**: Best prices across multiple DEXs and bridges
+- **✅ 85+ Chains**: Wide blockchain support including all SuperSafe networks
+- **✅ Instant Bridging**: Fast cross-chain transfers via relayer network
+- **✅ Optimized Gas**: Reduced costs through optimized routing
+
+### Active Network Support
+
+All SuperSafe EVM networks are supported by Relay.link (except Shardeum):
+
+| Network | Chain ID | Relay Chain ID | Cross-Chain | Status |
+|---------|----------|----------------|-------------|--------|
+| **SuperSeed** | 5330 | 5330 | ✅ Enabled | ✅ Active |
+| **Ethereum** | 1 | 1 | ✅ Enabled | ✅ Active |
+| **Optimism** | 10 | 10 | ✅ Enabled | ✅ Active |
+| **Base** | 8453 | 8453 | ✅ Enabled | ✅ Active |
+| **BNB Chain** | 56 | 56 | ✅ Enabled | ✅ Active |
+| **Arbitrum One** | 42161 | 42161 | ✅ Enabled | ✅ Active |
+| **Shardeum** | 8118 | 8118 | ❌ Not supported | ✅ Active (no Relay) |
+
+### AppFees Configuration
+
+**🔄 UNIFIED FEE SYSTEM** - Relay.link uses the same fee configuration as Bebop:
+
+Located in `src/background/config/relayConfig.js`:
+
 ```javascript
-class SwapService {
-  constructor() {
-    this.bebopClients = new Map();
-    this.partnerFee = 0.01; // 1% partner fee
-    this.setupBebopClients();
-  }
+// ✅ Reads from environment variables
+export const RELAY_CONFIG = loadRelayConfigFromEnv();
 
-  setupBebopClients() {
-    for (const [chainId, config] of Object.entries(BEBOP_NETWORKS)) {
-      this.bebopClients.set(chainId, new BebopClient(config));
-    }
-  }
+// ✅ AppFees use unified system with Bebop
+import { getFeeConfiguration as getBebopFeeConfiguration } from '../utils/feeConfig.js';
 
-  async getQuote(chainId, fromToken, toToken, amount, slippage = 0.5) {
-    const client = this.bebopClients.get(chainId);
-    if (!client) {
-      throw new Error('Swap not supported on this network');
-    }
-
-    return await client.getQuote(fromToken, toToken, amount, slippage);
-  }
-
-  async executeSwap(chainId, swapData) {
-    const client = this.bebopClients.get(chainId);
-    if (!client) {
-      throw new Error('Swap not supported on this network');
-    }
-
-    return await client.executeSwap(swapData);
-  }
-}
-```
-
-#### Bebop Client Implementation
-```javascript
-class BebopClient {
-  constructor(config) {
-    this.config = config;
-    this.apiUrl = config.apiUrl;
-    this.contracts = config.contracts;
-  }
-
-  async getQuote(fromToken, toToken, amount, slippage) {
-    try {
-      const response = await fetch(`${this.apiUrl}/quote`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fromToken,
-          toToken,
-          amount,
-          slippage,
-          partnerFee: this.partnerFee
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Quote request failed: ${response.statusText}`);
-      }
-
-      const quote = await response.json();
-      return this.processQuote(quote);
-    } catch (error) {
-      throw new Error(`Failed to get quote: ${error.message}`);
-    }
-  }
-
-  processQuote(quote) {
+export function getAppFeesConfig() {
+  const bebopFeeConfig = getBebopFeeConfiguration();
+  
     return {
-      fromToken: quote.fromToken,
-      toToken: quote.toToken,
-      fromAmount: quote.fromAmount,
-      toAmount: quote.toAmount,
-      priceImpact: quote.priceImpact,
-      fee: quote.fee,
-      partnerFee: quote.partnerFee,
-      executionTime: quote.executionTime,
-      mevProtection: quote.mevProtection,
-      validUntil: quote.validUntil
-    };
-  }
+    feeBps: bebopFeeConfig.feeBps,        // Same as Bebop
+    recipient: bebopFeeConfig.partnerInfo.receiverAddress // Same recipient
+  };
 }
 ```
+
+**Benefits of Unified System:**
+- ✅ Single point of configuration
+- ✅ Consistent fee rates across providers
+- ✅ Simplified management
+- ✅ No hardcoded values
+
+### Relay Swap Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as RelaySwapPanel
+    participant RA as RelayAdapter
+    participant BG as Background
+    participant RS as RelayStreamHandler
+    participant R as Relay SDK
+    participant BC as Blockchain
+
+    U->>UI: Select networks & tokens
+    UI->>UI: Auto-fetch quote (debounced)
+    UI->>RA: getQuote()
+    RA->>BG: RELAY_GET_QUOTE
+    BG->>RS: Handle get quote
+    RS->>R: Request quote with AppFees
+    R->>RS: Return quote with steps
+    RS->>BG: Return quote
+    BG->>UI: Display quote & fees
+    
+    U->>UI: Confirm swap
+    UI->>RA: executeSwap()
+    RA->>BG: RELAY_EXECUTE_SWAP
+    BG->>RS: Handle execute swap
+    RS->>R: Execute swap steps
+    R->>BC: Submit transactions
+    BC->>R: Return tx hash
+    R->>RS: Execution complete
+    RS->>BG: Return result
+    BG->>UI: Display success
+    
+    UI->>RA: checkStatus() (polling)
+    RA->>BG: RELAY_GET_STATUS
+    BG->>BC: Get tx receipt
+    BC->>BG: Confirmation status
+    BG->>UI: Update status
+```
+
+### Network Selection Architecture (v2.0.0)
+
+**Updated:** November 12, 2025
+
+Relay.link swap panel implements a **restricted origin network model** where the origin (Pay) network is always the active wallet network:
+
+**Design Rules:**
+- **Origin (Pay)**: Always uses active network - cannot be changed within panel
+- **Destination (Receive)**: User can select any supported network via dropdown
+- **To swap FROM a different network**: User must switch active network via AppHeader first
+
+**Rationale:**
+- ✅ Origin must be active network (required for transaction signing)
+- ✅ Consistent with Bebop and standard wallet behavior (MetaMask, Rainbow, etc.)
+- ✅ Balances always available for origin tokens (cached in Dashboard)
+- ✅ Eliminates cross-chain address mismatches
+- ✅ Prevents balance fetching issues for non-active networks
+
+### Differences from Bebop
+
+| Feature | Bebop | Relay.link |
+|---------|-------|------------|
+| **Cross-Chain** | ❌ No | ✅ Yes |
+| **Networks** | 6 EVM chains | 85+ chains |
+| **Gasless** | ✅ Yes (Permit2) | ⚠️ Gas required |
+| **MEV Protection** | ✅ Yes | ⚠️ Partial |
+| **Approval** | One-time Permit2 | Per-token ERC20 |
+| **Partner Fees** | JAM order signature | AppFees API parameter |
+| **Quote Expiry** | 30 seconds | 30 seconds |
+
+---
 
 ## Swap Flow
 
-### Complete Swap Process
+### Complete Swap Sequence
 
-#### Step 1: Quote Request
-```javascript
-class SwapQuoteManager {
-  async requestQuote(swapRequest) {
-    const { chainId, fromToken, toToken, amount, slippage } = swapRequest;
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as Swap UI
+    participant SA as SwapAdapter
+    participant BG as Background
+    participant B as Bebop API
+    participant BC as Blockchain
+
+    U->>UI: Enter swap amount
+    UI->>SA: getSwapQuote()
+    SA->>BG: SWAP_GET_QUOTE
+    BG->>B: Fetch quote with fees
+    B->>BG: Return quote
+    BG->>UI: Display quote
     
-    try {
-      // Validate swap request
-      this.validateSwapRequest(swapRequest);
-      
-      // Get quote from Bebop
-      const quote = await this.swapService.getQuote(
-        chainId,
-        fromToken,
-        toToken,
-        amount,
-        slippage
-      );
-      
-      // Store quote for later use
-      this.storeQuote(quote);
-      
-      return quote;
-    } catch (error) {
-      throw new Error(`Quote request failed: ${error.message}`);
-    }
-  }
-
-  validateSwapRequest(request) {
-    const { chainId, fromToken, toToken, amount } = request;
+    U->>UI: Confirm swap
+    UI->>SA: signAndSubmitOrder()
     
-    if (!chainId || !fromToken || !toToken || !amount) {
-      throw new Error('Missing required swap parameters');
-    }
-    
-    if (amount <= 0) {
-      throw new Error('Amount must be greater than 0');
-    }
-    
-    if (fromToken === toToken) {
-      throw new Error('From and to tokens cannot be the same');
-    }
-  }
-
-  storeQuote(quote) {
-    // Store quote with expiration
-    const quoteData = {
-      ...quote,
-      timestamp: Date.now(),
-      expiresAt: Date.now() + (quote.validUntil * 1000)
-    };
-    
-    this.quotes.set(quote.id, quoteData);
-  }
-}
-```
-
-#### Step 2: Order Signing
-```javascript
-class SwapOrderSigner {
-  async signOrder(quote, wallet) {
-    try {
-      // Create EIP-712 order
-      const order = this.createOrder(quote);
-      
-      // Sign order with wallet
-      const signature = await this.signEIP712Order(order, wallet);
-      
-      // Create signed order
-      const signedOrder = {
-        ...order,
-        signature
-      };
-      
-      return signedOrder;
-    } catch (error) {
-      throw new Error(`Order signing failed: ${error.message}`);
-    }
-  }
-
-  createOrder(quote) {
-    return {
-      fromToken: quote.fromToken,
-      toToken: quote.toToken,
-      fromAmount: quote.fromAmount,
-      toAmount: quote.toAmount,
-      slippage: quote.slippage,
-      partnerFee: quote.partnerFee,
-      validUntil: quote.validUntil,
-      nonce: this.generateNonce()
-    };
-  }
-
-  async signEIP712Order(order, wallet) {
-    const domain = {
-      name: 'Bebop',
-      version: '1',
-      chainId: wallet.chainId,
-      verifyingContract: this.contracts.BEBOP_CONTRACT
-    };
-
-    const types = {
-      Order: [
-        { name: 'fromToken', type: 'address' },
-        { name: 'toToken', type: 'address' },
-        { name: 'fromAmount', type: 'uint256' },
-        { name: 'toAmount', type: 'uint256' },
-        { name: 'slippage', type: 'uint256' },
-        { name: 'partnerFee', type: 'uint256' },
-        { name: 'validUntil', type: 'uint256' },
-        { name: 'nonce', type: 'uint256' }
-      ]
-    };
-
-    const signature = await wallet.signTypedData(domain, types, order);
-    return signature;
-  }
-}
-```
-
-#### Step 3: Permit2 Approval
-```javascript
-class Permit2Approval {
-  async approveToken(tokenAddress, amount, wallet) {
-    try {
-      // Create Permit2 approval
-      const approval = this.createPermit2Approval(tokenAddress, amount);
-      
-      // Sign approval with wallet
-      const signature = await this.signPermit2Approval(approval, wallet);
-      
-      // Submit approval to Bebop
-      await this.submitPermit2Approval(approval, signature);
-      
-      return { success: true };
-    } catch (error) {
-      throw new Error(`Permit2 approval failed: ${error.message}`);
-    }
-  }
-
-  createPermit2Approval(tokenAddress, amount) {
-    return {
-      token: tokenAddress,
-      amount: amount,
-      spender: this.contracts.BEBOP_CONTRACT,
-      deadline: Math.floor(Date.now() / 1000) + 3600 // 1 hour
-    };
-  }
-
-  async signPermit2Approval(approval, wallet) {
-    const domain = {
-      name: 'Permit2',
-      version: '1',
-      chainId: wallet.chainId,
-      verifyingContract: this.contracts.PERMIT2_CONTRACT
-    };
-
-    const types = {
-      PermitSingle: [
-        { name: 'token', type: 'address' },
-        { name: 'amount', type: 'uint256' },
-        { name: 'spender', type: 'address' },
-        { name: 'deadline', type: 'uint256' }
-      ]
-    };
-
-    const signature = await wallet.signTypedData(domain, types, approval);
-    return signature;
-  }
-}
-```
-
-#### Step 4: Order Execution
-```javascript
-class SwapExecutor {
-  async executeSwap(signedOrder) {
-    try {
-      // Submit order to Bebop
-      const orderId = await this.submitOrder(signedOrder);
-      
-      // Monitor order status
-      const status = await this.monitorOrderStatus(orderId);
-      
-      return {
-        orderId,
-        status,
-        success: status === 'completed'
-      };
-    } catch (error) {
-      throw new Error(`Swap execution failed: ${error.message}`);
-    }
-  }
-
-  async submitOrder(signedOrder) {
-    const response = await fetch(`${this.apiUrl}/order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(signedOrder)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Order submission failed: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    return result.orderId;
-  }
-
-  async monitorOrderStatus(orderId) {
-    const maxAttempts = 30; // 5 minutes with 10-second intervals
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-      try {
-        const response = await fetch(`${this.apiUrl}/order/${orderId}/status`);
-        const status = await response.json();
+    alt Token Requires Approval
+        SA->>BG: Check ERC20 allowance
+        BG->>BC: contract.allowance()
+        BC->>BG: Current allowance
         
-        if (status.status === 'completed' || status.status === 'failed') {
-          return status.status;
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
-        attempts++;
-      } catch (error) {
-        console.error('Status check failed:', error);
-        attempts++;
-      }
-    }
+        alt Insufficient Allowance
+            BG->>BG: Sign approval tx
+            BG->>BC: Send approval
+            BC->>BG: Approval confirmed
+        end
+    end
     
-    return 'timeout';
-  }
-}
+    SA->>BG: SWAP_SIGN_AND_SUBMIT
+    BG->>BG: Sign EIP-712 order
+    BG->>B: Submit signed order
+    B->>BG: Order accepted
+    BG->>UI: Show success
+    
+    loop Poll Status
+        UI->>SA: checkOrderStatus()
+        SA->>BG: SWAP_CHECK_STATUS
+        BG->>B: Query status
+        B->>BG: Status update
+        BG->>UI: Update UI
+    end
 ```
+
+---
 
 ## Partner Fee System
 
 ### Fee Configuration
 
-#### Fee Structure
+**Location:** `src/background/utils/feeConfig.js`
+
 ```javascript
 const FEE_CONFIG = {
-  partnerFee: 0.01, // 1% partner fee
-  minFee: 0.001, // Minimum fee in ETH
-  maxFee: 0.1, // Maximum fee in ETH
-  feeRecipient: '0x...', // Partner fee recipient
-  feeToken: 'ETH' // Fee token
+  // Fee in basis points (100 bps = 1%)
+  feeBps: 100,  // 1% partner fee
+  
+  // Partner information
+  partnerInfo: {
+    name: 'SuperSafe',
+    receiverAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',  // SuperSafe fee receiver
+    website: 'https://supersafe.xyz'
+  },
+  
+  // Fee validation
+  minFeeBps: 0,
+  maxFeeBps: 300  // Max 3%
 };
-```
 
-#### Fee Calculation
-```javascript
-class FeeCalculator {
-  calculatePartnerFee(swapAmount, feeRate = FEE_CONFIG.partnerFee) {
-    const fee = swapAmount * feeRate;
-    
-    // Apply min/max constraints
-    const minFee = FEE_CONFIG.minFee;
-    const maxFee = FEE_CONFIG.maxFee;
-    
-    return Math.max(minFee, Math.min(maxFee, fee));
-  }
-
-  calculateTotalFees(swapAmount) {
-    const partnerFee = this.calculatePartnerFee(swapAmount);
-    const bebopFee = this.calculateBebopFee(swapAmount);
-    
+export function getFeeConfiguration() {
     return {
-      partnerFee,
-      bebopFee,
-      totalFee: partnerFee + bebopFee
-    };
-  }
-
-  calculateBebopFee(swapAmount) {
-    // Bebop fee calculation logic
-    return swapAmount * 0.005; // 0.5% Bebop fee
-  }
+    feeBps: FEE_CONFIG.feeBps,
+    partnerInfo: FEE_CONFIG.partnerInfo
+  };
 }
 ```
 
-### Fee Management
+### Fee Calculation Example
 
-#### Fee Collection
-```javascript
-class FeeCollector {
-  async collectFees(orderId, fees) {
-    try {
-      // Collect partner fees
-      await this.collectPartnerFees(orderId, fees.partnerFee);
-      
-      // Collect Bebop fees
-      await this.collectBebopFees(orderId, fees.bebopFee);
-      
-      return { success: true };
-    } catch (error) {
-      throw new Error(`Fee collection failed: ${error.message}`);
-    }
-  }
-
-  async collectPartnerFees(orderId, feeAmount) {
-    // Transfer partner fees to fee recipient
-    const transferTx = await this.transferFees(
-      FEE_CONFIG.feeRecipient,
-      feeAmount,
-      FEE_CONFIG.feeToken
-    );
-    
-    return transferTx;
-  }
-
-  async collectBebopFees(orderId, feeAmount) {
-    // Transfer Bebop fees to Bebop
-    const transferTx = await this.transferFees(
-      BEBOP_FEE_RECIPIENT,
-      feeAmount,
-      FEE_CONFIG.feeToken
-    );
-    
-    return transferTx;
-  }
-}
 ```
+User swaps 100 USDC for ETH
+Quote returns: 0.05 ETH
+
+With 1% partner fee:
+- User receives: 0.0495 ETH (99%)
+- Partner receives: 0.0005 ETH (1%)
+
+Fee is taken from buy token (ETH in this case)
+```
+
+---
 
 ## Multi-Chain Support
 
 ### Network-Specific Configuration
 
-#### Network Configuration
 ```javascript
-const NETWORK_SWAP_CONFIG = {
-  '0x14a2': { // SuperSeed
-    protocol: 'JAM',
-    apiUrl: 'https://api.bebop.xyz/jam/superseed/v2/',
+// Location: src/utils/networks.js
+export const NETWORKS = {
+  superseed: {
+    // ... network config
+    bebop: {
+      bebopName: 'superseed',
+      displayName: 'SuperSeed',
+      apiSupport: ['JAM'],  // No RFQ on SuperSeed
+      jamApi: 'https://api.bebop.xyz/jam/superseed/v2/',
+      rfqApi: null,
+      swapEnabled: true,
     contracts: {
-      BEBOP_CONTRACT: '0x...',
-      PERMIT2_CONTRACT: '0x...'
+        jamSettlement: '0xbeb0b0623f66bE8cE162EbDfA2ec543A522F4ea6',
+        balanceManager: '0xC5a350853E4e36b73EB0C24aaA4b8816C9A3579a',
+        permit2: '0x000000000022D473030F116dDEE9F6B43aC78BA3'
+      }
     },
-    tokens: {
-      native: 'ETH',
-      stablecoin: 'USDC'
+    relay: {
+      enabled: true,
+      relayChainId: 5330,
+      crossChainEnabled: true
     }
   },
-  '0xa': { // Optimism
-    protocol: 'JAM + RFQ',
-    apiUrl: 'https://api.bebop.xyz/jam/optimism/v2/',
+  
+  optimism: {
+    // ... network config
+    bebop: {
+      bebopName: 'optimism',
+      displayName: 'Optimism',
+      apiSupport: ['JAM', 'RFQ'],
+      jamApi: 'https://api.bebop.xyz/jam/optimism/v2/',
+      rfqApi: 'https://api.bebop.xyz/pmm/optimism/',
+      swapEnabled: true,
     contracts: {
-      BEBOP_CONTRACT: '0x...',
-      PERMIT2_CONTRACT: '0x...'
+        jamSettlement: '0xbEbEbEb035351f58602E0C1C8B59ECBfF5d5f47b',
+        balanceManager: '0xfE96910cF84318d1B8a5e2a6962774711467C0be',
+        permit2: '0x000000000022D473030F116dDEE9F6B43aC78BA3'
+      }
     },
-    tokens: {
-      native: 'ETH',
-      stablecoin: 'USDC'
+    relay: {
+      enabled: true,
+      relayChainId: 10,
+      crossChainEnabled: true
     }
   }
 };
 ```
 
-#### Network Validation
+### Validation System
+
 ```javascript
-class NetworkSwapValidator {
-  validateSwapNetwork(chainId) {
-    const config = NETWORK_SWAP_CONFIG[chainId];
-    if (!config) {
-      throw new Error('Swap not supported on this network');
-    }
-    
-    return config;
-  }
-
-  getSupportedTokens(chainId) {
-    const config = this.validateSwapNetwork(chainId);
-    return config.tokens;
-  }
-
-  getSwapProtocol(chainId) {
-    const config = this.validateSwapNetwork(chainId);
-    return config.protocol;
-  }
-}
-```
-
-### Cross-Chain Swaps
-
-#### Cross-Chain Swap Manager
-```javascript
-class CrossChainSwapManager {
-  async executeCrossChainSwap(swapRequest) {
-    const { fromChain, toChain, fromToken, toToken, amount } = swapRequest;
-    
-    try {
-      // Validate cross-chain swap
-      this.validateCrossChainSwap(swapRequest);
-      
-      // Execute swap on source chain
-      const sourceSwap = await this.executeSourceSwap(fromChain, fromToken, amount);
-      
-      // Bridge tokens to destination chain
-      const bridgeTx = await this.bridgeTokens(fromChain, toChain, amount);
-      
-      // Execute swap on destination chain
-      const destSwap = await this.executeDestinationSwap(toChain, toToken, amount);
-      
-      return {
-        sourceSwap,
-        bridgeTx,
-        destSwap,
-        success: true
-      };
-    } catch (error) {
-      throw new Error(`Cross-chain swap failed: ${error.message}`);
-    }
-  }
-
-  validateCrossChainSwap(swapRequest) {
-    const { fromChain, toChain, fromToken, toToken, amount } = swapRequest;
-    
-    if (fromChain === toChain) {
-      throw new Error('Source and destination chains cannot be the same');
-    }
-    
-    if (!this.isChainSupported(fromChain) || !this.isChainSupported(toChain)) {
-      throw new Error('Unsupported chain for cross-chain swap');
-    }
-  }
-}
-```
-
-## Swap UI Components
-
-### Swap Interface
-
-#### Swap Form Component
-```javascript
-const SwapForm = () => {
-  const [fromToken, setFromToken] = useState(null);
-  const [toToken, setToToken] = useState(null);
-  const [amount, setAmount] = useState('');
-  const [slippage, setSlippage] = useState(0.5);
-  const [quote, setQuote] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleGetQuote = async () => {
-    if (!fromToken || !toToken || !amount) return;
-    
-    setIsLoading(true);
-    try {
-      const quoteData = await swapService.getQuote(
-        currentChainId,
-        fromToken.address,
-        toToken.address,
-        amount,
-        slippage
-      );
-      setQuote(quoteData);
-    } catch (error) {
-      console.error('Failed to get quote:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleExecuteSwap = async () => {
-    if (!quote) return;
-    
-    try {
-      const result = await swapService.executeSwap(quote);
-      console.log('Swap executed:', result);
-    } catch (error) {
-      console.error('Swap execution failed:', error);
-    }
-  };
-
-  return (
-    <div className="swap-form">
-      <div className="token-selection">
-        <TokenSelector
-          token={fromToken}
-          onTokenSelect={setFromToken}
-          label="From"
-        />
-        <TokenSelector
-          token={toToken}
-          onTokenSelect={setToToken}
-          label="To"
-        />
-      </div>
-      
-      <div className="amount-input">
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="0.0"
-        />
-      </div>
-      
-      <div className="slippage-settings">
-        <label>Slippage: {slippage}%</label>
-        <input
-          type="range"
-          min="0.1"
-          max="5"
-          step="0.1"
-          value={slippage}
-          onChange={(e) => setSlippage(parseFloat(e.target.value))}
-        />
-      </div>
-      
-      <button onClick={handleGetQuote} disabled={isLoading}>
-        {isLoading ? 'Getting Quote...' : 'Get Quote'}
-      </button>
-      
-      {quote && (
-        <div className="quote-display">
-          <h3>Quote</h3>
-          <p>From: {quote.fromAmount} {quote.fromToken}</p>
-          <p>To: {quote.toAmount} {quote.toToken}</p>
-          <p>Price Impact: {quote.priceImpact}%</p>
-          <p>Fee: {quote.fee} ETH</p>
-          <button onClick={handleExecuteSwap}>
-            Execute Swap
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-```
-
-#### Token Selector Component
-```javascript
-const TokenSelector = ({ token, onTokenSelect, label }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [tokens, setTokens] = useState([]);
-
-  useEffect(() => {
-    loadTokens();
-  }, []);
-
-  const loadTokens = async () => {
-    try {
-      const supportedTokens = await swapService.getSupportedTokens(currentChainId);
-      setTokens(supportedTokens);
-    } catch (error) {
-      console.error('Failed to load tokens:', error);
-    }
-  };
-
-  return (
-    <div className="token-selector">
-      <label>{label}</label>
-      <div className="token-input" onClick={() => setIsOpen(!isOpen)}>
-        {token ? (
-          <div className="selected-token">
-            <img src={token.logo} alt={token.symbol} />
-            <span>{token.symbol}</span>
-          </div>
-        ) : (
-          <span>Select Token</span>
-        )}
-      </div>
-      
-      {isOpen && (
-        <div className="token-list">
-          {tokens.map((tokenOption) => (
-            <div
-              key={tokenOption.address}
-              className="token-option"
-              onClick={() => {
-                onTokenSelect(tokenOption);
-                setIsOpen(false);
-              }}
-            >
-              <img src={tokenOption.logo} alt={tokenOption.symbol} />
-              <span>{tokenOption.symbol}</span>
-              <span>{tokenOption.name}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-```
-
-## Error Handling
-
-### Swap Error Management
-
-#### Error Types
-```javascript
-const SWAP_ERRORS = {
-  QUOTE_FAILED: 'QUOTE_FAILED',
-  ORDER_SIGNING_FAILED: 'ORDER_SIGNING_FAILED',
-  PERMIT2_APPROVAL_FAILED: 'PERMIT2_APPROVAL_FAILED',
-  ORDER_EXECUTION_FAILED: 'ORDER_EXECUTION_FAILED',
-  INSUFFICIENT_BALANCE: 'INSUFFICIENT_BALANCE',
-  NETWORK_ERROR: 'NETWORK_ERROR',
-  TIMEOUT: 'TIMEOUT'
-};
-```
-
-#### Error Handler
-```javascript
-class SwapErrorHandler {
-  handleError(error, context) {
-    console.error(`Swap error in ${context}:`, error);
-    
-    switch (error.type) {
-      case SWAP_ERRORS.QUOTE_FAILED:
-        return this.handleQuoteError(error);
-      case SWAP_ERRORS.ORDER_SIGNING_FAILED:
-        return this.handleSigningError(error);
-      case SWAP_ERRORS.ORDER_EXECUTION_FAILED:
-        return this.handleExecutionError(error);
-      default:
-        return this.handleGenericError(error);
-    }
-  }
-
-  handleQuoteError(error) {
+export function validateSwapNetwork(networkKey) {
+  const network = NETWORKS[networkKey];
+  
+  if (!network) {
     return {
-      message: 'Failed to get swap quote',
-      suggestion: 'Please try again or check your token selection',
-      retryable: true
+      valid: false,
+      reason: 'Network not supported'
     };
   }
 
-  handleSigningError(error) {
+  if (!network.bebop || !network.bebop.swapEnabled) {
     return {
-      message: 'Failed to sign swap order',
-      suggestion: 'Please check your wallet connection and try again',
-      retryable: true
+      valid: false,
+      reason: `Swaps not available on ${network.name}`
     };
   }
-
-  handleExecutionError(error) {
-    return {
-      message: 'Swap execution failed',
-      suggestion: 'Please check your balance and try again',
-      retryable: true
-    };
-  }
+  
+  return { valid: true };
 }
 ```
-
-## Troubleshooting
-
-### Common Swap Issues
-
-#### Quote Issues
-- **Check Token Support**: Verify tokens are supported
-- **Check Network**: Verify network is supported
-- **Check Amount**: Verify amount is valid
-- **Check Slippage**: Verify slippage settings
-
-#### Execution Issues
-- **Check Balance**: Verify sufficient balance
-- **Check Approval**: Verify token approval
-- **Check Network**: Verify network connection
-- **Check Gas**: Verify gas settings
-
-## Next Steps
-
-Now that you understand swap integration:
-
-1. **[Main Components](./main-components.md)** - Review main components
-2. **[State Management](./state-management.md)** - Review state management
-3. **[Networks Configuration](./networks-config.md)** - Review network configuration
-4. **[Architecture Deep Dive](./architecture-deep-dive.md)** - Review architecture details
 
 ---
 
-**Ready to learn more about the architecture?** Continue to [Main Components](./main-components.md)!
+## Adding New Providers
+
+To add a new swap provider (e.g., Uniswap):
+
+1. Create `src/components/swap/UniswapSwapPanel.jsx` (~1,300 lines)
+2. Follow same structure as `BebopSwapPanel.jsx` or `RelaySwapPanel.jsx`
+3. Create `UniswapAdapter.js` in `src/utils/`
+4. Add provider to `SwapProviderSelector.jsx`
+5. Add conditional rendering in `Swap.jsx`:
+
+```javascript
+{swapProvider === 'uniswap' ? (
+  <UniswapSwapPanel {...props} />
+) : swapProvider === 'relay' ? (
+  <RelaySwapPanel {...props} />
+) : (
+  <BebopSwapPanel {...props} />
+)}
+```
+
+**That's it!** No changes to existing panels required.
+
+---
+
+## Future Enhancements
+
+- [ ] Add Uniswap provider panel
+- [ ] Add 1inch aggregator panel
+- [ ] Implement provider comparison mode
+- [ ] Add swap history per provider
+- [ ] Implement best price routing across providers
+
+---
+
+**Document Status:** ✅ Current as of November 15, 2025  
+**Code Version:** v5.0.0+ (Unified Panel Architecture)  
+**Last Code Update:** November 15, 2025  
+**Major Changes:** 
+- **🆕 Unified Panel Architecture**: Refactored monolithic Swap.jsx (2,206 lines) into clean architecture
+- **🆕 Relay.link Integration**: Cross-chain swaps across 85+ blockchains
+- **Updated Network Support**: Bebop supports 6 active networks, Relay supports 6 active networks

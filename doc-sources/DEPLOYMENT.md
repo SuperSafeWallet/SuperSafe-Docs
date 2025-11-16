@@ -1,8 +1,10 @@
 # SuperSafe Wallet - Deployment Guide
 
 **Created:** October 13, 2025  
+**Last Updated:** November 15, 2025  
 **Version:** 3.0.0+  
-**Status:** ✅ CURRENT
+**Status:** ✅ CURRENT  
+**Last Code Update:** November 15, 2025
 
 ---
 
@@ -30,8 +32,11 @@ npm run build
 # Verify bundle separation
 npm run verify:bundles
 
-# Create distribution package
-npm run zip
+# Create distribution package (macOS)
+npm run zipmac
+
+# Or for Windows PowerShell
+npm run zipwin
 ```
 
 ### Build Output Verification
@@ -91,10 +96,13 @@ dist/
 
 4. **Upload Package**
    ```bash
-   # Create zip file
-   npm run zip
+   # Create zip file (macOS)
+   npm run zipmac
    
-   # Upload supersafe-to-chromes-store.zip to dashboard
+   # Or for Windows PowerShell
+   npm run zipwin
+   
+   # Upload supersafe-to-chromes-store-YYYYMMDD_HHMM.zip to dashboard
    ```
 
 5. **Privacy Policy**
@@ -118,7 +126,7 @@ vim package.json
 
 # 3. Build and package
 npm run build
-npm run zip
+npm run zipmac  # or npm run zipwin on Windows
 
 # 4. Upload to Chrome Web Store
 # Dashboard → Edit → Upload updated package
@@ -175,6 +183,30 @@ git push origin v3.0.1
 ```markdown
 # Changelog
 
+## [3.0.2] - 2025-11-01
+
+### Added
+- **NEW:** Batch token price fetching (`getBatchTokenPrices()`)
+  - 96.3% reduction in API calls for portfolio calculations
+  - Fetch 27 tokens in 1 API call instead of 27 separate calls
+- Automatic retry logic with exponential backoff for API calls
+  - 2 retries with 1s and 2s delays
+  - Graceful fallback on persistent failures
+
+### Changed
+- **OPTIMIZATION:** Portfolio 24h change calculation now uses batch API
+  - Reduced loading time from 5-10s to <1s for large portfolios
+  - Eliminated 503 errors from API overload
+- Improved error handling for SuperSafe Price API
+  - Graceful 503 handling with fallback data
+  - Reduced console spam (warnings instead of errors)
+  - Portfolio continues functioning with degraded data
+
+### Fixed
+- Fixed race condition in network switching causing double portfolio loads
+- Fixed tokens from wrong network appearing briefly during network switch
+- Eliminated console spam from transient API failures
+
 ## [3.0.1] - 2025-10-15
 
 ### Fixed
@@ -190,14 +222,19 @@ git push origin v3.0.1
 
 ### Added
 - Smart Native Connection architecture
-- Multi-network support (2 active: SuperSeed & Optimism)
-- Bebop swap integration with partner fees
-- WalletConnect v2 support
+- Multi-network support (7 active networks: SuperSeed, Optimism, Ethereum, Base, BSC, Arbitrum, Shardeum)
+- Bebop swap integration with partner fees (JAM and RFQ)
+- Relay.link cross-chain swap integration (85+ blockchains)
+- WalletConnect v2 / Reown support
+- EIP-6963 provider discovery
+- Professional logging system with environment-aware execution
 
 ### Changed
 - Complete architecture refactor
 - New unified vault system
 - Stream-based communication
+- Network switching coordination system
+- Transaction decoder supporting major DEX protocols
 
 ### Removed
 - Legacy handshake system
@@ -222,23 +259,30 @@ git push origin v3.0.1
 ### Build Verification
 
 - [ ] Clean build successful: `npm run clean && npm run build`
+- [ ] Bundle verification: `npm run verify:bundles`
 - [ ] Extension loads in Chrome without errors
 - [ ] Test on fresh profile (no previous wallet data)
 - [ ] Test wallet creation flow
 - [ ] Test wallet import flow
 - [ ] Test dApp connection (at least 2 dApps)
-- [ ] Test token transfers
-- [ ] Test swap functionality
-- [ ] Test network switching
+- [ ] Test EIP-6963 provider discovery
+- [ ] Test token transfers (native and ERC20)
+- [ ] Test swap functionality (Bebop JAM/RFQ)
+- [ ] Test cross-chain swaps (Relay.link)
+- [ ] Test network switching (all 7 active networks)
 - [ ] Test WalletConnect connection
+- [ ] Test transaction history across networks
 
 ### Security Checks
 
 - [ ] No hardcoded API keys or secrets
-- [ ] AllowList properly configured
-- [ ] Fee receiver address verified
-- [ ] RPC endpoints functional
-- [ ] External API endpoints accessible
+- [ ] Environment variables properly configured (Alchemy keys, WalletConnect Project ID)
+- [ ] AllowList properly configured (`public/assets/allowlist.json`)
+- [ ] Fee receiver address verified (Bebop partner fees)
+- [ ] RPC endpoints functional (all 7 active networks)
+- [ ] External API endpoints accessible (Bebop, Relay.link, SuperSafe Price API)
+- [ ] Content Security Policy (CSP) properly configured in manifest.json
+- [ ] Logger system eliminates sensitive data in production builds
 
 ### Post-Release
 
@@ -253,15 +297,33 @@ git push origin v3.0.1
 
 ### Environment Variables
 
-**Not used in current version** - All configuration is hardcoded or in config files.
+**Required Environment Variables** (`.env` file):
 
-**If implementing env vars:**
+```bash
+# Alchemy RPC Keys (required for Ethereum and Optimism)
+ALCHEMY_ETHEREUM_API_KEY=your_ethereum_key_here
+ALCHEMY_OPTIMISM_API_KEY=your_optimism_key_here
 
-```javascript
-// .env.production
-VITE_API_ENDPOINT=https://api.supersafe.xyz
-VITE_BEBOP_PARTNER_ID=supersafe
+# WalletConnect / Reown
+WALLETCONNECT_PROJECT_ID=your_project_id_here
+
+# Relay.link (optional, defaults provided)
+RELAY_PARTNER_SOURCE=supersafe
+RELAY_API_BASE_URL=https://api.relay.link
+
+# Bebop Partner Configuration (hardcoded in feeConfig.js)
+# Fee receiver address and BPS configured in src/background/utils/feeConfig.js
 ```
+
+**Access in Code:**
+- **Background**: Full access via `process.env.VARIABLE_NAME`
+- **Frontend**: Must request via stream messages (security restriction)
+
+**⚠️ Security Notes:**
+- Never commit `.env` file to version control
+- Add `.env` to `.gitignore`
+- Use different API keys for development and production
+- Rotate API keys periodically
 
 ### Configuration Files
 
@@ -272,11 +334,27 @@ VITE_BEBOP_PARTNER_ID=supersafe
   "policies": {
     "https://velodrome.finance": {
       "name": "Velodrome Finance",
-      "supportedChains": [10, 5330]
+      "supportedChains": [10, 5330, 8453, 42161],
+      "defaultChain": 10,
+      "autoApprove": false,
+      "framework": "web3-react"
+    },
+    "https://app.uniswap.org": {
+      "name": "Uniswap",
+      "supportedChains": [1, 10, 56, 8453, 42161],
+      "defaultChain": 1,
+      "autoApprove": false,
+      "framework": "web3-react"
     }
   }
 }
 ```
+
+**Configuration Notes:**
+- Supported chains should include all active networks where dApp operates
+- `defaultChain` sets initial network when dApp connects
+- `autoApprove` controls automatic connection approval
+- `framework` helps with framework-specific optimizations
 
 **Fee Configuration** (`src/background/utils/feeConfig.js`):
 ```javascript
@@ -290,19 +368,45 @@ const FEE_CONFIG = {
 
 ### Network Endpoints
 
-**Production RPC URLs:**
+**Production RPC URLs** (`src/utils/networks.js`):
+
 ```javascript
 NETWORKS = {
   superseed: {
-    rpcUrl: "https://mainnet.superseed.xyz"
+    rpcUrl: "https://mainnet.superseed.xyz",
+    chainId: 5330
+  },
+  ethereum: {
+    rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETHEREUM_API_KEY}`,
+    chainId: 1
   },
   optimism: {
-    rpcUrl: "https://opt-mainnet.g.alchemy.com/v2/YOUR_KEY"
+    rpcUrl: `https://opt-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_OPTIMISM_API_KEY}`,
+    chainId: 10
+  },
+  base: {
+    rpcUrl: "https://mainnet.base.org",
+    chainId: 8453
+  },
+  bsc: {
+    rpcUrl: "https://bsc-dataseed.binance.org",
+    chainId: 56
+  },
+  arbitrum: {
+    rpcUrl: "https://arbitrum-one-rpc.publicnode.com",
+    chainId: 42161
+  },
+  shardeum: {
+    rpcUrl: "https://dapps.shardeum.org",
+    chainId: 8118
   }
 }
 ```
 
-**⚠️ Important:** Update Alchemy API keys before production release.
+**⚠️ Important:** 
+- Update Alchemy API keys (`ALCHEMY_ETHEREUM_API_KEY`, `ALCHEMY_OPTIMISM_API_KEY`) in environment variables before production release
+- Verify all RPC endpoints are accessible and functional
+- Test network switching across all 7 active networks
 
 ---
 
@@ -314,6 +418,7 @@ NETWORKS = {
 
 ---
 
-**Document Status:** ✅ Current as of October 13, 2025  
-**Code Version:** v3.0.0+
+**Document Status:** ✅ Current as of November 15, 2025  
+**Code Version:** v3.0.0+  
+**Maintenance:** Review before each production release
 

@@ -10,10 +10,10 @@ Common questions and answers about SuperSafe Wallet.
 
 ### What is SuperSafe Wallet?
 
-SuperSafe Wallet is a **MetaMask-style Chrome extension** that provides secure, efficient Web3 wallet functionality with advanced features like gasless swaps, multi-chain support, and enterprise-grade security.
+SuperSafe Wallet is a **Professionally Standardized Chrome extension** that provides secure, efficient Web3 wallet functionality with advanced features like gasless swaps, multi-chain support, and enterprise-grade security.
 
 **Key Features**:
-- MetaMask-style Service Worker architecture
+- Professionally Standardized Service Worker architecture
 - Smart Native Connection for dApps
 - Multi-chain support (SuperSeed, Optimism, and more)
 - Gasless token swaps via Bebop integration
@@ -25,7 +25,7 @@ SuperSafe Wallet is a **MetaMask-style Chrome extension** that provides secure, 
 SuperSafe Wallet offers several unique advantages:
 
 **Architecture**:
-- **MetaMask-style Service Worker**: Familiar, reliable architecture
+- **Professionally Standardized Service Worker**: Familiar, reliable architecture
 - **Smart Native Connection**: Real chainIds, no compatibility hacks
 - **Thin Client Pattern**: Frontend focuses on UI, backend handles logic
 
@@ -338,7 +338,7 @@ SuperSafe Wallet supports popular Web3 frameworks:
 4. **Check Status**: Check if dApp is being reviewed
 
 **Adding dApp to AllowList**:
-1. **Contact Support**: Email security@suersafe.cool
+1. **Contact Support**: Email security@supersafe.cool
 2. **Provide Details**: Provide dApp URL and description
 3. **Security Review**: Security team reviews dApp
 4. **AllowList Update**: dApp added to AllowList if approved
@@ -400,7 +400,7 @@ SuperSafe Wallet supports popular Web3 frameworks:
 ### How can I get help?
 
 **Support Channels**:
-- **Email**: support@suersafe.cool
+- **Email**: support@supersafe.cool
 - **GitHub**: [SuperSafe Issues](https://github.com/SuperSafeWallet/SuperSafe/issues)
 - **Discord**: [SuperSafe Discord](https://discord.gg/supersafe)
 - **Twitter**: [@SuperSafeWallet](https://twitter.com/SuperSafeWallet)
@@ -446,4 +446,4 @@ SuperSafe Wallet supports popular Web3 frameworks:
 
 ---
 
-**Still have questions?** Check out our [Troubleshooting Guide](./troubleshooting.md) or [contact support](mailto:support@suersafe.cool)!
+**Still have questions?** Check out our [Troubleshooting Guide](./troubleshooting.md) or [contact support](mailto:support@supersafe.cool)!

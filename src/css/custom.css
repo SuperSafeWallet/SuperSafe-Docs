@@ -14,7 +14,7 @@
   --ifm-color-primary-lighter: #2dd8b0;
   --ifm-color-primary-lightest: #4fe0b9;
 
-  --ifm-background-color: #FAF3E0; /* SUPERsafeBeige for light mode background */
+  --ifm-background-color: #ffffff; /* White background for light mode */
   --ifm-font-color-base: #2D3748; /* SUPERsafeDarkText for base font color in light mode */
   --ifm-font-color-secondary: #525f7f; /* Adjusted for light mode if needed */
   --ifm-font-family-base: 'Inter', sans-serif;

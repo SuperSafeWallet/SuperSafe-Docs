@@ -33,6 +33,11 @@
   gap: 1rem;
 }
 
+.logoSection .logo,
+.logoSection .versionBadge {
+  align-self: center;
+}
+
 .logo {
   width: 120px;
   height: 120px;
@@ -40,13 +45,13 @@
 }
 
 .versionBadge {
-  background: linear-gradient(45deg, #00ff88, #00d4aa);
-  color: #0f0f23;
+  background: linear-gradient(45deg, #10b981, #059669);
+  color: #ffffff;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-weight: bold;
   font-size: 0.9rem;
-  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
 }
 
 .mainContent {
@@ -57,7 +62,7 @@
   font-size: 3.5rem;
   font-weight: 800;
   margin-bottom: 1rem;
-  background: linear-gradient(45deg, #00ff88, #ff6b6b, #4ecdc4);
+  background: linear-gradient(45deg, #10b981, #3b82f6, #8b5cf6);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -114,19 +119,19 @@
 }
 
 .primaryButton {
-  background: linear-gradient(45deg, #00ff88, #00d4aa);
+  background: linear-gradient(45deg, #10b981, #059669);
   border: none;
-  color: #0f0f23;
+  color: #ffffff;
   font-weight: 600;
   padding: 1rem 2rem;
   border-radius: 12px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
 }
 
 .primaryButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(0, 255, 136, 0.4);
+  box-shadow: 0 6px 25px rgba(16, 185, 129, 0.35);
 }
 
 .secondaryButton {
@@ -146,9 +151,11 @@
 
 .networkStatus {
   display: flex;
-  gap: 1.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .networkItem {
@@ -176,11 +183,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: 0.1;
+  opacity: 0.08;
   background-image:
-    radial-gradient(circle at 25% 25%, #00ff88 2px, transparent 2px),
-    radial-gradient(circle at 75% 75%, #ff6b6b 2px, transparent 2px),
-    radial-gradient(circle at 75% 25%, #4ecdc4 2px, transparent 2px);
+    radial-gradient(circle at 25% 25%, #10b981 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, #3b82f6 2px, transparent 2px),
+    radial-gradient(circle at 75% 25%, #8b5cf6 2px, transparent 2px);
   background-size: 50px 50px;
   animation: patternMove 20s linear infinite;
 }
@@ -188,7 +195,11 @@
 /* Stats Section */
 .statsSection {
   padding: 4rem 0;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: #ffffff;
+}
+
+[data-theme='dark'] .statsSection {
+  background: transparent;
 }
 
 .statsGrid {
@@ -209,6 +220,12 @@
   transition: transform 0.3s ease;
 }
 
+[data-theme='dark'] .statItem {
+  background: #262728;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
 .statItem:hover {
   transform: translateY(-5px);
 }
@@ -216,9 +233,9 @@
 .statNumber {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #00ff88;
+  color: #10b981;
   margin-bottom: 0.5rem;
-  background: linear-gradient(45deg, #00ff88, #00d4aa);
+  background: linear-gradient(45deg, #10b981, #059669);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -232,9 +249,13 @@
   font-weight: 500;
 }
 
+[data-theme='dark'] .statLabel {
+  color: #b0b0b0;
+}
+
 /* Main content area */
 .mainContent {
-  padding: 4rem 0;
+  padding: 0;
 }
 
 /* Animations */
@@ -288,28 +309,11 @@
     flex-direction: column;
     align-items: center;
   }
-
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  .statItem {
-    padding: 1.5rem;
-  }
-
-  .statNumber {
-    font-size: 2rem;
-  }
 }
 
 @media screen and (max-width: 768px) {
   .heroTitle {
     font-size: 2rem;
-  }
-
-  .statsGrid {
-    grid-template-columns: 1fr;
   }
 
   .networkStatus {

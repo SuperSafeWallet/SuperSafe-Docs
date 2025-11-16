@@ -3,7 +3,7 @@
 **Created:** October 13, 2025  
 **Version:** 3.0.0+  
 **Status:** ✅ CURRENT  
-**Last Code Update:** October 13, 2025
+**Last Code Update:** November 15, 2025
 
 ---
 
@@ -13,39 +13,44 @@
 2. [System Architecture](#system-architecture)
 3. [Core Design Principles](#core-design-principles)
 4. [Component Architecture](#component-architecture)
-5. [Data Flow Patterns](#data-flow-patterns)
-6. [Technology Stack](#technology-stack)
-7. [Directory Structure](#directory-structure)
-8. [Network Architecture](#network-architecture)
-9. [Performance Metrics](#performance-metrics)
+5. [Transaction Decoder Architecture](#transaction-decoder-architecture)
+6. [Signing System Architecture](#signing-system-architecture)
+7. [dApp Connection Architecture](#dapp-connection-architecture)
+8. [Service Worker Lifecycle](#service-worker-lifecycle)
+9. [Data Flow Patterns](#data-flow-patterns)
+10. [Technology Stack](#technology-stack)
+11. [Directory Structure](#directory-structure)
+12. [Network Architecture](#network-architecture)
+13. [Performance Metrics](#performance-metrics)
 
 ---
 
 ## Executive Summary
 
-SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implementing a **MetaMask-style Service Worker architecture** with **Smart Native Connection** for seamless multichain dApp integration. Built with React 18, ethers.js v6, and Chrome Extension Manifest V3.
+SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implementing a **Professionally Standardized Service Worker architecture** with **Smart Native Connection** for seamless multichain dApp integration. Built with React 18, ethers.js v6, and Chrome Extension Manifest V3.
 
 ### Key Architectural Features
 
-- **✅ MetaMask-Style Architecture**: Service worker as single source of truth
+- **✅ Professionally Standardized Architecture**: Service worker as single source of truth
 - **✅ Smart Native Connection**: Real chainIds only, zero compatibility hacks
-- **✅ Multichain Support**: 2 active networks (SuperSeed, Optimism) + 5 planned networks
+- **✅ Multichain Support**: 7 active networks (SuperSeed, Optimism, Ethereum, Base, BSC, Arbitrum, Shardeum)
 - **✅ Stream-Based Communication**: Native Chrome long-lived connections
-- **✅ Unified Vault System**: Enterprise-grade AES-256-GCM encryption
+- **✅ Unified Vault System**: Military-grade AES-256-GCM encryption
 - **✅ Thin Client Pattern**: Frontend as lightweight presentation layer
 - **✅ Enterprise Signing System**: Robust request management and recovery
 - **✅ Bebop Integration**: Native swap support with partner fees
+- **✅ Relay.link Integration**: Cross-chain swaps across 85+ blockchains
 - **✅ WalletConnect V2**: Full Reown WalletKit implementation
 - **✅ Framework Detection**: Automatic dApp framework identification
 
 ### System Metrics
 
 ```
-Total Project Files: 145 JavaScript/JSX files
+Total Project Files: 183 JavaScript/JSX files
 Total Lines of Code: ~25,000 lines
-Architecture Pattern: MetaMask-style Service Worker
-Security Level: Enterprise-grade encryption
-Supported Networks: 2 active networks (7 total planned)
+Architecture Pattern: Professionally Standardized Service Worker
+Security Level: Military-grade encryption
+Supported Networks: 7 active networks
 Response Time: <150ms average
 Vault Encryption: AES-256-GCM + PBKDF2
 ```
@@ -80,6 +85,7 @@ graph TB
     subgraph "External Services"
         SUPERSEED[🌟 SuperSeed RPC]
         BEBOP[🔄 Bebop Swap API]
+        RELAY[🌉 Relay.link Cross-Chain]
         WALLETCONNECT[🔗 WalletConnect/Reown]
         APIS[📊 Price & Token APIs]
     end
@@ -96,6 +102,7 @@ graph TB
     
     BACKGROUND --> SUPERSEED
     BACKGROUND --> BEBOP
+    BACKGROUND --> RELAY
     BACKGROUND --> WALLETCONNECT
     BACKGROUND --> APIS
     
@@ -144,6 +151,8 @@ graph TB
 │  ┌────────────────────────────────────────────────────────────┐ │
 │  │               External Integrations                        │ │
 │  │  - WalletConnect Manager  - Bebop Integration              │ │
+│  │  - Relay.link Integration  - Cross-chain swaps             │ │
+│  │  - Transaction History Service  - Explorer Adapters        │ │
 │  │  - SuperSeed API Wrapper  - Secure API Client              │ │
 │  └────────────────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────────┘
@@ -261,7 +270,7 @@ backgroundStreamManager.onMessage('session', async (message, port) => {
 - `blockchain` - Blockchain queries
 - `api` - External API calls
 
-### 4. Zero Frontend Crypto
+### 8. Zero Frontend Crypto
 
 **All cryptographic operations isolated in background.**
 
@@ -276,7 +285,7 @@ backgroundStreamManager.onMessage('session', async (message, port) => {
 - Audit-friendly architecture
 - Simplified security model
 
-### 5. MetaMask-Style Controllers
+### 5. Professionally Standardized Controllers
 
 **Modular controller pattern for separation of concerns.**
 
@@ -292,6 +301,39 @@ BackgroundControllers {
 Each controller:
 - Single responsibility
 - Independent initialization
+- Event-driven architecture
+- Stateless where possible
+
+### 6. Multichain Transaction History
+
+**Pluggable adapter architecture for different explorers.**
+
+SuperSafe implements a universal transaction history system that automatically selects the appropriate blockchain explorer API based on the network:
+
+```javascript
+TransactionHistoryService {
+  getAdapter(chainId) → BlockscoutAdapter | MoralisAdapter | EtherscanAdapter
+  getTransactionHistory(address, chainId) → transactions[]
+  getTokenTransfers(address, chainId) → transfers[]
+  getCombinedHistory(address, chainId) → combined[]
+}
+```
+
+**Supported Explorer Types:**
+- **Blockscout**: SuperSeed
+- **Moralis**: Ethereum, Optimism, Base, BSC, Arbitrum
+- **Etherscan**: Ethereum (via Moralis adapter)
+
+**Key Benefits:**
+- Network-agnostic API interface
+- Automatic adapter selection
+- Per-network rate limiting
+- Extensible for new networks
+- Unified data format
+
+See [MULTICHAIN_TRANSACTION_HISTORY.md](./MULTICHAIN_TRANSACTION_HISTORY.md) for complete documentation.
+
+### 7. No Frontend Crypto
 - Event-driven communication
 - Storage persistence
 
@@ -395,6 +437,60 @@ const {
 } = useWalletProvider();
 ```
 
+### Swap Architecture (v2.0.0 - Refactored Nov 2025)
+
+**Design Philosophy:** Unified panel architecture for provider-agnostic swap interface.
+
+**Structure:**
+```
+Swap.jsx (~115 lines)              # Container/Orchestrator
+  ├─ SwapProviderSelector          # Tab selector (Bebop | Relay)
+  ├─ SlippageControl               # Shared slippage configuration
+  └─ Conditional Rendering:
+      ├─ BebopSwapPanel.jsx (~1,400 lines)   # Bebop JAM protocol
+      └─ RelaySwapPanel.jsx (~1,288 lines)   # Relay.link cross-chain
+```
+
+**Key Benefits:**
+1. ✅ **Consistency**: Both panels follow same architectural pattern
+2. ✅ **Maintainability**: Each panel is self-contained and independently testable
+3. ✅ **Scalability**: Easy to add new providers (Uniswap, 1inch, etc.)
+4. ✅ **Separation of Concerns**: `Swap.jsx` only handles routing, not implementation
+5. ✅ **Reduced Complexity**: From 2,206 lines monolith to 115-line orchestrator
+
+**BebopSwapPanel (~1,400 lines):**
+- Gasless MEV-protected swaps via Bebop JAM protocol
+- Permit2 approvals (one-time per token)
+- Internal components: `LoadingDots`, `PriceDeviationTooltip`, `SwapDetails`
+- Uses `SwapAdapter` for all backend communication
+- NO ethers imports (architecture compliance)
+
+**RelaySwapPanel (~1,288 lines):**
+- Cross-chain swaps via Relay.link
+- Network selection: Origin fixed (active network), Destination selectable
+- Internal components: `UsdBalanceDisplay`, `formatTokenAmount`
+- Uses `RelayAdapter` for all backend communication
+- Advanced features: Route visualization, gas estimation, bridge time
+
+**Shared Components (`src/components/swap/`):**
+- `CompactNetworkSelector.jsx` - Network dropdown for cross-chain
+- `RouteVisualization.jsx` - Visual swap route display
+- `BridgeTimeDisplay.jsx` - Bridge time estimation
+- `GasEstimateDisplay.jsx` - Gas cost estimation
+- `LoadingDots.jsx` - Loading animation
+
+**Props Interface (Both Panels):**
+```javascript
+{
+  onTransactionComplete: () => {},
+  preselectedToken: null,
+  onClearPreselection: () => {},
+  walletTokensWithBalance: [],
+  nativeTokenBalance: null,
+  slippage: 0.5  // Shared via Swap.jsx
+}
+```
+
 ### Stream Handlers
 
 **Location:** `src/background/handlers/streams/`
@@ -407,6 +503,497 @@ const {
 | **SendStreamHandler** | Token transfers | estimateGas, sendTransaction |
 | **BlockchainStreamHandler** | Blockchain queries | getBalance, getTokens, getNFTs |
 | **ApiStreamHandler** | External APIs | price feeds, token lists |
+
+### Managers
+
+**Location:** `src/background/managers/`
+
+| Manager | Purpose | Key Features |
+|---------|---------|--------------|
+| **SigningRequestManager** | Signing request lifecycle | Timeout protection, request recovery |
+| **PopupManager** | Popup window management | Mutual exclusion, priority system |
+| **EIP1193EventsManager** | Event broadcasting | accountsChanged, chainChanged |
+| **AutoEscalationManager** | Auto-approval system | Trusted dApp whitelist |
+| **WalletConnectManager** | WalletConnect v2 | Session management, request handling |
+
+### Services
+
+**Location:** `src/background/services/`
+
+| Service | Purpose | Implementation |
+|---------|---------|----------------|
+| **TokenMetadataService** | Token metadata lookup | Multi-layer: Cache → BebopTokenService → RPC |
+| **BebopTokenService** | Token list management | Local database, 2000+ tokens |
+| **NetworkSwitchService** | Unified network switching | Bidirectional dApp-wallet sync |
+
+### Logo Resolution System
+
+**Location:** `src/utils/logoProviders/` & `src/utils/logoOrchestrator.js`
+
+**Purpose:** Modular, extensible system for fetching token logos from multiple sources with intelligent caching and fallback.
+
+**Architecture:**
+```
+┌─────────────────────────────────────────────────────────┐
+│                  React Components                       │
+│        (TokenLogo, TokenImage, Dashboard, etc.)         │
+└────────────────────┬────────────────────────────────────┘
+                     │ useTokenLogo / resolveLogoURL
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│              Logo Orchestrator                          │
+│  - Provider cascade (priority order)                    │
+│  - In-memory + persistent cache                         │
+│  - URL validation (HEAD/GET)                            │
+│  - Request deduplication                                │
+└────────────────────┬────────────────────────────────────┘
+                     │ Try providers in order
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│                Logo Providers                           │
+│  0. Curated (510 tokens, local, instant)                │
+│  1. Backend (from existing metadata)                    │
+│  2. TrustWallet (GitHub CDN, EIP-55)                    │
+│  3. SmolDapp (GitHub CDN, multiple formats)             │
+│  4. Bebop (S3 bucket)                                   │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Key Features:**
+- **510 Curated Tokens**: Instant loading for top tokens across 6 chains
+- **Zero Privacy Leaks**: Local curated list checked first
+- **Offline Support**: Works without network for curated tokens
+- **Intelligent Caching**: In-memory + chrome.storage.local persistence
+- **Automatic Fallback**: Cascades through providers until logo found
+- **EIP-55 Compliance**: Proper checksummed addresses for compatibility
+
+**Provider Priority:**
+1. **Curated** (Priority 0) - `/assets/tokens/<chainId>/<symbol>-<address>.png`
+   - 510 tokens: ETH(100), OPT(101), BSC(100), BASE(101), ARB(101), SEED(7)
+   - Native tokens + major DeFi tokens (USDT, USDC, WBTC, etc.)
+   
+2. **Backend** (Priority 1) - Extracts from existing token metadata
+3. **TrustWallet** (Priority 2) - Official TrustWallet assets repository
+4. **SmolDapp** (Priority 3) - Community-maintained assets
+5. **Bebop** (Priority 4) - Bebop aggregator S3 bucket
+
+**Usage in Components:**
+```javascript
+// Using the hook (recommended)
+import { useTokenLogo } from '../hooks/useTokenLogoNew';
+
+const { logoUrl, isLoading } = useTokenLogo({
+  chainId: 56,
+  address: '0x0000000000000000000000000000000000000000',
+  metadata: tokenData // Optional
+});
+
+// Direct usage
+import { resolveLogoURL } from '../utils/logoOrchestrator';
+
+const logoUrl = await resolveLogoURL({
+  chainId: 56,
+  address: '0x0000000000000000000000000000000000000000'
+});
+```
+
+**Performance:**
+- Curated logos: < 1ms (instant)
+- Backend provider: < 1ms (no external request)
+- TrustWallet: ~50-200ms (GitHub CDN)
+- Cache hit: < 1ms (in-memory)
+
+**Documentation:** See [FRONTEND.md#token-logos-integration](./FRONTEND.md#token-logos-integration) for complete details.
+
+### Decoders
+
+**Location:** `src/background/decoders/`
+
+| Decoder | Purpose | Protocols |
+|---------|---------|-----------|
+| **TransactionDecoder** | Main orchestrator | Routes to specialized decoders |
+| **UniversalRouterDecoder** | Universal Router | Uniswap V2/V3/V4, Velodrome |
+| **UniversalRouterDecoderPancake** | PancakeSwap Infinity | Concentrated liquidity swaps |
+
+---
+
+## Transaction Decoder Architecture
+
+### Overview
+
+SuperSafe Wallet implements a professional-grade transaction decoding system that transforms raw blockchain transactions into human-readable information. The system supports major DEX protocols (Uniswap V2/V3/V4, PancakeSwap Infinity, Velodrome, Aerodrome) across 7 EVM networks with a strict "no fallbacks" security policy.
+
+### Core Components
+
+**TransactionDecoder** - Main orchestrator (`src/background/decoders/TransactionDecoder.js`)
+- Routes transactions to specialized decoders based on function selector
+- Manages token metadata resolution
+- Enforces strict "no fallbacks" policy
+
+**UniversalRouterDecoder** - Universal Router transactions (`src/background/decoders/UniversalRouterDecoder.js`)
+- Decodes Uniswap and Velodrome Universal Router transactions
+- Supports 11 command types (V2/V3/V4 swaps, wrap/unwrap, permit2)
+- Context-aware opcode interpretation (detects Uniswap vs PancakeSwap)
+
+**UniversalRouterDecoderPancake** - PancakeSwap Infinity (`src/background/decoders/UniversalRouterDecoderPancake.js`)
+- Specialized decoder for PancakeSwap Infinity concentrated liquidity swaps
+- Heuristic-based decoding for complex CL structures
+- Handles both native (BNB) and ERC-20 inputs
+
+**TokenMetadataService** - Token metadata management (`src/background/services/TokenMetadataService.js`)
+- Multi-layer lookup: Cache → BebopTokenService → On-Chain RPC
+- LRU cache with 1000 entry limit
+- Strict validation with no fallbacks
+- Request deduplication to prevent redundant RPC calls
+
+### Protocol Support
+
+| Protocol | Networks | Status |
+|----------|----------|--------|
+| Uniswap V2/V3/V4 | ETH, OPT, BASE | ✅ Full support |
+| Universal Router | ETH, OPT, BASE, BSC | ✅ Full support |
+| PancakeSwap Infinity | BSC | ✅ Heuristic decode |
+| Velodrome | Optimism | ✅ Full support |
+| Aerodrome | Base | ✅ Full support |
+| ERC-20 Operations | All networks | ✅ Full support |
+| Permit2 | All networks | ✅ Single/batch |
+
+### "No Fallbacks" Security Policy
+
+**Core Principle:** Never use default or guessed values for critical transaction parameters.
+
+**Examples:**
+```javascript
+// ✅ CORRECT
+const metadata = await tokenMetadataService.getTokenMetadata(address, chainId, provider);
+if (!metadata) {
+  throw new Error(`Cannot fetch metadata for token ${address}`);
+}
+
+// ❌ NEVER DO THIS
+const decimals = metadata?.decimals || 18; // Dangerous!
+```
+
+**Rationale:**
+- Better to show error than incorrect amounts/tokens
+- Prevents user from signing wrong information
+- Eliminates network mismatch risks
+
+---
+
+## Signing System Architecture
+
+### Overview
+
+Unified signing system handling all signing request types (transactions, personal messages, typed data) with consistent request management, network validation, and security controls.
+
+### Core Components
+
+**SigningRequestManager** (`src/background/managers/SigningRequestManager.js`)
+- Centralized manager for all signing requests
+- Request lifecycle management (created → pending → completed/rejected/expired)
+- Timeout protection (5 minutes default)
+- Request recovery on popup crash
+
+**SigningModalAdapter** (`src/background/adapters/SigningModalAdapter.js`)
+- Transforms raw RPC requests into user-friendly modal data
+- Handles personal_sign hex-to-UTF8 decoding
+- Parses eth_signTypedData_v4 structured data
+- Detects Permit2 approvals for enhanced UI
+
+### Supported Signing Methods
+
+| Method | Status | Purpose |
+|--------|--------|---------|
+| `personal_sign` | ✅ Active | SIWE, message authentication |
+| `eth_signTypedData_v4` | ✅ Active | Permit2, structured data |
+| `eth_signTypedData_v3` | ✅ Active | Legacy support |
+| `eth_sign` | ❌ Disabled | Blind signing risk |
+
+**Snake_case Support:** Both `personal_sign` and `personalSign` work (industry compatibility).
+
+### Request Lifecycle
+1. createRequest() → Generate requestId, set timeout
+2. buildModalRequestFromRpc() → Transform to modal format
+3. createSigningPopup() → Show popup to user
+4. User approves/rejects
+5. handleResponse() → Process response
+6. Complete/reject/expire →ent:**
+- Permanently disabled for security
+- Returns error code 4200
+- Users must use personal_sign or eth_signTypedData_v4
+
+---
+
+## dApp Connection Architecture
+
+### PopupManager Mutual Exclusion
+
+**Purpose:** Ensures extension UI and popup windows never coexist (Professionally Standardized UX).
+
+**Implementation:**
+- When popup opens → Extension closes
+- When extension opens while popup active → Extension closes, popup gains focus
+- Applies to ALL popup types
+
+**Popup Priority Order:**
+1. Personal Sign
+2. Typed Data
+3. Transaction
+4. Network Switch
+5. Connection
+6. Unlock
+
+**Triple Verification:**
+1. `main.jsx:66-83` - Pre-render check
+2. `App.jsx:58-81` - Post-render safety net
+3. `PopupManager.checkAndFocusExistingPopups()` - Centralized verification
+
+### Network Management
+
+**Bidirectional Network Switching:**
+
+SuperSafe supports network switching initiated from both sides:
+
+1. **Extension → dApp**: User changes network in wallet → `eth_chainChanged` event propagated to all connected dApps
+2. **dApp → Wallet**: dApp requests network switch via `wallet_switchEthereumChain` → Popup shown to user
+
+**Network Validation:**
+
+```javascript
+validateSigningNetwork(chainId, supportedNetworks, origin)
+```
+
+- Validates signing requests against dApp's supported networks
+- Prevents cross-network signing attacks
+- Shows clear error for unsupported networks
+
+**Unsupported Network Handling:**
+
+When dApp requests unsupported network:
+1. Show `UnsupportedNetworkScreen` popup
+2. Display network details and error message
+3. User can dismiss or manually switch to supported network
+4. Request automatically rejected if network mismatch
+
+### Stream Architecture
+
+**Long-Lived Connections:**
+
+SuperSafe uses native Chrome message ports for bidirectional communication:
+
+```javascript
+// Content Script → Background
+const port = chrome.runtime.connect({ name: 'provider-stream' });
+
+// Background maintains open connections
+providerStreams.set(origin, { port, metadata });
+```
+
+**Stream Types:**
+- **Provider Stream** - dApp RPC requests (eth_sendTransaction, personal_sign, etc.)
+- **Session Stream** - Extension UI communication
+- **WalletConnect Stream** - Mobile wallet protocol
+
+**Lifecycle Management:**
+- Streams auto-reconnect on service worker restart
+- Pending requests recovered from memory
+- Disconnect cleanup removes stale connections
+
+---
+
+## Service Worker Lifecycle
+
+### Manifest V3 Architecture
+
+SuperSafe runs as Manifest V3 service worker with different lifecycle than traditional background pages.
+
+**Lifecycle States:**
+- Installing → Activated → Running → Idle (30s) → Terminated (5min)
+- Wake-up events restart from Terminated to Running
+
+### Wakeup Mechanism
+
+**Problem:** Service workers terminate after inactivity, breaking long-lived connections.
+
+**Solution:** Proactive keep-alive ping system.
+
+**Implementation:**
+```javascript
+// Keep service worker alive with periodic ping
+setInterval(() => {
+  chrome.runtime.getPlatformInfo(() => {
+    // Ping prevents termination
+  });
+}, 20000); // Every 20 seconds
+```
+
+**Benefits:**
+- Maintains stream connections
+- Prevents timeout-related disconnections
+- Ensures WalletConnect sessions stay alive
+- Preserves in-memory session state
+
+### Persistence Strategy
+
+- **Critical State** → Chrome Storage (encrypted vault, network selection)
+- **Session State** → In-memory with auto-lock timeout
+- **Transient State** → Streams with reconnection logic
+
+### Session Recovery
+
+**Automatic Corruption Detection:**
+
+SuperSafe implements self-healing session restoration that automatically detects and cleans corrupted session data:
+
+```javascript
+// checkPersistentSession() in BackgroundSessionController
+const success = await this.restoreSessionWithLoginToken(loginToken, timeElapsed);
+
+if (!success) {
+  // Auto-cleanup corrupted session data
+  await this.clearSessionState();
+  return false;  // User sees login screen
+}
+```
+
+**Recovery Triggers:**
+- Decryption failure (OperationError)
+- Invalid credentials (vault mismatch)
+- Restoration exceptions
+
+**Benefits:**
+- ✅ Prevents error loops on every extension open
+- ✅ Self-healing without user intervention
+- ✅ Maintains vault integrity (only clears session state)
+
+See [SECURITY.md](./SECURITY.md#corrupted-session-recovery) for detailed security implementation.
+
+---
+
+## Transaction Decoder Architecture
+
+### Overview
+
+SuperSafe Wallet implements a professional-grade transaction decoding system that transforms raw blockchain transactions into human-readable information. The system supports major DEX protocols (Uniswap V2/V3/V4, PancakeSwap Infinity, Velodrome, Aerodrome) across 7 EVM networks with a strict "no fallbacks" security policy.
+
+### Core Components
+
+**TransactionDecoder** - Main orchestrator (`src/background/decoders/TransactionDecoder.js`)
+- Routes transactions to specialized decoders based on function selector
+- Manages token metadata resolution
+- Enforces strict "no fallbacks" policy
+
+**UniversalRouterDecoder** - Universal Router transactions (`src/background/decoders/UniversalRouterDecoder.js`)
+- Decodes Uniswap and Velodrome Universal Router transactions
+- Supports 11 command types (V2/V3/V4 swaps, wrap/unwrap, permit2)
+- Context-aware opcode interpretation (detects Uniswap vs PancakeSwap)
+
+**UniversalRouterDecoderPancake** - PancakeSwap Infinity (`src/background/decoders/UniversalRouterDecoderPancake.js`)
+- Specialized decoder for PancakeSwap Infinity concentrated liquidity swaps
+- Heuristic-based decoding for complex CL structures
+- Handles both native (BNB) and ERC-20 inputs
+
+**TokenMetadataService** - Token metadata management (`src/background/services/TokenMetadataService.js`)
+- Multi-layer lookup: Cache → BebopTokenService → On-Chain RPC
+- LRU cache with 1000 entry limit
+- Strict validation with no fallbacks
+- Request deduplication to prevent redundant RPC calls
+
+### Protocol Support
+
+| Protocol | Networks | Status |
+|----------|----------|--------|
+| Uniswap V2/V3/V4 | ETH, OPT, BASE | ✅ Full support |
+| Universal Router | ETH, OPT, BASE, BSC | ✅ Full support |
+| PancakeSwap Infinity | BSC | ✅ Heuristic decode |
+| Velodrome | Optimism | ✅ Full support |
+| Aerodrome | Base | ✅ Full support |
+| ERC-20 Operations | All networks | ✅ Full support |
+| Permit2 | All networks | ✅ Single/batch |
+
+### "No Fallbacks" Security Policy
+
+**Core Principle:** Never use default or guessed values for critical transaction parameters.
+
+**Examples:**
+
+```javascript
+// ✅ CORRECT
+const metadata = await tokenMetadataService.getTokenMetadata(address, chainId, provider);
+if (!metadata) {
+  throw new Error(`Cannot fetch metadata for token ${address}`);
+}
+
+// ❌ NEVER DO THIS
+const decimals = metadata?.decimals || 18; // Dangerous!
+```
+
+**Rationale:**
+- Better to show error than incorrect amounts/tokens
+- Prevents user from signing wrong information
+- Eliminates network mismatch risks
+
+---
+
+## Signing System Architecture
+
+### Overview
+
+Unified signing system handling all signing request types (transactions, personal messages, typed data) with consistent request management, network validation, and security controls.
+
+### Core Components
+
+**SigningRequestManager** (`src/background/managers/SigningRequestManager.js`)
+- Centralized manager for all signing requests
+- Request lifecycle management (created → pending → completed/rejected/expired)
+- Timeout protection (5 minutes default)
+- Request recovery on popup crash
+
+**SigningModalAdapter** (`src/background/adapters/SigningModalAdapter.js`)
+- Transforms raw RPC requests into user-friendly modal data
+- Handles personal_sign hex-to-UTF8 decoding
+- Parses eth_signTypedData_v4 structured data
+- Detects Permit2 approvals for enhanced UI
+
+### Supported Signing Methods
+
+| Method | Status | Purpose |
+|--------|--------|---------|
+| `personal_sign` | ✅ Active | SIWE, message authentication |
+| `eth_signTypedData_v4` | ✅ Active | Permit2, structured data |
+| `eth_signTypedData_v3` | ✅ Active | Legacy support |
+| `eth_sign` | ❌ Disabled | Blind signing risk |
+
+**Snake_case Support:** Both `personal_sign` and `personalSign` work (industry compatibility).
+
+### Request Lifecycle
+
+```
+1. createRequest() → Generate requestId, set timeout
+2. buildModalRequestFromRpc() → Transform to modal format
+3. createSigningPopup() → Show popup to user
+4. User approves/rejects
+5. handleResponse() → Process response
+6. Complete/reject/expire → Cleanup
+```
+
+### Security Validation
+
+**Network Validation:**
+
+```javascript
+validateSigningNetwork(chainId, supportedNetworks, origin)
+```
+
+- Prevents signing on unsupported networks
+- Clear error messages
+- Protects against replay attacks
+
+**eth_sign Disablement:**
+- Permanently disabled for security
+- Returns error code 4200
+- Users must use personal_sign or eth_signTypedData_v4
 
 ---
 
@@ -557,6 +1144,85 @@ sequenceDiagram
     end
 ```
 
+### Relay Network Selection Architecture
+
+**Last Updated:** November 12, 2025
+
+#### Design Philosophy
+
+Relay swap panel implements a **restricted network selection model** where the origin network is always the active wallet network. This design choice aligns with fundamental blockchain security requirements and provides a consistent user experience across all swap interfaces.
+
+#### Network Selection Rules
+
+| Section | Network Source | User Control | Rationale |
+|---------|---------------|--------------|-----------|
+| **Pay (Origin)** | Active network only (`networkKey` prop) | ❌ No control within panel | Transaction signing requires active network |
+| **Receive (Destination)** | Any supported network | ✅ Full control via `CompactNetworkSelector` | Destination can be any chain |
+
+#### Implementation Details
+
+```javascript
+// Pay section - ALWAYS uses active network
+const { tokens: fromTokens } = useTokenList(networkKey);
+// Uses walletTokensWithBalance and nativeTokenBalance props directly
+// (these are always available for active network)
+
+// Receive section - User can select destination
+const [toNetworkKey, setToNetworkKey] = useState(networkKey);
+const { tokens: toTokens } = useTokenList(toNetworkKey);
+// Fetches balances dynamically for selected destination network
+```
+
+#### Key Benefits
+
+1. **Security:** Origin must be active network (required for transaction signing)
+2. **Performance:** No need to fetch balances for non-active networks
+3. **Consistency:** Same behavior as Bebop swap and standard wallets (MetaMask, Rainbow, etc.)
+4. **Reliability:** Balances for origin network are always available (cached in Dashboard)
+5. **Simplicity:** Reduces cognitive load (one less decision for users)
+6. **Bug Prevention:** Eliminates edge cases with token addresses across different networks
+
+#### User Workflow
+
+**For Same-Network Swap (e.g., Arbitrum → Arbitrum):**
+1. User is on Arbitrum (active network)
+2. Select pay token from Arbitrum tokens (with balances)
+3. Select receive token from Arbitrum tokens
+4. Execute swap
+
+**For Cross-Chain Swap (e.g., Arbitrum → Ethereum):**
+1. User is on Arbitrum (active network)
+2. Select pay token from Arbitrum tokens (with balances)
+3. Select Ethereum as destination network (via selector)
+4. Select receive token from Ethereum tokens
+5. Execute cross-chain swap
+
+**To swap FROM Ethereum TO Arbitrum:**
+1. User must first **switch active network to Ethereum** (via AppHeader)
+2. Then follow cross-chain flow above
+
+#### Technical Components
+
+- **`RelaySwapPanel.jsx`**: Main component implementing this architecture
+- **`CompactNetworkSelector`**: Only present in "Receive" section
+- **Pay Section**: No network display (identical to Bebop's design), implicitly uses active network
+- **Balance Fetching**: Origin uses props, destination uses dynamic fetch via `getWalletBalances`
+- **Token Context**: Uses `context="swap-pay"` and `context="swap-receive"` for proper balance display within selectors
+
+#### Migration Notes
+
+**Previous Design (v1.0.0):**
+- Had `CompactNetworkSelector` in both Pay and Receive sections
+- Used `fromNetworkKey` state for origin network
+- Attempted to fetch balances for any selected origin network
+- Led to issues: balances not available, incorrect token addresses in cross-chain swaps
+
+**Current Design (v2.0.0):**
+- Removed `CompactNetworkSelector` from Pay section
+- Replaced `fromNetworkKey` with direct use of `networkKey` prop
+- Origin always uses active network (consistent with transaction signing requirements)
+- Eliminated balance fetching problems and cross-chain address mismatches
+
 ---
 
 ## Technology Stack
@@ -576,6 +1242,7 @@ sequenceDiagram
 ```json
 {
   "@reown/walletkit": "^1.2.8",
+  "@reservoir0x/relay-sdk": "^2.4.0",
   "@metamask/eth-sig-util": "^8.2.0",
   "ethereum-cryptography": "^3.2.0",
   "buffer": "^6.0.3",
@@ -678,9 +1345,19 @@ src/
 │
 ├── components/                       # UI components
 │   ├── Dashboard.jsx                 # Portfolio view
-│   ├── Swap.jsx                      # Swap interface
+│   ├── Swap.jsx                      # Swap container/orchestrator (~115 lines)
+│   ├── SwapProviderSelector.jsx      # Bebop/Relay provider selector
 │   ├── Settings.jsx                  # Settings panel
 │   ├── Ecosystem.jsx                 # Ecosystem explorer
+│   │
+│   ├── swap/                         # Swap-specific components
+│   │   ├── BebopSwapPanel.jsx        # Bebop swap implementation (~1,400 lines)
+│   │   ├── RelaySwapPanel.jsx        # Relay swap implementation (~1,288 lines)
+│   │   ├── CompactNetworkSelector.jsx # Compact network selector for cross-chain
+│   │   ├── RouteVisualization.jsx    # Visual swap route display
+│   │   ├── BridgeTimeDisplay.jsx     # Bridge time estimation
+│   │   ├── GasEstimateDisplay.jsx    # Gas cost estimation
+│   │   └── LoadingDots.jsx           # Loading animation
 │   │
 │   ├── screens/                      # Full-screen views
 │   │   ├── ConnectionRequestScreen.jsx
@@ -788,104 +1465,54 @@ Root/
 
 ### Supported Networks
 
-**Active Networks (2):**
+**Active Networks (7):**
+
+| Network | Chain ID | Swap Support | Relay Support | Status |
+|---------|----------|-------------|---------------|--------|
+| **SuperSeed** | 5330 | ✅ Bebop (JAM) | ✅ Cross-chain | ✅ Active |
+| **Optimism** | 10 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **Ethereum** | 1 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **Base** | 8453 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **BNB Chain** | 56 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **Arbitrum One** | 42161 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **Shardeum** | 8118 | ❌ Not supported | ❌ Not supported | ✅ Active |
+
+**Inactive/Testnet Networks:**
+- Ethereum Sepolia (chainId: 11155111) - Testnet, no swaps
+- SuperSeed Sepolia (chainId: 53302) - Testnet, no swaps
+- Injective (chainId: 1776) - Inactive
+
+**Network Configuration Example:**
 
 ```javascript
 NETWORKS = {
   superseed: {
+    active: true,
     networkKey: 'superseed',
     name: "SuperSeed",
     chainId: 5330,
     rpcUrl: "https://mainnet.superseed.xyz",
-    wsUrl: "wss://mainnet.superseed.xyz",
-    currency: "ETH",
-    explorer: "https://explorer.superseed.xyz",
-    testnet: false,
-    nativeCurrency: {
-      name: "Ethereum",
-      symbol: "ETH",
-      decimals: 18
-    },
-    networkToken: {
-      name: "Superseed",
-      symbol: "SUPR",
-      decimals: 18,
-      address: "0x4200000000000000000000000000000000000042"
-    },
-    networkStableToken: {
-      name: "USDC",
-      symbol: "USDC",
-      decimals: 6,
-      address: "0xC316C8252B5F2176d0135Ebb0999E99296998F2e"
-    },
     supportBebopSwap: true,
     bebop: {
-      bebopName: 'superseed',
-      displayName: 'SuperSeed',
-      apiSupport: ['JAM'],
-      jamApi: 'https://api.bebop.xyz/jam/superseed/v2/',
-      rfqApi: null,
-      swapEnabled: true,
-      contracts: {
-        jamSettlement: "0xbeb0b0623f66bE8cE162EbDfA2ec543A522F4ea6",
-        balanceManager: "0xC5a350853E4e36b73EB0C24aaA4b8816C9A3579a",
-        rfqSettlement: "0xbbbbbBB520d69a9775E85b458C58c648259FAD5F",
-        permit2: "0x000000000022D473030F116dDEE9F6B43aC78BA3"
-      }
+      apiSupport: ['JAM'], // JAM only (no RFQ)
+      jamApi: 'https://api.bebop.xyz/jam/superseed/v2/'
+    },
+    relay: {
+      enabled: true,
+      relayChainId: 5330,
+      crossChainEnabled: true
     }
   },
-  
-  optimism: {
-    networkKey: 'optimism',
-    name: "Optimism",
-    chainId: 10,
-    rpcUrl: "https://opt-mainnet.g.alchemy.com/v2/dR8aRdNaihRBCMJpBw4Fn",
-    wsUrl: null,
-    currency: "ETH",
-    explorer: "https://optimistic.etherscan.io",
-    testnet: false,
-    nativeCurrency: {
-      name: "Ethereum",
-      symbol: "ETH",
-      decimals: 18
-    },
-    networkToken: {
-      name: "Optimism",
-      symbol: "OP",
-      decimals: 18,
-      address: "0x4200000000000000000000000000000000000042"
-    },
-    networkStableToken: {
-      name: "USDC",
-      symbol: "USDC",
-      decimals: 6,
-      address: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
-    },
-    supportBebopSwap: true,
-    bebop: {
-      bebopName: 'optimism',
-      displayName: 'Optimism',
-      apiSupport: ['JAM', 'RFQ'],
-      jamApi: 'https://api.bebop.xyz/jam/optimism/v2/',
-      rfqApi: 'https://api.bebop.xyz/pmm/optimism/v3/',
-      swapEnabled: true,
-      contracts: {
-        jamSettlement: "0xbEbEbEb035351f58602E0C1C8B59ECBfF5d5f47b",
-        balanceManager: "0xfE96910cF84318d1B8a5e2a6962774711467C0be",
-        rfqSettlement: "0xbbbbbBB520d69a9775E85b458C58c648259FAD5F",
-        permit2: "0x000000000022D473030F116dDEE9F6B43aC78BA3"
-      }
-    }
-  }
+  // ... 6 other active networks follow similar structure
 }
 ```
 
-**Additional Networks (Commented/Planned):**
-- Ethereum (chainId: 1) - Full Bebop support (JAM + RFQ)
-- Base (chainId: 8453) - Full Bebop support (JAM + RFQ)
-- BSC (chainId: 56) - Full Bebop support (JAM + RFQ)
-- Ethereum Sepolia (chainId: 11155111) - Testnet, no swaps
-- SuperSeed Sepolia (chainId: 53302) - Testnet, no swaps
+**Key Features:**
+- **Bebop Support**: 6 networks support Bebop swaps (JAM and/or RFQ)
+- **Relay.link Support**: 6 networks support cross-chain swaps via Relay.link
+- **Network Tokens**: Each network has wrapped native token (WETH, WBNB, etc.)
+- **Stable Tokens**: USDC/USDT configured per network
+- **Explorer APIs**: Moralis (ETH, OPT, BASE, BSC, ARB), Blockscout (SuperSeed)
 
 ### Network Switching Architecture
 
@@ -911,6 +1538,70 @@ graph LR
 - `dapp_request` - dApp-requested via wallet_switchEthereumChain
 - `connection` - During dApp connection
 - `automatic` - System-initiated
+
+### Pre-Switch Coordination System
+
+**Purpose:** Ensures all components are ready before network switch completes, preventing race conditions and state inconsistencies.
+
+**Architecture:** Promise-based coordination replaces fragile timing-based delays with deterministic handler execution.
+
+```javascript
+// Pre-switch handler registration
+preSwitchCoordinator.registerHandler(
+  'portfolio-data-lock',
+  async (targetNetworkKey) => {
+    // Prepare for network switch
+    isNetworkSwitchingRef.current = true;
+    pendingNetworkSwitchRef.current = targetNetworkKey;
+  },
+  { name: 'Portfolio Lock', timeout: 500 }
+);
+
+// Coordinated execution during switch
+await preSwitchCoordinator.executeHandlers(targetNetworkKey, {
+  context: 'manual',
+  abortOnError: true  // Abort switch on handler failure
+});
+```
+
+**Key Features:**
+- **Deterministic Execution**: Waits for actual handler completion, not arbitrary delays
+- **Abort-on-Failure**: Network switch aborts if any handler fails/times out
+- **Per-Handler Timeouts**: Individual 2s timeout protection (configurable)
+- **Global Timeout**: 5s safety net prevents infinite hangs
+- **Detailed Logging**: Full visibility into handler execution and failures
+- **Cleanup Support**: Automatic unregistration on component unmount
+
+**Security Benefits:**
+- Prevents showing one network while signing on another
+- Eliminates race conditions in portfolio data fetching
+- Ensures UI state consistency across network switches
+- No silent failures - all errors surfaced to user
+
+**Registered Handlers:**
+- **Portfolio Data Lock** (`usePortfolioData`) - Sets network switching flag before state updates
+
+**Migration from Event-Based:**
+
+```javascript
+// ❌ OLD: Fragile timing-based approach
+window.dispatchEvent(new CustomEvent('supersafe-network-pre-switch', {...}));
+await new Promise(resolve => setTimeout(resolve, 50)); // Arbitrary delay
+
+// ✅ NEW: Promise-based coordination
+await preSwitchCoordinator.executeHandlers(targetNetworkKey, {
+  abortOnError: true
+});
+```
+
+**Benefits over Events:**
+1. **Deterministic**: No guessing on timing
+2. **Error Visibility**: Know exactly which handler failed
+3. **Configurable Timeouts**: Per-handler and global protection
+4. **Abort-on-Failure**: Prevents inconsistent states
+5. **Observable**: Full execution metrics logged
+
+See [NETWORK_SWITCHING.md](./NETWORK_SWITCHING.md) for complete documentation.
 
 ---
 
@@ -952,11 +1643,12 @@ Content Script: ~150 KB (minimal injection)
 - [BLOCKCHAIN_OPERATIONS.md](./BLOCKCHAIN_OPERATIONS.md) - Blockchain interactions
 - [DAPP_CONNECTIONS.md](./DAPP_CONNECTIONS.md) - dApp connection mechanisms
 - [SWAP_SYSTEM.md](./SWAP_SYSTEM.md) - Bebop swap integration
+- [FRONTEND.md#token-logos-integration](./FRONTEND.md#token-logos-integration) - Token logo resolution system
 - [API_REFERENCE.md](./API_REFERENCE.md) - Complete API documentation
 
 ---
 
-**Document Status:** ✅ Current as of October 13, 2025  
+**Document Status:** ✅ Current as of November 15, 2025  
 **Code Version:** v3.0.0+  
 **Maintenance:** Review quarterly or after major architecture changes
 

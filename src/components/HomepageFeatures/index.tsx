@@ -13,11 +13,11 @@ type FeatureItem = {
 // Updated FeatureList with SuperSafe v3.0.0+ key features
 const FeatureList: FeatureItem[] = [
   {
-    title: 'MetaMask-Style Architecture',
+    title: 'Professionally Standardized Architecture',
     description: (
       <>
-        Built with Service Worker architecture for reliability. 25K+ lines of code with enterprise-grade security
-        and MetaMask-compatible APIs.
+        Industry-standard Service Worker architecture with 30K+ lines of code. Stream-based communication
+        for &lt;150ms response times. Thin client pattern ensures private keys never leave the background.
       </>
     ),
   },
@@ -25,8 +25,8 @@ const FeatureList: FeatureItem[] = [
     title: 'Smart Native Connection',
     description: (
       <>
-        Real chainIds, no compatibility hacks. Connect to dApps with confidence using EIP-6963 and
-        automatic framework detection.
+        Real chainIds only, zero compatibility hacks. Automatic framework detection for RainbowKit, Wagmi,
+        Dynamic, and Web3-React. WalletConnect V2/Reown integration with AllowList security system.
       </>
     ),
   },
@@ -34,26 +34,44 @@ const FeatureList: FeatureItem[] = [
     title: 'Gasless Token Swaps',
     description: (
       <>
-        Swap tokens without paying gas fees. Integrated with Bebop JAM protocol for MEV protection
-        and competitive pricing across SuperSeed and Optimism.
+        Swap tokens without paying gas fees via Bebop JAM protocol with MEV protection. Cross-chain swaps
+        across 85+ blockchains via Relay.link. Unified panel architecture v2.0.0 with best price execution.
       </>
     ),
   },
   {
-    title: 'AES-256-GCM Encryption',
+    title: 'Enterprise-Grade Security',
     description: (
       <>
-        Enterprise-grade encryption with PBKDF2 key derivation. Security score of 96/100 with
-        AllowList system for trusted dApps only.
+        Military-grade AES-256-GCM encryption with PBKDF2 (10,000 iterations). Security score 96/100.
+        Auto-lock after 15 minutes. Professional transaction decoder with "no fallbacks" security policy.
       </>
     ),
   },
   {
-    title: 'Multi-Chain Ready',
+    title: '7 Active Networks',
     description: (
       <>
-        2 active networks (SuperSeed, Optimism) with 5+ planned. Seamless network switching with
-        automatic dApp compatibility detection.
+        Ethereum, BSC, Arbitrum, Optimism, Base, SuperSeed, and Shardeum. Context-aware network switching
+        with pre-switch coordination. Multichain transaction history with adapter architecture for easy expansion.
+      </>
+    ),
+  },
+  {
+    title: 'Professional Transaction Decoder',
+    description: (
+      <>
+        Human-readable transaction decoding for Uniswap V2/V3/V4, PancakeSwap Infinity, Velodrome, and Aerodrome.
+        Multi-layer token metadata system with LRU caching. Universal Router support with comprehensive protocol coverage.
+      </>
+    ),
+  },
+  {
+    title: 'Unified Signing System',
+    description: (
+      <>
+        Enterprise signing system handling all request types with consistent validation. Network-aware signing
+        with strict security controls. Comprehensive error handling and recovery mechanisms for maximum reliability.
       </>
     ),
   },
@@ -61,8 +79,19 @@ const FeatureList: FeatureItem[] = [
     title: 'Developer-First Approach',
     description: (
       <>
-        Complete EIP-1193 implementation with framework support for RainbowKit, Wagmi, Web3-React,
-        and Dynamic. Comprehensive API documentation.
+        Complete EIP-1193 and EIP-6963 implementation. Stream-based APIs with typed messages. Comprehensive
+        documentation with backend/frontend architecture guides. Full API reference with session, controller,
+        and swap endpoints.
+      </>
+    ),
+  },
+  {
+    title: 'Security Audits & Compliance',
+    description: (
+      <>
+        Comprehensive security audits covering dApp connections, signing system, transaction decoding, and state
+        management. 100% compliance achieved across all audit criteria. Professional-grade security practices
+        with continuous monitoring and vulnerability reporting.
       </>
     ),
   },
@@ -78,7 +107,7 @@ function Feature({title, /* Svg, */ description}: FeatureItem) {
         </div>
       )} */}
       <div className={styles.featureCard}>
-        <div className="text--center padding-horiz--md">
+        <div className="padding-horiz--md">
           <Heading as="h3" className={styles.featureCardTitle}>{title}</Heading>
           <p className={styles.featureCardDescription}>{description}</p>
         </div>

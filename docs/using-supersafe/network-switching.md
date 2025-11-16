@@ -4,101 +4,356 @@ sidebar_position: 6
 
 # 🌐 Network Switching
 
-Learn how to switch between different blockchain networks and understand network-specific features in SuperSafe Wallet.
+SuperSafe Wallet implements a sophisticated network switching system that ensures all components are synchronized and ready before, during, and after network changes. The system prevents race conditions, maintains state consistency, and provides robust error handling.
 
 ## Overview
 
-SuperSafe Wallet supports multiple blockchain networks, each with its own characteristics, tokens, and features. The **Smart Native Connection** architecture ensures seamless dApp integration across all supported networks without compatibility hacks.
+**Supported Networks:** Currently supports **7 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Shardeum) with extensible architecture for adding new networks.
+
+### Key Features
+
+- **Promise-Based Coordination**: Deterministic execution with timeout protection
+- **Abort-on-Failure**: Network switches abort if preparation fails
+- **Context-Aware**: Different behaviors for manual, dApp-requested, and connection switches
+- **Event-Driven**: Components notified of network changes via custom events
+- **Bidirectional**: Supports wallet→dApp and dApp→wallet network switching
+- **State Consistency**: Ensures UI and backend stay synchronized
+
+---
 
 ## Supported Networks
 
-### Active Networks
+### Active Networks (7)
 
-#### SuperSeed (Chain ID: 5330)
-- **Type**: Layer 1 blockchain
-- **Native Token**: ETH
-- **Network Token**: SUPR
-- **Stablecoin**: USDC
-- **RPC**: `https://mainnet.superseed.xyz`
-- **Explorer**: `https://explorer.superseed.xyz`
-- **Swap Support**: Bebop JAM
-- **Status**: ✅ Active
+| Network | Chain ID | Swap Support | Relay Support | Status |
+|---------|----------|--------------|---------------|--------|
+| **SuperSeed** | 5330 | ✅ Bebop (JAM) | ✅ Cross-chain | ✅ Active |
+| **Ethereum** | 1 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **Optimism** | 10 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **Base** | 8453 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **BNB Chain** | 56 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **Arbitrum One** | 42161 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
+| **Shardeum** | 8118 | ❌ Not supported | ❌ Not supported | ✅ Active |
 
-#### Optimism (Chain ID: 10)
-- **Type**: Layer 2 (Optimistic Rollup)
-- **Native Token**: ETH
-- **Network Token**: OP
-- **Stablecoin**: USDC
-- **RPC**: Alchemy endpoint
-- **Explorer**: `https://optimistic.etherscan.io`
-- **Swap Support**: Bebop JAM + RFQ
-- **Status**: ✅ Active
+---
 
-### Planned Networks
+## Architecture
 
-#### Ethereum (Chain ID: 1)
-- **Type**: Layer 1 blockchain
-- **Native Token**: ETH
-- **Stablecoin**: USDC
-- **Swap Support**: Bebop JAM + RFQ
-- **Status**: 💤 Planned
+### Three-Phase Switch Process
 
-#### Base (Chain ID: 8453)
-- **Type**: Layer 2 (Optimistic Rollup)
-- **Native Token**: ETH
-- **Stablecoin**: USDC
-- **Swap Support**: Bebop JAM + RFQ
-- **Status**: 💤 Planned
+Network switching happens in three distinct phases:
 
-#### BSC (Chain ID: 56)
-- **Type**: Layer 1 blockchain
-- **Native Token**: BNB
-- **Stablecoin**: USDT
-- **Swap Support**: Bebop JAM + RFQ
-- **Status**: 💤 Planned
+#### Phase 1: Pre-Switch Coordination
 
-#### Testnets
-- **Ethereum Sepolia** (Chain ID: 11155111)
-- **SuperSeed Sepolia** (Chain ID: 53302)
-- **Status**: 💤 Planned (No swap support)
+**Purpose**: Ensure all components are ready before network state changes.
 
-## Network Switching Interface
+**Actions**:
+- Execute registered pre-switch handlers
+- Set component locks and flags
+- Cancel network-dependent operations
+- Validate switch conditions
 
-### Network Selector
+**Timeout**: Per-handler (2s default) + Global (5s safety net)
+
+**Failure Behavior**: Abort switch, show error to user
+
+#### Phase 2: Network Switch Execution
+
+**Purpose**: Update network state in background and frontend.
+
+**Actions**:
+- Validate target network exists and is supported
+- Switch provider in background service
+- Update session state (currentNetworkKey)
+- Refresh custom tokens for new network
+- Persist network selection to storage
+
+**Failure Behavior**: Throw error, revert to previous network
+
+#### Phase 3: Post-Switch Broadcast
+
+**Purpose**: Notify all components of completed network change.
+
+**Actions**:
+- Broadcast `supersafe-network-changed` event to frontend
+- Send `eth_chainChanged` event to connected dApps
+- Execute context-specific post-switch actions
+- Trigger UI updates and data refresh
+
+**Failure Behavior**: Log warning, continue (switch already completed)
+
+---
+
+## Switch Flow
+
+### Complete Switch Sequence
 
 ```
-┌─────────────────────────────────────┐
-│ 🌐 Select Network                   │
-│ ┌─────────────────────────────────┐ │
-│ │ ✅ SuperSeed (5330)            │ │ ← Active Network
-│ │   RPC: mainnet.superseed.xyz   │ │
-│ │   Explorer: explorer.superseed │ │
-│ │   Swap: Bebop JAM              │ │
-│ └─────────────────────────────────┘ │
-│ ┌─────────────────────────────────┐ │
-│ │ ⚪ Optimism (10)                │ │ ← Available Network
-│ │   RPC: opt-mainnet.g.alchemy   │ │
-│ │   Explorer: optimistic.etherscan│ │
-│ │   Swap: Bebop JAM + RFQ        │ │
-│ └─────────────────────────────────┘ │
-│ ┌─────────────────────────────────┐ │
-│ │ 💤 Ethereum (1) - Coming Soon   │ │ ← Planned Network
-│ │   RPC: mainnet.infura.io        │ │
-│ │   Explorer: etherscan.io        │ │
-│ │   Swap: Bebop JAM + RFQ        │ │
-│ └─────────────────────────────────┘ │
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│ 1. Switch Initiated                                      │
+│    • User clicks network selector                        │
+│    • dApp requests wallet_switchEthereumChain            │
+│    • Connection requires different network               │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 2. Validation                                            │
+│    • Check targetNetworkKey exists in NETWORKS           │
+│    • Verify network is active                            │
+│    • Validate context permissions                        │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 3. Pre-Switch Coordination                               │
+│    • Execute all registered handlers                     │
+│    • Wait for handlers to complete (or timeout)          │
+│    • Abort if any handler fails                          │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 4. Background Switch                                     │
+│    • Call NetworkAdapter.switchNetwork()                 │
+│    • Update provider in background                       │
+│    • Switch controllers to new network                   │
+│    • Persist network selection                           │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 5. Session State Refresh                                 │
+│    • Fetch updated session state from background         │
+│    • Load custom tokens for new network                  │
+│    • Prepare session data for broadcast                  │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 6. Event Broadcasting                                    │
+│    • Dispatch supersafe-network-changed event            │
+│    • Include session data and context                    │
+│    • Notify all frontend components                      │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 7. dApp Notification                                     │
+│    • Send eth_chainChanged to connected dApps            │
+│    • Update connection state                             │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 8. Post-Switch Actions                                   │
+│    • Context-specific callbacks                          │
+│    • UI updates (redirect, refresh)                      │
+│    • Data fetching for new network                       │
+└──────────────────────────────────────────────────────────┘
 ```
 
-### Network Information
+### Timing Breakdown
 
-Each network displays:
-- **Network Name**: Official network name
-- **Chain ID**: Unique network identifier
-- **RPC Endpoint**: Network RPC URL
-- **Explorer**: Block explorer URL
-- **Swap Support**: Available swap protocols
-- **Status**: Active, planned, or testnet
+Typical network switch timing:
+
+```
+Pre-Switch Coordination:   50-500ms   (depends on handlers)
+Background Switch:          20-50ms    (provider update)
+Session Refresh:            10-30ms    (fetch session state)
+Event Broadcasting:         <5ms       (dispatch events)
+Post-Switch Actions:        Variable   (depends on context)
+────────────────────────────────────────────────────────────
+Total:                      ~100-600ms (user-perceived delay)
+```
+
+---
+
+## Context-Aware Switching
+
+SuperSafe supports different network switching contexts, each with specialized behavior.
+
+### Switch Contexts
+
+#### 1. Manual Context
+
+**Trigger**: User clicks network selector in wallet UI
+
+**Use Case**: User-initiated network changes
+
+**Behavior**:
+- No consent modal (user explicitly selected network)
+- Immediate execution after validation
+- Post-switch redirect to dashboard
+- Refresh portfolio data
+
+#### 2. Connection Context
+
+**Trigger**: dApp connection with network mismatch
+
+**Use Case**: User connecting to dApp that requires different network
+
+**Behavior**:
+- Show consent modal explaining mismatch
+- Wait for user approval
+- Switch network if approved
+- Continue with connection after switch
+
+#### 3. dApp-Requested Context
+
+**Trigger**: dApp calls `wallet_switchEthereumChain` RPC method
+
+**Use Case**: dApp needs wallet on different network
+
+**Behavior**:
+- Show consent modal with dApp origin
+- Display target network details
+- Wait for user approval
+- Send response to dApp
+
+---
+
+## Pre-Switch Coordination
+
+### Overview
+
+Pre-switch coordination replaces fragile timing-based delays with promise-based handler execution. Components register async handlers that must complete successfully before the network switch proceeds.
+
+### PreSwitchCoordinator
+
+**Location**: `src/utils/PreSwitchCoordinator.js`
+
+**Purpose**: Manages async handler registration and coordinated execution.
+
+**Key Methods**:
+```javascript
+// Register a handler
+preSwitchCoordinator.registerHandler(handlerId, handler, options)
+
+// Unregister on cleanup
+preSwitchCoordinator.unregisterHandler(handlerId)
+
+// Execute all handlers (called by switch system)
+await preSwitchCoordinator.executeHandlers(targetNetworkKey, options)
+```
+
+### Timeout Configuration
+
+**Per-Handler Timeout** (default: 2000ms)
+- Individual protection for each handler
+- Configurable per handler registration
+- Should match handler complexity
+
+**Global Timeout** (default: 5000ms)
+- Safety net for all handlers combined
+- Prevents infinite hangs
+- Configurable per execution
+
+### Error Handling
+
+**Abort-on-Failure** (default behavior):
+- If any handler fails or times out, the network switch aborts
+- Error is thrown with details about which handler failed
+- User sees clear error message
+- Network remains on current chain
+
+**Benefits**:
+- Prevents inconsistent states
+- Ensures UI reflects actual network
+- Clear failure visibility
+- No silent failures
+
+---
+
+## Error Handling
+
+### Error Types
+
+#### 1. Validation Errors
+
+**Cause**: Invalid network key or unsupported network
+
+**User Impact**: Immediate error message, no state change
+
+#### 2. Coordination Errors
+
+**Cause**: Pre-switch handler failed or timed out
+
+**User Impact**: Error modal, network stays on current chain
+
+#### 3. Background Errors
+
+**Cause**: Provider initialization failed, RPC unreachable
+
+**User Impact**: Error modal, may need to retry
+
+#### 4. Session Errors
+
+**Cause**: Failed to refresh session state after switch
+
+**User Impact**: Switch completes, may need manual refresh
+
+### Error Recovery
+
+**Automatic Recovery**:
+- Concurrent switch prevention (only one switch at a time)
+- Timeout protection prevents infinite hangs
+- State rollback on pre-switch failures
+
+**Manual Recovery**:
+- Retry switch after fixing issue
+- Refresh wallet if state inconsistent
+- Check network RPC connectivity
+
+---
+
+## Events & Communication
+
+### Frontend Events
+
+#### supersafe-network-changed
+
+**Purpose**: Notify frontend components of completed network switch
+
+**Dispatched**: After successful network switch (Phase 3)
+
+**Event Detail**:
+```javascript
+{
+  targetNetworkKey: 'ethereum',
+  sessionData: {
+    isUnlocked: true,
+    currentWallet: { address: '0x...', ... },
+    network: { chainId: 1, name: 'Ethereum', ... },
+    customTokens: [...],
+    ...
+  },
+  context: 'manual',
+  operationType: 'SWITCH',
+  syncMode: false,
+  timestamp: 1698765432000
+}
+```
+
+### dApp Events
+
+#### eth_chainChanged
+
+**Purpose**: Notify connected dApps of network change
+
+**Dispatched**: After successful network switch (to all connected dApps)
+
+**Format**: EIP-1193 standard event
+
+**Event Data**:
+```javascript
+{
+  method: 'eth_chainChanged',
+  params: {
+    chainId: '0x1'  // Hex-encoded chain ID
+  }
+}
+```
+
+**dApp Behavior**:
+- dApp should refresh UI for new network
+- dApp may need to reload if network unsupported
+- dApp should re-fetch network-dependent data
+
+---
 
 ## Switching Networks
 
@@ -107,28 +362,30 @@ Each network displays:
 #### From Header
 1. **Click Network Name**: Click current network in header
 2. **Select Target Network**: Choose from dropdown
-3. **Confirm Switch**: Confirm network change
-4. **Wait for Switch**: Wait for network switch
+3. **Confirm Switch**: Network changes immediately (no confirmation needed for manual switches)
+4. **Wait for Switch**: Wait for network switch (~100-600ms)
 
 #### From Settings
 1. **Go to Settings**: Click settings icon
 2. **Navigate to Networks**: Go to network section
 3. **Select Network**: Click target network
-4. **Apply Changes**: Save network selection
+4. **Apply Changes**: Network switches automatically
 
 ### Automatic Network Switch
 
 #### dApp Requested Switch
-1. **dApp Requests Switch**: dApp requests network change
-2. **Show Consent Modal**: Display switch confirmation
+1. **dApp Requests Switch**: dApp requests network change via `wallet_switchEthereumChain`
+2. **Show Consent Modal**: Display switch confirmation with dApp origin
 3. **User Approves/Rejects**: User makes decision
 4. **Execute Switch**: Switch if approved
 
 #### Connection-Based Switch
 1. **Connect to dApp**: Connect to dApp
 2. **Check Network Compatibility**: Verify network support
-3. **Suggest Switch**: Suggest network switch if needed
+3. **Show Switch Modal**: Show network switch modal if mismatch
 4. **User Decision**: User chooses to switch or not
+
+---
 
 ## Network-Specific Features
 
@@ -146,12 +403,6 @@ Each network displays:
 - **MEV Protection**: Frontrunning protection
 - **Best Prices**: Aggregated liquidity
 
-#### Token Support
-- **ETH**: Native gas token
-- **SUPR**: SuperSeed network token
-- **USDC**: USD Coin on SuperSeed
-- **Custom ERC-20**: Any ERC-20 token
-
 ### Optimism Network
 
 #### Layer 2 Features
@@ -163,14 +414,10 @@ Each network displays:
 #### Swap Support
 - **Bebop JAM**: Gasless swaps
 - **Bebop RFQ**: Request for Quote swaps
+- **Relay.link**: Cross-chain swaps
 - **Dual Protocol**: Both JAM and RFQ support
-- **Advanced Features**: More swap options
 
-#### Token Support
-- **ETH**: Native gas token
-- **OP**: Optimism token
-- **USDC**: USD Coin on Optimism
-- **L2 Tokens**: Layer 2 specific tokens
+---
 
 ## Smart Native Connection
 
@@ -188,110 +435,7 @@ Each network displays:
 - **Automatic Detection**: Detect dApp framework automatically
 - **Graceful Handling**: Handle network mismatches gracefully
 
-### Connection Flow
-
-```
-dApp Connection Flow:
-├── dApp Requests Connection
-├── Check Network Compatibility
-├── If Compatible
-│   ├── Show Connection Request
-│   └── User Approves/Rejects
-└── If Incompatible
-    ├── Show Network Switch Modal
-    ├── User Chooses to Switch
-    └── Switch Network or Reject
-```
-
-## Network Configuration
-
-### RPC Endpoints
-
-#### SuperSeed
-- **Primary**: `https://mainnet.superseed.xyz`
-- **WebSocket**: `wss://mainnet.superseed.xyz`
-- **Backup**: Multiple backup endpoints
-- **Status**: Monitored and maintained
-
-#### Optimism
-- **Primary**: Alchemy endpoint
-- **Backup**: Multiple RPC providers
-- **WebSocket**: Not available
-- **Status**: Monitored and maintained
-
-### Network Settings
-
-#### Custom RPC
-- **Add Custom RPC**: Add custom network endpoints
-- **RPC Configuration**: Configure custom RPC settings
-- **Network Validation**: Validate custom networks
-- **Backup Endpoints**: Set backup RPC endpoints
-
-#### Network Monitoring
-- **Health Checks**: Monitor network health
-- **Latency Monitoring**: Track RPC response times
-- **Failover**: Automatic failover to backup
-- **Status Alerts**: Network status notifications
-
-## Network-Specific Tokens
-
-### Token Management
-
-#### Network-Specific Balances
-- **Separate Balances**: Each network has separate balances
-- **Token Lists**: Different tokens per network
-- **Price Feeds**: Network-specific price feeds
-- **Portfolio View**: Combined portfolio view
-
-#### Token Migration
-- **Cross-Chain**: Move tokens between networks
-- **Bridge Support**: Use bridges for token migration
-- **Gas Requirements**: Different gas requirements
-- **Time Estimates**: Migration time estimates
-
-### Token Discovery
-
-#### Automatic Detection
-- **Balance Scanning**: Scan for token balances
-- **Token Detection**: Automatically detect tokens
-- **Metadata Fetching**: Fetch token metadata
-- **Price Integration**: Integrate price feeds
-
-#### Manual Addition
-- **Custom Tokens**: Add custom tokens manually
-- **Token Lists**: Use curated token lists
-- **Community Lists**: Community-maintained lists
-- **Verification**: Verify token contracts
-
-## Network Switching Scenarios
-
-### User-Initiated Switch
-
-#### Manual Switch
-1. **User Clicks Network**: User clicks network selector
-2. **Selects Target**: Chooses target network
-3. **Confirms Switch**: Confirms network change
-4. **Network Switches**: Network changes immediately
-
-#### Settings Switch
-1. **Go to Settings**: Navigate to settings
-2. **Network Section**: Go to network settings
-3. **Select Network**: Choose target network
-4. **Apply Changes**: Save and apply changes
-
-### dApp-Requested Switch
-
-#### Connection Request
-1. **dApp Requests Connection**: dApp requests connection
-2. **Check Network**: Check if dApp supports current network
-3. **Show Switch Modal**: Show network switch modal
-4. **User Decision**: User approves or rejects switch
-
-#### Transaction Request
-1. **dApp Requests Transaction**: dApp requests transaction
-2. **Check Network**: Verify network compatibility
-3. **Suggest Switch**: Suggest network switch if needed
-4. **Execute Switch**: Switch network if approved
+---
 
 ## Troubleshooting
 
@@ -315,19 +459,7 @@ dApp Connection Flow:
 - **RPC Problems**: Check RPC endpoint
 - **Refresh Data**: Force refresh data
 
-### Network Issues
-
-#### RPC Problems
-- **Endpoint Down**: RPC endpoint is down
-- **High Latency**: Slow RPC response
-- **Rate Limiting**: RPC rate limiting
-- **Switch RPC**: Try different RPC endpoint
-
-#### Network Congestion
-- **High Gas**: Network is congested
-- **Slow Transactions**: Transactions are slow
-- **Wait Time**: Wait for congestion to clear
-- **Alternative Network**: Try different network
+---
 
 ## Best Practices
 
@@ -343,41 +475,8 @@ dApp Connection Flow:
 - **Clear Communication**: Explain network changes
 - **Smooth Experience**: Ensure smooth switching
 
-### Network Monitoring
-- **Health Checks**: Monitor network health
-- **Performance**: Track network performance
-- **Uptime**: Monitor network uptime
-- **Alerts**: Set up network alerts
-
-## Advanced Features
-
-### Multi-Network Portfolio
-- **Combined View**: View all networks together
-- **Network Breakdown**: See per-network breakdown
-- **Total Value**: Combined portfolio value
-- **Cross-Network**: Cross-network operations
-
-### Network Analytics
-- **Transaction History**: Per-network transaction history
-- **Gas Usage**: Network-specific gas usage
-- **Performance Metrics**: Network performance data
-- **Cost Analysis**: Transaction cost analysis
-
-### Custom Networks
-- **Add Networks**: Add custom networks
-- **RPC Configuration**: Configure custom RPC
-- **Network Validation**: Validate custom networks
-- **Token Support**: Add custom network tokens
-
-## Next Steps
-
-Now that you understand network switching:
-
-1. **[Connect to dApps](../connecting-dapps/connecting.md)** - Learn dApp connections
-2. **[Security Overview](../security/overview.md)** - Understand security
-3. **[For Developers](../for-developers/integration-overview.md)** - Developer integration
-4. **[Advanced Topics](../advanced/networks-config.md)** - Advanced network configuration
-
 ---
 
-**Ready to connect to dApps?** Continue to [Connecting to dApps](../connecting-dapps/connecting.md)!
+**Document Status:** ✅ Current as of November 15, 2025  
+**Code Version:** v3.1.0+  
+**Maintenance:** Review after adding new networks or modifying switch flow

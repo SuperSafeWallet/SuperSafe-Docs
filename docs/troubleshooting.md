@@ -369,7 +369,7 @@ Common issues and solutions for SuperSafe Wallet users and developers.
 ### Support Channels
 
 #### Official Support
-- **Email**: support@suersafe.cool
+- **Email**: support@supersafe.cool
 - **GitHub**: [SuperSafe Issues](https://github.com/SuperSafeWallet/SuperSafe/issues)
 - **Discord**: [SuperSafe Discord](https://discord.gg/supersafe)
 - **Twitter**: [@SuperSafeWallet](https://twitter.com/SuperSafeWallet)
@@ -450,4 +450,4 @@ When requesting features, include:
 
 ---
 
-**Need more help?** Check out our [FAQ](./faq.md) or [contact support](mailto:support@suersafe.cool)!
+**Need more help?** Check out our [FAQ](./faq.md) or [contact support](mailto:support@supersafe.cool)!

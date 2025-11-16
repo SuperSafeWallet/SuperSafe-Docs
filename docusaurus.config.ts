@@ -6,11 +6,11 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'SuperSafe Wallet Documentation',
-  tagline: 'MetaMask-style Service Worker architecture with Smart Native Connection, Multi-chain support, and Gasless swaps',
+  tagline: 'Professionally Standardized Service Worker architecture with Smart Native Connection, Multi-chain support, and Gasless swaps',
   favicon: 'img/favicon.png',
 
   // Set the production url of your site here
-  url: 'https://docs.suersafe.cool',
+  url: 'https://docs.supersafe.cool',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
@@ -54,7 +54,7 @@ const config: Config = {
     colorMode: {
       defaultMode: 'dark',
       disableSwitch: false,
-      respectPrefersColorScheme: true,
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: 'SuperSafe Wallet',
@@ -75,7 +75,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://suersafe.cool',
+          href: 'https://supersafe.cool',
           label: 'Website',
           position: 'right',
         },
@@ -109,17 +109,17 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Discord',
-              href: 'https://discord.gg/supersafe',
-            },
-            {
-              label: 'Twitter',
-              href: 'https://twitter.com/SuperSafeWallet',
+              label: 'X',
+              href: 'https://x.com/SuperSafeWallet',
             },
             {
               label: 'GitHub',
               href: 'https://github.com/SuperSafeWallet/SuperSafe-Docs',
             },
+            {
+              label: 'Discord (soon)',
+              href: 'https://discord.gg/supersafe',
+            }            
           ],
         },
         {
@@ -130,12 +130,12 @@ const config: Config = {
               href: 'https://www.supersafe.cool',
             },
             {
-              label: 'Chrome Web Store',
+              label: 'Chrome Web Store (soon)',
               href: 'https://www.supersafe.cool',
             },
             {
               label: 'Support',
-              href: 'mailto:supersafewallet@gmail.com',
+              href: 'mailto:contact@supersafe.cool',
             },
           ],
         },

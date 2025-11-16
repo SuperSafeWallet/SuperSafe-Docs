@@ -1,8 +1,9 @@
 # SuperSafe Wallet - Documentation Index
 
 **Version:** 3.0.0+  
-**Last Updated:** October 13, 2025  
-**Status:** ✅ Current
+**Last Updated:** November 15, 2025  
+**Status:** ✅ Current  
+**Last Code Update:** November 15, 2025
 
 ---
 
@@ -13,7 +14,10 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 ### Quick Links
 
 - 🏗️ [**Architecture**](#architecture-documentation) - System design and component structure
-- 🔒 [**Security**](#security-documentation) - Cryptography and security model  
+- 🔍 [**Transaction System**](#transaction-system) - Transaction decoding and token metadata
+- ✍️ [**Signing System**](#signing-system) - Unified signing request management
+- 🔒 [**Security**](#security-documentation) - Cryptography and security model
+- 📋 [**Audits**](#audit-reports) - Security audits and compliance scorecard
 - 💻 [**Development**](#development-documentation) - Backend, frontend, and APIs
 - 🔗 [**Integration**](#integration-documentation) - dApp connections and blockchain operations
 - 🛠️ [**Operations**](#operations-documentation) - Development setup and deployment
@@ -28,13 +32,17 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Executive summary and key features
 - High-level architecture diagrams
 - Component interaction models
+- Transaction decoder architecture
+- Signing system architecture
+- dApp connection architecture
+- Service worker lifecycle
 - Data flow patterns
 - Technology stack
 - Directory structure
 - Performance metrics
 
 **Key Topics:**
-- MetaMask-style Service Worker architecture
+- Professionally Standardized Service Worker architecture
 - Smart Native Connection design
 - Thin Client pattern
 - Stream-based communication
@@ -42,10 +50,67 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 
 ---
 
+## 🔍 Transaction System
+
+### [TRANSACTION_SYSTEM.md](./TRANSACTION_SYSTEM.md)
+**Professional-grade transaction decoding system**
+
+- Complete transaction lifecycle
+- Universal Router support (Uniswap, PancakeSwap, Velodrome, Aerodrome)
+- Token metadata service with multi-layer lookup
+- Supported protocols across 7 active EVM networks
+- "No Fallbacks" security policy
+- Performance optimization strategies
+
+**Key Features:**
+- 20+ transaction types supported
+- Multi-protocol decoding (Uniswap V2/V3/V4, PancakeSwap Infinity)
+- Strict token metadata validation
+- LRU caching (1000 entries)
+- User-friendly transaction display
+
+### [MULTICHAIN_TRANSACTION_HISTORY.md](./MULTICHAIN_TRANSACTION_HISTORY.md)
+**Multichain transaction history visualization system**
+
+- Universal explorer API integration (Blockscout, Moralis, Etherscan)
+- Automatic adapter selection based on network
+- Transaction and token transfer history
+- Combined history views with intelligent merging
+- Support for all 7 active networks (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Shardeum)
+
+**Key Features:**
+- Network-agnostic architecture with pluggable adapters
+- Rate limiting and caching per network
+- Unified API interface across all explorers
+- Easy extensibility for new networks
+- Graceful handling of unsupported networks
+
+---
+
+## ✍️ Signing System
+
+### [SIGNING_SYSTEM.md](./SIGNING_SYSTEM.md)
+**Unified signing request management**
+
+- Complete signing methods (personal_sign, eth_signTypedData_v4)
+- Signing request lifecycle with timeout protection
+- Network validation before signing
+- Security validation layers
+- 100+ test scenarios matrix
+
+**Key Features:**
+- SigningRequestManager for unified handling
+- SigningModalAdapter for RPC-to-modal transformation
+- eth_sign permanently disabled for security
+- Snake_case method compatibility
+- Permit2 integration with enhanced UI
+
+---
+
 ## 🔒 Security Documentation
 
 ### [SECURITY.md](./SECURITY.md)
-**Enterprise-grade security implementation**
+**Military-grade security implementation**
 
 - Security model and principles
 - Cryptographic implementation (AES-256-GCM, PBKDF2)
@@ -62,6 +127,46 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Defense-in-depth security layers
 - Vault-centric encrypted storage
 - Memory-first security model
+
+### [CSP_POLICY.md](./CSP_POLICY.md)
+**Content Security Policy documentation**
+
+- Complete CSP directive breakdown
+- Domain-by-domain purpose documentation
+- Security audit guidelines
+- Testing and validation procedures
+- Browser compatibility notes
+
+**Key Categories:**
+- RPC providers & infrastructure (9 services)
+- Block explorers (7 services)
+- DEX & swap aggregators (3 services)
+- Chain infrastructure (10+ networks)
+- CDN & asset sources (5 services)
+
+---
+
+## 📋 Audit Reports
+
+### [AUDITS.md](./AUDITS.md)
+**Comprehensive security and system audits**
+
+- Executive summary of all audits
+- dApp connection system audit
+- Signing system implementation audit
+- Transaction decoder implementation audit
+- Shared state consistency audit
+- ChainId format audit
+- Compliance scorecard (A+ grade, 98.8% overall)
+- Recommendations for future enhancements
+
+**Audit Status:**
+- Total Audits: 10 completed
+- Critical Issues: 15 found, 15 resolved (100%)
+- Security Vulnerabilities: 5 found, 5 resolved (100%)
+- Production Ready: ✅ YES
+
+**Detailed Reports:** All audit reports available in [/Docs/Audits/](./Audits/) directory
 
 ---
 
@@ -117,7 +222,7 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Provider API (EIP-1193 compliance)
 - Controller APIs (tokens, networks, transactions)
 - Swap API (Bebop integration)
-- External APIs (SuperSeed, Bebop)
+- External APIs (SuperSafe Price API, Bebop, SuperSeed RPC)
 
 **API Channels:**
 - `session` - Wallet operations
@@ -126,6 +231,23 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - `send` - Transfers
 - `blockchain` - Queries
 - `api` - External calls
+
+#### [API Key Rotation System](./API_REFERENCE.md#api-key-rotation-system)
+**API key rotation and failover system** (see [API_REFERENCE.md](./API_REFERENCE.md#api-key-rotation-system))
+
+- Round-robin rotation algorithm
+- Automatic failover on rate limits
+- Configuration and setup guide
+- Monitoring and debugging
+- Security best practices
+- Troubleshooting guide
+
+**Key Features:**
+- 2x rate limit capacity with backup keys
+- Zero-downtime failover
+- Transparent retry logic
+- Comprehensive logging
+- No code changes required
 
 ---
 
@@ -137,8 +259,9 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 **dApp connection mechanisms and frameworks**
 
 - Smart Native Connection architecture
-- AllowList security system
+- AllowList security system (v3.1.0)
 - Direct injection (RainbowKit, Wagmi)
+- EIP-6963 provider discovery
 - WalletConnect V2 / Reown integration
 - Framework detection (automatic)
 - Connection flow diagrams
@@ -150,51 +273,89 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - WalletConnect v2
 - Dynamic
 - Web3-React
+- EIP-6963 compliant wallets
 
 ### Blockchain Operations
 
 #### [BLOCKCHAIN_OPERATIONS.md](./BLOCKCHAIN_OPERATIONS.md)
 **Multi-chain blockchain operations**
 
-- Multi-network support (2 active, 5 planned)
+- Multi-network support (7 active networks)
 - Network switching architecture
 - Transaction management and lifecycle
 - Smart contract interactions (ERC20, ERC721)
-- Provider implementation (EIP-1193)
+- Provider implementation (EIP-1193, EIP-6963)
 - Gas estimation and fee calculation
 - RPC communication
 
 **Active Networks:**
-| Network | Chain ID | Swap Support |
-|---------|----------|--------------|
-| SuperSeed | 5330 | ✅ Bebop (JAM) |
-| Optimism | 10 | ✅ Bebop (JAM+RFQ) |
-
-**Planned Networks:**
-| Network | Chain ID | Status |
-|---------|----------|--------|
-| Ethereum | 1 | 💤 Commented |
-| Base | 8453 | 💤 Commented |
-| BSC | 56 | 💤 Commented |
+| Network | Chain ID | Swap Support | Relay Support |
+|---------|----------|--------------|---------------|
+| SuperSeed | 5330 | ✅ Bebop (JAM) | ✅ Cross-chain |
+| Ethereum | 1 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain |
+| Optimism | 10 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain |
+| Base | 8453 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain |
+| BNB Chain | 56 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain |
+| Arbitrum One | 42161 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain |
+| Shardeum | 8118 | ❌ Not supported | ❌ Not supported |
 
 ### Swap System
 
 #### [SWAP_SYSTEM.md](./SWAP_SYSTEM.md)
-**Bebop swap integration**
+**Unified swap system with Bebop and Relay.link**
 
-- Bebop JAM protocol integration
-- Multi-chain swap support (2 active networks)
+- Unified Panel Architecture (v2.0.0)
+- Bebop JAM protocol integration (6 active networks)
+- Relay.link cross-chain swaps (6 active networks)
+- Multi-chain swap support (7 active networks total)
 - Quote fetching and validation
-- Gasless swaps with Permit2
-- Partner fee system (1% configurable)
+- Gasless swaps with Permit2 (Bebop)
+- Cross-chain swaps (Relay.link)
+- Partner fee system (configurable)
 - Order signing (EIP-712)
 - Status polling and tracking
 
 **Features:**
-- MEV protection
+- MEV protection (Bebop)
 - Best price aggregation
-- Multi-chain support
-- Partner revenue sharing
+- Cross-chain support (Relay.link)
+- Unified fee system
+- Provider switching (Bebop ↔ Relay)
+
+### Network Management
+
+#### [NETWORK_SWITCHING.md](./NETWORK_SWITCHING.md)
+**Network switching system**
+
+- Three-phase switching process (pre-switch, execution, post-switch)
+- Promise-based handler system
+- Context-aware switching
+- Network validation and error handling
+- State synchronization across contexts
+- Support for all 7 active networks
+
+**Key Features:**
+- Pre-switch coordination (validation, handlers)
+- Execution phase (network change, state update)
+- Post-switch broadcast (notifications, state sync)
+- Robust error handling and recovery
+
+### Logging System
+
+#### [LOGGER.md](./LOGGER.md)
+**Professional logging system**
+
+- Namespace-based logging architecture
+- Multiple log levels (debug, info, warn, error)
+- Profile-based configuration
+- Performance monitoring
+- Development and production profiles
+
+**Key Features:**
+- Namespace isolation
+- Configurable log levels per namespace
+- Performance metrics
+- Production-safe logging
 
 ---
 
@@ -245,12 +406,13 @@ npm run zip          # Create distribution package
 ## 📊 Project Metrics
 
 ```
-Total Project Files: 145 JavaScript/JSX files
-Total Lines of Code: ~25,000 lines
-Documentation: 10 comprehensive documents (~15,000 lines)
-Supported Networks: 2 active (7 total planned)
+Total Project Files: 183+ JavaScript/JSX files
+Total Lines of Code: ~30,000+ lines
+Documentation: 15+ comprehensive documents (~20,000+ lines)
+Supported Networks: 7 active networks
 Security Score: 96/100
-Architecture Pattern: MetaMask-style Service Worker
+Architecture Pattern: Professionally Standardized Service Worker
+Swap Providers: Bebop (6 networks) + Relay.link (6 networks)
 ```
 
 ---
@@ -311,8 +473,9 @@ npm run build
 
 This documentation is maintained to reflect the current codebase state.
 
-**Last Major Update:** October 13, 2025  
+**Last Major Update:** November 15, 2025  
 **Code Version:** v3.0.0+  
+**Last Code Update:** November 15, 2025  
 **Next Review:** January 2026
 
 **Update Process:**
@@ -357,7 +520,7 @@ Previous versions of documentation are available in [`./olds/`](./olds/) directo
 ---
 
 **Document Index Status:** ✅ Complete and Current  
-**Total Documents:** 10 comprehensive guides  
-**Coverage:** Architecture, Security, Development, Integration, Operations  
-**Maintenance:** Active and up-to-date
+**Total Documents:** 15+ comprehensive guides  
+**Coverage:** Architecture, Security, Development, Integration, Operations, Logging, Transactions, Signing, Swaps, Network Switching  
+**Maintenance:** Active and up-to-date (last review: November 15, 2025)
 

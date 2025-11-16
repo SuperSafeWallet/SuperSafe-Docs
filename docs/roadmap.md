@@ -13,7 +13,7 @@ SuperSafe Wallet's development roadmap and future plans.
 SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with significant improvements in security, performance, and user experience.
 
 #### 🏗️ Architecture Improvements
-- **MetaMask-style Service Worker**: Familiar, reliable architecture
+- **Professionally Standardized Service Worker**: Familiar, reliable architecture
 - **Smart Native Connection**: Real chainIds, no compatibility hacks
 - **Thin Client Pattern**: Frontend focuses on UI, backend handles logic
 - **Stream-Based Communication**: Efficient inter-process communication
@@ -27,10 +27,10 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Defense-in-Depth**: Multiple security layers
 
 #### 🌐 Multi-Chain Support
-- **Active Networks**: Ethereum, Base, Arbitrum One, Optimism, Binance Smart Chain, SuperSeed
+- **Active Networks**: 7 active networks (Ethereum, BSC, Arbitrum, Optimism, Base, SuperSeed, Shardeum)
 - **Smart Native Connection**: Seamless dApp integration
-- **Network Switching**: Easy network switching
-- **Cross-Chain Support**: Future cross-chain functionality
+- **Network Switching**: Easy network switching with pre-switch coordination
+- **Cross-Chain Support**: Relay.link integration for cross-chain swaps across 85+ blockchains
 
 #### 🔄 Swap Integration
 - **Gasless Swaps**: No gas fees for users
@@ -48,19 +48,25 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 
 ## Short-Term Roadmap (Q4 2025)
 
+### 🚀 Public Launch
+- **Chrome Web Store Release**: Public release for everyone to start using SuperSafe Wallet
+- **Public Beta**: Open beta testing phase
+- **User Onboarding**: Streamlined onboarding experience for new users
+- **Documentation**: Complete public documentation and guides
+- **Community Support**: Community channels and support systems
+
 ### 🔧 Bug Fixes & Improvements
 - **Performance Optimization**: Improve response times
 - **Memory Management**: Optimize memory usage
 - **Error Handling**: Better error messages and recovery
-- **UI/UX Improvements**: Enhanced user interface
+- **UI/UX Improvements**: Enhanced user interface based on beta feedback
 - **Accessibility**: Better accessibility features
 
 ### 🌐 Network Expansion
-- **Ethereum Mainnet**: Full Ethereum support
-- **Base Network**: Base layer 2 support
-- **BSC Integration**: Binance Smart Chain support
-- **Arbitrum One Integration**: Binance Smart Chain support
-- **Testnet Support**: Sepolia testnets for testing
+- **Additional Networks**: Support for new EVM-compatible networks based on user demand
+- **Network Optimization**: Improve existing network support and reliability
+- **Testnet Support**: Enhanced testnet support for developers
+- **Network Discovery**: Easy network addition and discovery
 
 ### 🔄 Swap Enhancements
 - **More Tokens**: Support for additional tokens
@@ -70,11 +76,10 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Price Alerts**: Price notification system
 
 ### 🔐 Security Improvements
-- **AllowList Updates**: Regular AllowList updates
-- **Security Audits**: Third-party security audits
-- **Vulnerability Fixes**: Address security vulnerabilities
-- **Penetration Testing**: Regular penetration testing
-- **Security Monitoring**: Enhanced security monitoring
+- **AllowList Updates**: Regular AllowList updates based on community feedback
+- **Security Monitoring**: Enhanced security monitoring and incident response
+- **Vulnerability Fixes**: Address security vulnerabilities as they are discovered
+- **Security Documentation**: Comprehensive security documentation for users
 
 ## Medium-Term Roadmap (Q2-Q3 2026)
 
@@ -224,7 +229,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Community**: Community management
 
 ### 📞 Contact
-- **Email**: contact@suersafe.cool
+- **Email**: contact@supersafe.cool
 - **GitHub**: [SuperSafe Docs GitHub](https://github.com/SuperSafeWallet/SuperSafe-Docs)
 - **x**: [@SuperSafeWallet](https://x.com/SuperSafeWallet)
 

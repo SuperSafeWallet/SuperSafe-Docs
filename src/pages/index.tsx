@@ -24,6 +24,38 @@ function HomepageHeader() {
             <div className={styles.versionBadge}>
               v3.0.0+
             </div>
+            
+            {/* Network Status */}
+            <div className={styles.networkStatus}>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{backgroundColor: '#627EEA'}}></div>
+                <span>Ethereum (Chain ID: 1)</span>
+              </div>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{backgroundColor: '#F3BA2F'}}></div>
+                <span>Binance Smart Chain (Chain ID: 56)</span>
+              </div>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{backgroundColor: '#28A0F0'}}></div>
+                <span>Arbitrum (Chain ID: 42161)</span>
+              </div>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{backgroundColor: '#FF0420'}}></div>
+                <span>Optimism (Chain ID: 10)</span>
+              </div>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{backgroundColor: '#0052FF'}}></div>
+                <span>Base (Chain ID: 8453)</span>
+              </div>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{backgroundColor: '#10b981'}}></div>
+                <span>SuperSeed (Chain ID: 5330)</span>
+              </div>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{backgroundColor: '#6b7280'}}></div>
+                <span>More networks coming soon...</span>
+              </div>
+            </div>
           </div>
 
           {/* Main Content */}
@@ -43,7 +75,7 @@ function HomepageHeader() {
               </div>
               <div className={styles.featureItem}>
                 <span className={styles.featureIcon}>🌐</span>
-                <span className={styles.featureText}>2 Active Networks</span>
+                <span className={styles.featureText}>7 Active Networks</span>
               </div>
               <div className={styles.featureItem}>
                 <span className={styles.featureIcon}>⚡</span>
@@ -61,29 +93,13 @@ function HomepageHeader() {
             <Link
               className={clsx("button button--primary button--lg", styles.primaryButton)}
               to="/docs/intro">
-              📚 Read Documentation
+              Read Documentation
             </Link>
             <Link
               className={clsx("button button--outline button--lg", styles.secondaryButton)}
               to="https://github.com/SuperSafeWallet/SuperSafe-Docs">
-              💻 View on GitHub
+              View on GitHub
             </Link>
-          </div>
-
-          {/* Network Status */}
-          <div className={styles.networkStatus}>
-            <div className={styles.networkItem}>
-              <div className={styles.networkDot} style={{backgroundColor: '#00ff88'}}></div>
-              <span>SuperSeed (Chain ID: 5330)</span>
-            </div>
-            <div className={styles.networkItem}>
-              <div className={styles.networkDot} style={{backgroundColor: '#ff6b6b'}}></div>
-              <span>Optimism (Chain ID: 10)</span>
-            </div>
-            <div className={styles.networkItem}>
-              <div className={styles.networkDot} style={{backgroundColor: '#4ecdc4'}}></div>
-              <span>5+ Networks Planned</span>
-            </div>
           </div>
         </div>
       </div>
@@ -104,7 +120,7 @@ function StatsSection() {
             <div className={styles.statLabel}>Security Score</div>
           </div>
           <div className={styles.statItem}>
-            <div className={styles.statNumber}>2</div>
+            <div className={styles.statNumber}>7</div>
             <div className={styles.statLabel}>Active Networks</div>
           </div>
           <div className={styles.statItem}>
@@ -112,7 +128,7 @@ function StatsSection() {
             <div className={styles.statLabel}>Response Time</div>
           </div>
           <div className={styles.statItem}>
-            <div className={styles.statNumber}>25K+</div>
+            <div className={styles.statNumber}>30K+</div>
             <div className={styles.statLabel}>Lines of Code</div>
           </div>
         </div>
@@ -125,7 +141,7 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title="SuperSafe Wallet - MetaMask-style Service Worker Architecture"
+      title="SuperSafe Wallet - Professionally Standardized Service Worker Architecture"
       description="Secure web3 browser wallet extension with Smart Native Connection, Multi-chain support, and Gasless swaps via Bebop JAM protocol">
       <HomepageHeader />
       <StatsSection />

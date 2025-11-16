@@ -4,11 +4,11 @@ sidebar_position: 5
 
 # 🏗️ Architecture Overview
 
-Understand SuperSafe Wallet's MetaMask-style Service Worker architecture and how it provides secure, efficient dApp integration.
+Understand SuperSafe Wallet's Professionally Standardized Service Worker architecture and how it provides secure, efficient dApp integration.
 
 ## Architecture Overview
 
-SuperSafe Wallet implements a **MetaMask-style Service Worker architecture** that provides a secure, efficient, and scalable foundation for Web3 wallet functionality.
+SuperSafe Wallet implements a **Professionally Standardized Service Worker architecture** that provides a secure, efficient, and scalable foundation for Web3 wallet functionality.
 
 ### Key Architectural Principles
 
@@ -16,7 +16,7 @@ SuperSafe Wallet implements a **MetaMask-style Service Worker architecture** tha
 - **Thin Client Pattern**: Frontend focuses on UI, backend handles logic
 - **Stream-Based Communication**: Efficient inter-process communication
 - **Zero Frontend Crypto**: No cryptographic operations in frontend
-- **MetaMask-Style Controllers**: Familiar architecture for developers
+- **Professionally Standardized Controllers**: Familiar architecture for developers
 
 ## System Architecture
 
