@@ -37,13 +37,14 @@ SuperSafe Wallet implements **Smart Native Connection Architecture** supporting 
 
 ### Supported Networks
 
-SuperSafe supports **7 active networks** for dApp connections:
+SuperSafe supports **8 active networks** for dApp connections:
 - SuperSeed (5330)
 - Ethereum (1)
 - Optimism (10)
 - Base (8453)
 - BNB Chain (56)
 - Arbitrum One (42161)
+- Monad (143) - Added 2025-11-26, [Official Docs](https://docs.monad.xyz/developer-essentials/network-information)
 - Shardeum (8118)
 
 ---
@@ -146,78 +147,200 @@ sequenceDiagram
 
 ---
 
-## AllowList System
+## Allowlist Security (Enhanced - Nov 2025)
 
-### Purpose
+**Version:** 3.1 (Security Enhancements)  
+**Status:** ✅ PRODUCTION  
+**Last Updated:** November 21, 2025
 
-The AllowList system provides whitelist-based authorization for trusted dApps, preventing phishing and malicious connections.
+### Overview
 
-### AllowList Structure
+SuperSafe uses a strict allowlist to control which dApps can connect. This prevents phishing attacks and unauthorized access with enterprise-grade protection.
+
+### Security Enhancements (v3.1)
+
+**November 2025 Updates:**
+1. ✅ Eliminated WalletConnect name-based fallback (CRITICAL vulnerability)
+2. ✅ Added wildcard subdomain support (`*.domain.com`)
+3. ✅ Implemented rate limiting (5 attempts/minute)
+4. ✅ Added blocked attempts logging
+5. ✅ Strict origin format validation
+
+### Three-Layer Protection
+
+**Layer 1: Provider Injection Gate**
+- Content script checks allowlist before injecting provider
+- Unauthorized origins never see `window.ethereum`
+- Handler: `ProviderStreamHandler.js` (CS_CAN_INJECT)
+
+**Layer 2: Connection Authorization**
+- Validates origin on `eth_requestAccounts`
+- Strict origin-only matching (no name fallbacks)
+- Rate limiting integrated
+- Handler: `ProviderStreamHandler.js` (ETH_REQUEST_ACCOUNTS)
+
+**Layer 3: WalletConnect Validation**
+- Origin-based validation for mobile connections
+- URL normalization and validation
+- No name-based fallbacks (security fix Nov 2025)
+- Handler: `SessionStreamHandler.js`
+
+### Allowlist Format
 
 **Location:** `public/assets/allowlist.json`
 
 ```json
 {
-  "version": "1.0.0",
-  "policies": {
-    "https://velodrome.finance": {
-      "name": "Velodrome Finance",
-      "supportedChains": [10, 5330],
-      "defaultChain": 10,
-      "autoApprove": false,
-      "requiresConsent": true,
-      "framework": "rainbowkit"
-    },
-    "https://app.uniswap.org": {
+  "version": "3.1.0",
+  "globalSettings": {
+    "defaultChainIdHex": "0x14d2",
+    "defaultChainIdDecimal": 5330,
+    "unauthorizedOriginMessage": "This dApp is not authorized to connect to SuperSafe Wallet."
+  },
+  "dapps": [
+    {
+      "origin": "https://app.uniswap.org",
       "name": "Uniswap",
+      "description": "Swap anything, anywhere",
       "supportedChains": [1, 10, 56, 8453, 42161],
-      "defaultChain": 1,
-      "autoApprove": false,
-      "framework": "web3-react"
+      "defaultChain": 1
+    },
+    {
+      "origin": "*.velodrome.finance",
+      "name": "Velodrome (All Subdomains)",
+      "description": "Superchain DEX with wildcard subdomain support",
+      "supportedChains": [10, 5330],
+      "defaultChain": 10
     }
-  }
+  ]
 }
 ```
+
+### Wildcard Support
+
+Authorize all subdomains without individual entries:
+
+```json
+{
+  "origin": "*.uniswap.org",
+  "name": "Uniswap (All Subdomains)",
+  "supportedChains": [1, 10, 56, 8453, 42161]
+}
+```
+
+**Matches:** `app.uniswap.org`, `interface.uniswap.org`, `v3.uniswap.org`  
+**Does NOT match:** `fake-uniswap.org`, `uniswap.org.phishing.com`
+
+### Rate Limiting
+
+**Protection:** Prevents brute-force connection attempts
+
+**Configuration:**
+- 5 attempts per origin per minute
+- 5-minute block on exceeding limit
+- Automatic cleanup of old records
+- Minimal UX impact on legitimate users
+
+**Implementation:** `src/background/security/ConnectionRateLimiter.js`
+
+**User Experience:**
+- Attempts 1-5: Allowed with logging
+- Attempt 6+: Blocked with "Too many connection attempts. Please try again in X seconds."
+- Successful connection: Counter reset
+
+### Monitoring
+
+**Blocked Attempts Logging:**
+
+View blocked attempts statistics:
+
+```javascript
+import { getBlockedAttemptsStats } from '../background/policy/AllowListManager';
+
+const stats = await getBlockedAttemptsStats();
+// {
+//   totalOrigins: 15,
+//   totalAttempts: 247,
+//   recentAttempts: [...],  // Last 24h
+//   topOffenders: [...]      // Top 10 by count
+// }
+```
+
+**Data Collected:**
+- Origin URL
+- Timestamp
+- Connection type (web/walletconnect)
+- Attempt count
+- dApp metadata
+
+**Retention:** Last 100 attempts per origin (local only, privacy-preserving)
 
 ### Policy Enforcement
 
 **Location:** `src/background/policy/AllowListManager.js`
 
+**Key Functions:**
+
 ```javascript
-export function getPolicyForOrigin(origin) {
-  const policies = getAllowlistConfig().policies || {};
+// Check if origin is authorized (with wildcard support)
+export function isOriginAllowed(origin) {
+  // Direct match
+  if (_ORIGIN_POLICIES.has(origin)) return true;
   
-  // Exact match
-  if (policies[origin]) {
-    return policies[origin];
-  }
-  
-  // Subdomain match
-  for (const [policyOrigin, policy] of Object.entries(policies)) {
-    if (origin.endsWith(policyOrigin.replace('https://', ''))) {
-      return policy;
+  // Wildcard subdomain match
+  const url = new URL(origin);
+  for (const [allowedOrigin] of _ORIGIN_POLICIES) {
+    if (allowedOrigin.startsWith('*.')) {
+      const wildcardDomain = allowedOrigin.slice(2);
+      if (url.hostname.endsWith('.' + wildcardDomain)) {
+        return true;
+      }
     }
   }
   
-  return null;  // Unauthorized
+  return false;
 }
 
-export function validateNetworkCompatibility(policy, currentChainId) {
-  if (!policy || !policy.supportedChains) {
-    return { compatible: false, reason: 'No policy' };
+// Get policy for origin (with wildcard support + logging)
+export function getPolicyForOrigin(origin) {
+  let policy = _ORIGIN_POLICIES.get(origin);
+  
+  // Wildcard match if direct match fails
+  if (!policy) {
+    // ... wildcard matching logic ...
   }
   
-  if (!policy.supportedChains.includes(currentChainId)) {
-    return {
-      compatible: false,
-      reason: `Current network (${currentChainId}) not supported by dApp`,
-      supportedChains: policy.supportedChains
-    };
+  // Log blocked attempt if no policy found
+  if (!policy) {
+    logBlockedConnectionAttempt(origin, 'web').catch(() => {});
   }
   
-  return { compatible: true };
+  return policy;
 }
 ```
+
+### Security Properties
+
+1. **No Name-Based Fallbacks** - Only origin matching
+2. **Strict Format Validation** - URL normalization enforced
+3. **Rate Limiting** - Prevents brute-force attacks
+4. **Comprehensive Logging** - Full attack visibility
+5. **Fail-Safe Default** - Empty allowlist on load failure
+
+### Adding New dApps
+
+**Process:**
+1. Update `public/assets/allowlist.json`
+2. Test locally (`npm run build:dev`)
+3. Build for production (`npm run build`)
+4. Submit to Chrome Web Store
+5. Users auto-update within 24-48h
+
+**No hot-reload needed** - Chrome Web Store handles distribution
+
+### Security Audit
+
+See [Allowlist Security Enhancements Audit](./Audits/2025-11-21_ALLOWLIST_SECURITY_ENHANCEMENTS.md) for complete security assessment.
 
 ---
 
@@ -639,7 +762,7 @@ SuperSafe implements a sophisticated popup management system with mutual exclusi
 
 ### Mutual Exclusion System
 
-**Core Principle:** Extension UI and popup windows NEVER coexist (Professionally Standardized UX)
+**Core Principle:** Extension UI and popup windows NEVER coexist (MetaMask-style UX)
 
 **Implementation:**
 

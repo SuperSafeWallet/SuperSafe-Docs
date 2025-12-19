@@ -24,11 +24,11 @@ Comprehensive audit of the entire dApp connection system per user requirements:
 
 ### Overall Status: ✅ MOSTLY COMPLIANT with CRITICAL FIXES APPLIED
 
-The dApp connection system architecture is fundamentally sound and follows Professionally Standardized patterns correctly. The audit identified **3 critical security vulnerabilities** related to fallback chainIds and **1 critical UX issue** related to popup management, all of which have been fixed.
+The dApp connection system architecture is fundamentally sound and follows MetaMask-style patterns correctly. The audit identified **3 critical security vulnerabilities** related to fallback chainIds and **1 critical UX issue** related to popup management, all of which have been fixed.
 
 ### Key Achievements
 
-✅ **Professionally Standardized Architecture**: Proper background as single source of truth  
+✅ **MetaMask-Style Architecture**: Proper background as single source of truth  
 ✅ **Stream-Based Communication**: Robust bidirectional streams  
 ✅ **AllowList Security**: Proper authorization enforcement  
 ✅ **Network Validation**: Comprehensive chainId validation  
@@ -229,7 +229,7 @@ The dApp connection system architecture is fundamentally sound and follows Profe
 **Requirement:** "Evitaremos el código legacy"
 - All communication migrated to streams
 - No legacy chrome.runtime.sendMessage (except for quick popup check)
-- Professionally Standardized architecture throughout
+- MetaMask-style architecture throughout
 - Modern controller pattern
 
 ### ✅ Professional Quality
@@ -250,7 +250,7 @@ The dApp connection system architecture is fundamentally sound and follows Profe
 3. `src/controllers/NetworkController.js` - Improved initialization comments
 
 ### UX/Stability Fixes
-4. `src/background/managers/PopupManager.js` - Professionally Standardized mutual exclusion
+4. `src/background/managers/PopupManager.js` - MetaMask-style mutual exclusion
 5. `src/App.jsx` - Secondary popup detection safety net
 6. `src/hooks/usePortfolioData.js` - Network change event listener
 7. `src/components/screens/NetworkSwitchConfirmationScreen.jsx` - User messaging
@@ -422,7 +422,7 @@ The dApp connection system architecture is fundamentally sound and follows Profe
 
 ### Strengths
 
-1. **Excellent Architecture**: Clean separation of concerns, Professionally Standardized patterns
+1. **Excellent Architecture**: Clean separation of concerns, MetaMask-style patterns
 2. **Comprehensive Logging**: Detailed debug logs for troubleshooting
 3. **Error Handling**: Proper error propagation and user feedback
 4. **Security-First**: AllowList enforcement, network validation
@@ -467,7 +467,7 @@ The dApp connection system architecture is fundamentally sound and follows Profe
 The dApp connection system is architecturally sound and follows best practices. All critical security vulnerabilities have been eliminated. The system now properly enforces:
 
 - **NO fallback chainIds** - All network parameters are deterministic
-- **Professionally Standardized popup management** - Extension and popups never coexist
+- **MetaMask-style popup management** - Extension and popups never coexist
 - **Proper error codes** - EIP-1193 compliant error handling
 - **Network validation** - Comprehensive chainId and network validation
 - **User consent** - All network changes require explicit approval
@@ -485,7 +485,7 @@ The dApp connection system is architecturally sound and follows best practices. 
 This audit confirms that the SuperSafe Wallet dApp connection system:
 1. ✅ Complies with ARCHITECTURE.md and DAPP_CONNECTIONS.md
 2. ✅ Implements ALL user security requirements
-3. ✅ Follows Professionally Standardized best practices
+3. ✅ Follows MetaMask-style best practices
 4. ✅ Has NO critical fallbacks or security vulnerabilities
 5. ✅ Provides professional-quality error handling
 

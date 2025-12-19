@@ -1,9 +1,9 @@
 # SuperSafe Wallet - Architecture Documentation
 
 **Created:** October 13, 2025  
-**Version:** 3.0.0+  
+**Version:** 3.1.3  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** December 10, 2025
 
 ---
 
@@ -22,18 +22,20 @@
 11. [Directory Structure](#directory-structure)
 12. [Network Architecture](#network-architecture)
 13. [Performance Metrics](#performance-metrics)
+14. [One Window Policy Architecture](#one-window-policy-architecture) 🆕
+15. [Responsive Design Architecture](#responsive-design-architecture) 🆕
 
 ---
 
 ## Executive Summary
 
-SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implementing a **Professionally Standardized Service Worker architecture** with **Smart Native Connection** for seamless multichain dApp integration. Built with React 18, ethers.js v6, and Chrome Extension Manifest V3.
+SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implementing a **MetaMask-style Service Worker architecture** with **Smart Native Connection** for seamless multichain dApp integration. Built with React 18, ethers.js v6, and Chrome Extension Manifest V3.
 
 ### Key Architectural Features
 
-- **✅ Professionally Standardized Architecture**: Service worker as single source of truth
+- **✅ MetaMask-Style Architecture**: Service worker as single source of truth
 - **✅ Smart Native Connection**: Real chainIds only, zero compatibility hacks
-- **✅ Multichain Support**: 7 active networks (SuperSeed, Optimism, Ethereum, Base, BSC, Arbitrum, Shardeum)
+- **✅ Multichain Support**: 8 active networks (SuperSeed, Optimism, Ethereum, Base, BSC, Arbitrum, Monad, Shardeum)
 - **✅ Stream-Based Communication**: Native Chrome long-lived connections
 - **✅ Unified Vault System**: Military-grade AES-256-GCM encryption
 - **✅ Thin Client Pattern**: Frontend as lightweight presentation layer
@@ -48,9 +50,9 @@ SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implem
 ```
 Total Project Files: 183 JavaScript/JSX files
 Total Lines of Code: ~25,000 lines
-Architecture Pattern: Professionally Standardized Service Worker
+Architecture Pattern: MetaMask-style Service Worker
 Security Level: Military-grade encryption
-Supported Networks: 7 active networks
+Supported Networks: 8 active networks
 Response Time: <150ms average
 Vault Encryption: AES-256-GCM + PBKDF2
 ```
@@ -285,7 +287,7 @@ backgroundStreamManager.onMessage('session', async (message, port) => {
 - Audit-friendly architecture
 - Simplified security model
 
-### 5. Professionally Standardized Controllers
+### 5. MetaMask-Style Controllers
 
 **Modular controller pattern for separation of concerns.**
 
@@ -727,9 +729,56 @@ Unified signing system handling all signing request types (transactions, persona
 
 ## dApp Connection Architecture
 
+### Allowlist System
+
+**Version:** 3.1 (Enhanced Security - Nov 2025)
+
+SuperSafe implements a three-layer allowlist system for dApp authorization:
+
+**Layer 1: Provider Injection Gate**
+- Content script checks with background before injecting `window.ethereum`
+- Message type: `CS_CAN_INJECT`
+- Handler: `ProviderStreamHandler.js` (line 555)
+- **Result:** Unauthorized origins never see the provider
+
+**Layer 2: Connection Request Authorization**
+- Validates origin on `eth_requestAccounts` / `wallet_requestPermissions`
+- Strict origin matching (no fallbacks)
+- Handler: `ProviderStreamHandler.js` (line 633)
+- Rate limiting: 5 attempts per minute
+- **Result:** Blocked attempts logged and rate-limited
+
+**Layer 3: WalletConnect Validation**
+- Origin-based validation for mobile connections
+- No name-based fallbacks (security fix Nov 2025)
+- Handler: `SessionStreamHandler.js` (line 840)
+- URL normalization and validation
+- Rate limiting + comprehensive logging
+- **Result:** Same security as web connections
+
+**Security Features:**
+- ✅ Wildcard subdomain support (`*.domain.com`)
+- ✅ Rate limiting (5 attempts/minute, 5-minute block)
+- ✅ Blocked attempts logging (last 100 per origin)
+- ✅ Origin format validation and normalization
+- ✅ Fail-safe defaults (deny-all on error)
+
+**Manager:** `src/background/policy/AllowListManager.js`  
+**Allowlist:** `public/assets/allowlist.json` (7 authorized dApps)  
+**Security:** See [SECURITY.md](./SECURITY.md#allowlist-security-system) for complete details
+
+**November 2025 Security Enhancements:**
+1. Eliminated WalletConnect name-based fallback (CRITICAL vulnerability)
+2. Added origin validation and normalization
+3. Implemented rate limiting for connection attempts
+4. Added comprehensive logging system
+5. Implemented wildcard subdomain support
+
+See [Allowlist Security Enhancements Audit](./Audits/2025-11-21_ALLOWLIST_SECURITY_ENHANCEMENTS.md) for complete details.
+
 ### PopupManager Mutual Exclusion
 
-**Purpose:** Ensures extension UI and popup windows never coexist (Professionally Standardized UX).
+**Purpose:** Ensures extension UI and popup windows never coexist (MetaMask-style UX).
 
 **Implementation:**
 - When popup opens → Extension closes
@@ -1272,6 +1321,66 @@ dist/
 
 ---
 
+## API Proxy Architecture
+
+> **Security Migration (December 2025)**: All sensitive API keys now stored server-side via SuperSafe proxy.
+
+### Overview
+
+The extension uses a centralized API proxy system to protect sensitive API keys. All calls to Moralis, CoinGecko, and RPC endpoints route through `api.supersafe.cool`.
+
+### Architecture Diagram
+
+```
+┌─────────────────┐      ┌──────────────────────┐      ┌─────────────────┐
+│   Extension     │      │   SuperSafe Proxy    │      │   External API  │
+│   (Background)  │ ───► │   api.supersafe.cool │ ───► │   (Moralis,     │
+│                 │      │                      │      │   CoinGecko,    │
+│ Installation    │      │   API Keys stored    │      │   RPC nodes)    │
+│ Token Auth      │      │   server-side        │      │                 │
+└─────────────────┘      └──────────────────────┘      └─────────────────┘
+```
+
+### Components
+
+| File | Purpose |
+|------|---------|
+| `src/background/api/InstallationManager.js` | Token lifecycle (register, validate, refresh) |
+| `src/background/api/SuperSafeProxyClient.js` | HTTP client with auth injection, retry logic |
+| `src/background/api/ProxyServices.js` | Service-specific methods (moralisProxy, coingeckoProxy, rpcProxy) |
+
+### Token Lifecycle
+
+1. **Installation**: `chrome.runtime.onInstalled` → Generate UUID → Register with API → Store token
+2. **Startup**: `chrome.runtime.onStartup` → Validate token → Refresh if invalid
+3. **API Calls**: `X-Installation-Token` header injected automatically
+4. **Token Invalid (401)**: Auto re-register → Get new token → Retry request
+
+### Proxy Services
+
+```javascript
+// Moralis (wallet tokens, history, transfers)
+import { moralisProxy } from './background/api/ProxyServices.js';
+const tokens = await moralisProxy.getWalletTokens(address, chainId);
+
+// CoinGecko (price data)
+import { coingeckoProxy } from './background/api/ProxyServices.js';
+const prices = await coingeckoProxy.getPrices(['ethereum', 'bitcoin']);
+
+// RPC (eth_gasPrice, eth_call, eth_sendRawTransaction)
+import { rpcProxy } from './background/api/ProxyServices.js';
+const gasPrice = await rpcProxy.getGasPrice(chainId);
+```
+
+### Security Benefits
+
+- **No API Keys in Bundle**: Keys stored server-side only
+- **Rate Limit Protection**: Server-side control of rate limits
+- **Key Rotation**: Server can rotate keys without extension update
+- **Audit Trail**: Server logs all API usage per installation
+
+---
+
 ## Directory Structure
 
 ### Backend Architecture
@@ -1290,6 +1399,11 @@ src/background/
 │   │   ├── BlockchainStreamHandler.js # Blockchain queries
 │   │   ├── ApiStreamHandler.js       # External API calls
 │   │   └── GenericStreamHandlers.js  # Generic utilities
+│
+├── api/                              # API Proxy System (Dec 2025)
+│   ├── InstallationManager.js        # Token lifecycle management
+│   ├── SuperSafeProxyClient.js       # HTTP client with auth
+│   └── ProxyServices.js              # moralisProxy, coingeckoProxy, rpcProxy
 │   ├── walletHandlers.js             # Wallet operations
 │   ├── contractHandlers.js           # Smart contract calls
 │   └── providerHandlers.js           # Provider management
@@ -1322,9 +1436,10 @@ src/background/
 │   └── SimpleBlacklistManager.js     # Blacklist management
 │
 ├── config/                           # Configuration
-│   ├── apiConfig.js                  # API endpoints
-│   ├── bebopPartnerConfig.js         # Bebop partner settings
-│   └── walletConnectConfig.js        # WalletConnect settings
+│   ├── apis.config.js                # Unified API configuration (v3.1.0)
+│   ├── networkConfig.js              # RPC and network configuration
+│   ├── explorerConfig.js             # Block explorer configuration
+│   └── relayConfig.js                # Relay.link cross-chain config
 │
 ├── strategy/                         # Strategy patterns
 │   └── ConnectionStrategies.js       # dApp connection strategies
@@ -1635,8 +1750,624 @@ Content Script: ~150 KB (minimal injection)
 
 ---
 
+## Unified Configuration System
+
+**Added:** November 19, 2025  
+**Version:** 3.0.3
+
+### Overview
+
+SuperSafe implements a **two-tier unified configuration system** following MetaMask industry standards. All configuration is centralized with strict separation between public metadata and sensitive credentials.
+
+### Architecture
+
+```
+Public Configuration (Frontend-Safe)
+├── src/config/
+│   ├── index.js              # Single public entry point
+│   ├── networks.config.js    # Network metadata (NO RPC URLs)
+│   ├── apis.config.js        # Public API endpoints (NO keys)
+│   ├── features.config.js    # Feature flags
+│   ├── dapps.config.js       # Known dApps directory
+│   └── gas.config.js         # Gas thresholds
+
+Backend Configuration (Sensitive)
+└── src/background/config/
+    ├── index.js              # Single backend entry point
+    ├── networkConfig.js      # RPC URLs with API keys
+    ├── apis.config.js        # API keys & credentials
+    └── [helpers...]          # Specialized configs
+```
+
+### Key Principles
+
+1. **Single Import Point**
+   ```javascript
+   // Frontend
+   import { NETWORKS, FEATURE_FLAGS } from '../config'
+   
+   // Backend
+   import { getRpcUrl, MORALIS_CONFIG } from './config'
+   ```
+
+2. **Security Separation**
+   - Frontend bundle: 0 credentials, only public metadata
+   - Backend bundle: All credentials + public metadata
+
+3. **No Duplication**
+   - Each configuration item has exactly one source
+   - Backend re-exports public configs for convenience
+
+4. **Fail-Fast Validation**
+   - Missing required vars → Application fails at startup
+   - Context validation prevents frontend importing backend configs
+
+### Configuration Categories
+
+**Networks** (`networks.config.js` - 26 KB)
+- 8 networks with complete metadata
+- Bebop/Relay integration settings
+- 40+ utility functions
+- ERC-20 ABI definitions
+
+**APIs** (`apis.config.js` - Public: 3.9 KB, Backend: 15 KB)
+- Moralis (multi-key rotation)
+- Bebop (partner fees)
+- Relay.link (cross-chain)
+- WalletConnect (Web3 modal)
+- Explorers & Price feeds
+
+**Features** (`features.config.js` - 8.3 KB)
+- 20+ global feature toggles
+- Per-network feature support
+- Experimental features control
+
+**dApps** (`dapps.config.js` - 8.7 KB)
+- Known dApps directory (Uniswap, Aave, OpenSea, etc.)
+- Contract addresses per network
+- Category system
+
+**Gas** (`gas.config.js` - 10 KB)
+- Gas price thresholds (7 networks)
+- Validation settings
+- Alert levels
+
+### Benefits
+
+**For Developers:**
+- 📍 Single location for each config type
+- 🔍 Easy to find and update
+- 🚀 Single file change to add networks
+- 📝 Self-documenting structure
+
+**For Security:**
+- ✅ Zero credentials in frontend bundle
+- ✅ Context validation prevents misuse
+- ✅ Clear separation of concerns
+- ✅ Audit-ready architecture
+
+**For Maintenance:**
+- ✅ No duplication
+- ✅ Centralized validation
+- ✅ Consistent patterns
+- ✅ Future TypeScript ready
+
+See [CONFIGURATION.md](./CONFIGURATION.md) for complete documentation.
+
+---
+
+## One Window Policy Architecture
+
+**Version:** 3.1.3  
+**Implementation Date:** December 9, 2025  
+**Status:** ✅ Production
+
+### Overview
+
+The One Window Policy prevents race conditions and state conflicts by ensuring only one main wallet window is active at any time. This architecture eliminates:
+- ❌ Race conditions when multiple windows modify state
+- ❌ Conflicting streams between popup and tab
+- ❌ Inconsistent state displayed across windows
+- ❌ Transaction interruptions from window conflicts
+
+### Architecture Components
+
+#### 1. PopupManager Window Tracking
+
+**Location:** `src/background/managers/PopupManager.js`
+
+**State Properties:**
+```javascript
+{
+  mainWindowId: number | null,        // Window ID of active main window
+  mainWindowType: 'popup' | 'tab' | null,  // Type of main window
+  mainWindowTimestamp: number | null  // Registration timestamp
+}
+```
+
+**Key Methods:**
+- `registerMainWindow(windowId, windowType)` - Register new main window
+- `checkMainWindow()` - Check if main window exists
+- `focusMainWindow(windowId)` - Focus existing main window
+- `clearMainWindow()` - Clear main window registration
+- `handleMainWindowClosed(windowId)` - Cleanup on window close
+
+#### 2. Session Stream Handlers
+
+**Location:** `src/background/handlers/streams/SessionStreamHandler.js`
+
+**New Message Types:**
+```javascript
+// Check if main window exists
+{
+  type: 'CHECK_MAIN_WINDOW'
+  // Returns: { exists: boolean, windowId: number, windowType: string }
+}
+
+// Register new main window
+{
+  type: 'REGISTER_MAIN_WINDOW',
+  windowId: number,
+  windowType: 'popup' | 'tab'
+  // Returns: { success: boolean, registered: boolean }
+}
+
+// Focus existing main window
+{
+  type: 'FOCUS_MAIN_WINDOW',
+  windowId: number
+  // Returns: { success: boolean }
+}
+```
+
+#### 3. Frontend Enforcement
+
+**Location:** `src/main.jsx`
+
+**Enforcement Flow:**
+```javascript
+async function enforceOneWindowPolicy() {
+  const windowId = await getCurrentWindowId();
+  const windowType = await getWindowType();
+  
+  // 1. Check for existing main window
+  const existingWindow = await sessionStream.send({
+    type: 'CHECK_MAIN_WINDOW'
+  });
+  
+  if (existingWindow.exists) {
+    // 2. Focus existing window and close this one
+    await sessionStream.send({
+      type: 'FOCUS_MAIN_WINDOW',
+      windowId: existingWindow.windowId
+    });
+    window.close();
+    return;
+  }
+  
+  // 3. Register as main window
+  await sessionStream.send({
+    type: 'REGISTER_MAIN_WINDOW',
+    windowId,
+    windowType
+  });
+}
+
+// Execute on app initialization
+enforceOneWindowPolicy();
+```
+
+#### 4. Background Cleanup
+
+**Location:** `src/background/BackgroundSessionController.js`
+
+**Window Close Handler:**
+```javascript
+handleWindowClosed(windowId) {
+  // ... existing cleanup ...
+  
+  // 🪟 ONE WINDOW POLICY: Clean up main window tracking
+  if (this.popupManager) {
+    this.popupManager.handleMainWindowClosed(windowId);
+  }
+}
+```
+
+### Window Type Priority
+
+**Main Windows** (only one allowed):
+- Popup (375px window from extension icon)
+- Tab (full browser tab with `chrome-extension://[id]/index.html`)
+
+**Action Popups** (can coexist with main window):
+- Transaction confirmation popup
+- Signing confirmation popup
+- Connection request popup
+- Network switch popup
+
+**Rationale:** Action popups are **read-only** until user approves/rejects, so they don't cause state conflicts with the main window.
+
+### Behavioral Scenarios
+
+#### Scenario 1: Tab Open → Click Icon
+```
+Initial State: Tab open with Dashboard
+User Action: Clicks extension icon
+Expected Result:
+  ✅ Tab auto-focuses
+  ❌ Popup does NOT open
+  💡 User sees existing tab
+```
+
+#### Scenario 2: Popup Open → Open Tab
+```
+Initial State: Popup open (375px)
+User Action: Opens chrome-extension://[id]/index.html in new tab
+Expected Result:
+  ✅ Popup remains focused
+  ❌ Tab closes immediately
+  💡 User sees existing popup
+```
+
+#### Scenario 3: Tab Open → dApp Requests Signature
+```
+Initial State: Tab open with Dashboard
+External Event: dApp requests signature
+Expected Result:
+  ✅ Tab remains open (main window)
+  ✅ Action popup opens for confirmation
+  ⚠️ Two windows coexist (intentional)
+  💡 User can review dashboard while signing
+```
+
+### State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> NoMainWindow: Initial state
+    NoMainWindow --> CheckExisting: User opens wallet
+    CheckExisting --> ExistingFound: Main window exists
+    CheckExisting --> NoExisting: No main window
+    ExistingFound --> FocusExisting: Focus main window
+    FocusExisting --> CloseNew: Close new window
+    CloseNew --> [*]
+    NoExisting --> RegisterNew: Register as main window
+    RegisterNew --> ActiveMainWindow: Main window active
+    ActiveMainWindow --> WindowClosed: User closes window
+    WindowClosed --> NoMainWindow: Clear registration
+    NoMainWindow --> [*]
+```
+
+### Debugging
+
+**Check Main Window State:**
+```javascript
+// In background console (chrome://extensions → SuperSafe → background service worker)
+backgroundSessionController.popupManager.mainWindowId
+// → null (no main window) or number (window ID)
+
+backgroundSessionController.popupManager.mainWindowType
+// → null, 'popup', or 'tab'
+
+backgroundSessionController.popupManager.mainWindowTimestamp
+// → null or timestamp (when registered)
+```
+
+**View Console Logs:**
+```
+[main] 🪟 ONE WINDOW POLICY: Checking for existing windows...
+[main] 🪟 ONE WINDOW POLICY: Registering as main window: { windowId: 123, windowType: 'tab' }
+[PopupManager] 🪟 ONE WINDOW POLICY: Main window registered successfully
+[PopupManager] 🪟 ONE WINDOW POLICY: Main window closed: 123
+```
+
+### Security Benefits
+
+- ✅ **Prevents Race Conditions** - Only one window can modify state
+- ✅ **Ensures Consistency** - Single source of truth for UI state
+- ✅ **Protects Transactions** - No interruptions from window conflicts
+- ✅ **Reduces Attack Surface** - Fewer communication channels to exploit
+
+### Performance Impact
+
+- **Registration Check:** < 10ms (local state check)
+- **Focus Operation:** < 50ms (browser window focus)
+- **Window Close:** < 5ms (cleanup)
+- **Memory Overhead:** +3 properties in PopupManager (negligible)
+
+**Related Documentation:** See also [One Window Policy in FRONTEND.md](./FRONTEND.md#one-window-policy) for frontend implementation details.
+
+---
+
+## Responsive Design Architecture
+
+**Version:** 3.1.3  
+**Implementation Date:** December 9, 2025  
+**Status:** ✅ Production
+
+### Overview
+
+SuperSafe Wallet implements a **professional responsive design system** that adapts seamlessly between:
+- **Popup Mode** (375px) - Extension icon popup (original behavior preserved)
+- **Fullpage Mode** (responsive) - Browser tab with adaptive width
+
+This matches the UX of professional wallets like MetaMask, providing flexibility without breaking existing layouts.
+
+### Architecture Components
+
+#### 1. Viewport Detection Utilities
+
+**Location:** `src/utils/viewportUtils.js`
+
+**API Functions:**
+```javascript
+// Check if in popup mode (≤400px width)
+isPopupView(): boolean
+
+// Check if in fullpage mode (>400px width)
+isFullPageView(): boolean
+
+// Get current mode
+getViewMode(): 'popup' | 'fullpage'
+
+// Get CSS class for current mode
+getViewModeClass(): 'context-popup' | 'context-fullpage'
+
+// Listen for viewport changes
+onViewModeChange(callback: (mode: string) => void): () => void
+```
+
+**Implementation:**
+```javascript
+export function isPopupView() {
+  return window.innerWidth <= 400;
+}
+
+export function isFullPageView() {
+  return window.innerWidth > 400;
+}
+
+export function getViewMode() {
+  return isPopupView() ? 'popup' : 'fullpage';
+}
+
+export function getViewModeClass() {
+  return isPopupView() ? 'context-popup' : 'context-fullpage';
+}
+
+export function onViewModeChange(callback) {
+  let previousMode = getViewMode();
+  
+  function handleResize() {
+    const currentMode = getViewMode();
+    if (currentMode !== previousMode) {
+      previousMode = currentMode;
+      callback(currentMode);
+    }
+  }
+  
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}
+```
+
+#### 2. Dynamic CSS Classes
+
+**Location:** `src/main.jsx`
+
+**Class Application:**
+```javascript
+import { getViewModeClass, onViewModeChange } from './utils/viewportUtils.js';
+
+function applyViewModeClass() {
+  const viewModeClass = getViewModeClass();
+  document.body.classList.remove('context-popup', 'context-fullpage');
+  document.body.classList.add(viewModeClass);
+  logger.debug(`🪟 Responsive mode detected: ${viewModeClass}`);
+}
+
+// Apply initial class
+applyViewModeClass();
+
+// Listen for window resize
+const cleanupViewModeListener = onViewModeChange((newMode) => {
+  logger.debug(`🪟 View mode changed to: ${newMode}`);
+  applyViewModeClass();
+});
+```
+
+#### 3. Responsive CSS System
+
+**Location:** `src/index.css`
+
+**Base Layout:**
+```css
+body {
+  /* 🪟 RESPONSIVE: Default to fullpage mode */
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* * POPUP MODE: Small window (≤400px) - Fixed width */
+@media (max-width: 400px) {
+  body {
+    width: 375px;
+    max-width: 375px;
+  }
+}
+
+/* * FULLPAGE MODE: Large window (>400px) - Responsive */
+@media (min-width: 401px) {
+  body {
+    width: 100%;
+    max-width: 100vw;
+  }
+}
+```
+
+**Context-Based Classes:**
+```css
+/* * CSS CLASS-BASED RESPONSIVE */
+body.context-popup {
+  width: 375px;
+  max-width: 375px;
+}
+
+body.context-fullpage {
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Responsive containers for modals and screens */
+body.context-fullpage .modal-container,
+body.context-fullpage .screen-container {
+  max-width: min(90vw, 500px) !important;
+  width: 100% !important;
+}
+
+/* Larger on tablets+ (≥768px) */
+@media (min-width: 768px) {
+  body.context-fullpage .modal-container,
+  body.context-fullpage .screen-container {
+    max-width: min(80vw, 600px) !important;
+  }
+}
+
+/* Even larger on desktops (≥1024px) */
+@media (min-width: 1024px) {
+  body.context-fullpage .modal-container,
+  body.context-fullpage .screen-container {
+    max-width: min(70vw, 700px) !important;
+  }
+}
+```
+
+### Breakpoint Strategy
+
+| Breakpoint | Width | Mode | Container Width |
+|------------|-------|------|-----------------|
+| Mobile Popup | ≤400px | `popup` | Fixed 375px |
+| Mobile Fullpage | 401-767px | `fullpage` | 90vw (max 500px) |
+| Tablet | 768-1023px | `fullpage` | 80vw (max 600px) |
+| Desktop | ≥1024px | `fullpage` | 70vw (max 700px) |
+
+### Component Updates
+
+**Components with Responsive Support:**
+- ✅ `ConnectionRequestScreen.jsx` - Added `.screen-container` class
+- ✅ `UnsupportedNetworkScreen.jsx` - Added `.screen-container` class
+- ✅ `StyledModal.jsx` - Added `.modal-container` class
+- ✅ `TransactionConfirmationScreen.jsx` - Already responsive (inherits)
+- ✅ `SigningConfirmationScreen.jsx` - Already responsive (inherits)
+- ✅ `NetworkSwitchConfirmationScreen.jsx` - Already responsive (inherits)
+- ✅ `TypedDataConfirmationScreen.jsx` - Already responsive (inherits)
+- ✅ `App.jsx` - Uses Tailwind responsive utilities
+- ✅ `Dashboard.jsx` - Uses Tailwind responsive utilities
+
+**Example Component Update:**
+```javascript
+// BEFORE (fixed width)
+<div className="connection-screen">
+  {/* content */}
+</div>
+
+// AFTER (responsive)
+<div className="connection-screen screen-container">
+  {/* content */}
+</div>
+```
+
+### Responsive Behavior
+
+#### Popup Mode (≤400px)
+```
+Window Width: 375px (fixed)
+Container Width: 375px
+Scroll: Vertical if content overflows
+Layout: Original design preserved
+Use Case: Extension icon popup
+```
+
+#### Fullpage Mode (>400px)
+```
+Window Width: 100vw (responsive)
+Container Width: 
+  - Mobile (401-767px): 90vw, max 500px
+  - Tablet (768-1023px): 80vw, max 600px
+  - Desktop (≥1024px): 70vw, max 700px
+Scroll: Vertical if content overflows
+Layout: Responsive, centered
+Use Case: Browser tab
+```
+
+### State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> DetectViewport: App loads
+    DetectViewport --> PopupMode: Width ≤ 400px
+    DetectViewport --> FullpageMode: Width > 400px
+    PopupMode --> ApplyPopupClass: Apply .context-popup
+    FullpageMode --> ApplyFullpageClass: Apply .context-fullpage
+    ApplyPopupClass --> FixedLayout: Fixed 375px width
+    ApplyFullpageClass --> ResponsiveLayout: Responsive width
+    FixedLayout --> ListenResize: Monitor window resize
+    ResponsiveLayout --> ListenResize: Monitor window resize
+    ListenResize --> DetectViewport: Viewport change detected
+```
+
+### Debugging
+
+**Check Current Mode:**
+```javascript
+// In browser console
+import { getViewMode, getViewModeClass } from './utils/viewportUtils.js';
+
+console.log('Current mode:', getViewMode());
+// → 'popup' or 'fullpage'
+
+console.log('Current class:', getViewModeClass());
+// → 'context-popup' or 'context-fullpage'
+
+console.log('Window width:', window.innerWidth);
+// → Current viewport width in pixels
+
+console.log('Body classes:', document.body.classList);
+// → Should include 'context-popup' or 'context-fullpage'
+```
+
+**View Console Logs:**
+```
+[main] 🪟 Responsive mode detected: context-fullpage
+[main] 🪟 View mode changed to: context-popup
+```
+
+### Advantages
+
+- ✅ **Backwards Compatible** - Popup mode (375px) works exactly as before
+- ✅ **Industry Standard** - Matches MetaMask and other professional wallets
+- ✅ **Easy to Maintain** - Centralized CSS with clear breakpoints
+- ✅ **Flexible** - Easily adjust breakpoints or container sizes
+- ✅ **No Breaking Changes** - Original popup behavior preserved 100%
+- ✅ **Professional UX** - Adaptive layout improves usability in fullpage mode
+
+### Performance Impact
+
+- **Viewport Detection:** < 1ms (read window.innerWidth)
+- **Class Application:** < 5ms (DOM class manipulation)
+- **Resize Listener:** < 2ms per resize event (debounced by browser)
+- **CSS Cascade:** No performance impact (native browser rendering)
+- **Memory Overhead:** +1 resize listener per app instance (negligible)
+
+**Related Documentation:** See also [Responsive Design System in FRONTEND.md](./FRONTEND.md#responsive-design-system) for frontend implementation details.
+
+---
+
 ## Related Documentation
 
+- [CONFIGURATION.md](./CONFIGURATION.md) - **NEW** - Complete configuration system guide
 - [BACKEND.md](./BACKEND.md) - Detailed backend architecture
 - [FRONTEND.md](./FRONTEND.md) - React component architecture
 - [SECURITY.md](./SECURITY.md) - Security implementation
@@ -1648,7 +2379,7 @@ Content Script: ~150 KB (minimal injection)
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
+**Document Status:** ✅ Current as of December 10, 2025  
+**Code Version:** v3.1.3  
 **Maintenance:** Review quarterly or after major architecture changes
 

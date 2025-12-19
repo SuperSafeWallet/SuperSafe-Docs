@@ -1,10 +1,36 @@
 # SuperSafe Wallet - Development Guide
 
 **Created:** October 13, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
+**Last Updated:** November 19, 2025  
+**Version:** 3.0.3  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** November 19, 2025
+
+## 🆕 What's New in v3.0.3 (November 19, 2025)
+
+### Unified Configuration System
+
+SuperSafe now uses a **unified, two-tier configuration system** following MetaMask industry standards.
+
+**New Import Pattern:**
+```javascript
+// ✅ NEW: Frontend files
+import { NETWORKS, FEATURE_FLAGS, GAS_THRESHOLDS } from '../config'
+
+// ✅ NEW: Backend files
+import { getRpcUrl, MORALIS_CONFIG, NETWORKS } from './config'
+
+// ⚠️ DEPRECATED: Old pattern (DELETED in v3.1.0)
+// import { NETWORKS } from '../utils/networks.js' // No longer exists!
+```
+
+**Configuration Locations:**
+- **Public:** `src/config/` (frontend-safe, no credentials)
+- **Sensitive:** `src/background/config/` (backend-only, with API keys)
+
+**Complete Guide:** See [CONFIGURATION.md](./CONFIGURATION.md)
+
+---
 
 ---
 
@@ -1091,7 +1117,7 @@ BEBOP_PARTNER_FEE_BPS=100
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
+**Document Status:** ✅ Current as of November 19, 2025  
+**Code Version:** v3.0.3+  
 **Maintenance:** Review after major dependency updates
 

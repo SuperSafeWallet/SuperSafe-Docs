@@ -8,7 +8,7 @@ SuperSafe Wallet implements a sophisticated network switching system that ensure
 
 ## Overview
 
-**Supported Networks:** Currently supports **7 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Shardeum) with extensible architecture for adding new networks.
+**Supported Networks:** Currently supports **8 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad, Shardeum) with extensible architecture for adding new networks.
 
 ### Key Features
 
@@ -23,17 +23,18 @@ SuperSafe Wallet implements a sophisticated network switching system that ensure
 
 ## Supported Networks
 
-### Active Networks (7)
+### Active Networks (8)
 
-| Network | Chain ID | Swap Support | Relay Support | Status |
-|---------|----------|--------------|---------------|--------|
-| **SuperSeed** | 5330 | ✅ Bebop (JAM) | ✅ Cross-chain | ✅ Active |
-| **Ethereum** | 1 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
-| **Optimism** | 10 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
-| **Base** | 8453 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
-| **BNB Chain** | 56 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
-| **Arbitrum One** | 42161 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Active |
-| **Shardeum** | 8118 | ❌ Not supported | ❌ Not supported | ✅ Active |
+| Network | Chain ID | Swap Support | Relay Support | Fiat On-Ramp | Status |
+|---------|----------|--------------|---------------|--------------|--------|
+| **SuperSeed** | 5330 | ✅ Bebop (JAM) | ✅ Cross-chain | ❌ | ✅ Active |
+| **Ethereum** | 1 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Tradesilvania | ✅ Active |
+| **Optimism** | 10 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ⏳ Coming | ✅ Active |
+| **Base** | 8453 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ⏳ Coming | ✅ Active |
+| **BNB Chain** | 56 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Tradesilvania | ✅ Active |
+| **Arbitrum One** | 42161 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain | ✅ Tradesilvania | ✅ Active |
+| **Monad** | TBD | ❌ Not supported | ❌ Not supported | ❌ | ✅ Active |
+| **Shardeum** | 8118 | ❌ Not supported | ❌ Not supported | ❌ | ✅ Active |
 
 ---
 
@@ -477,6 +478,6 @@ await preSwitchCoordinator.executeHandlers(targetNetworkKey, options)
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.1.0+  
+**Document Status:** ✅ Current as of December 18, 2025  
+**Code Version:** v3.1.4  
 **Maintenance:** Review after adding new networks or modifying switch flow

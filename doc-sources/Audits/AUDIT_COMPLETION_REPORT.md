@@ -27,7 +27,7 @@ The system now complies 100% with:
 1. ✅ `src/content-script.js` - Removed '0x1' fallbacks (2 locations)
 2. ✅ `src/background.js` - Clarified error handling and fixed network change rejection
 3. ✅ `src/controllers/NetworkController.js` - Improved initialization comments
-4. ✅ `src/background/managers/PopupManager.js` - Professionally Standardized mutual exclusion
+4. ✅ `src/background/managers/PopupManager.js` - MetaMask-style mutual exclusion
 5. ✅ `src/App.jsx` - Secondary popup detection as safety net
 6. ✅ `src/hooks/usePortfolioData.js` - Event listener for network changes
 7. ✅ `src/components/screens/NetworkSwitchConfirmationScreen.jsx` - Improved UX messages
@@ -259,7 +259,7 @@ throw new Error('CRITICAL: Cannot determine network chainId - invalid response f
 The comprehensive audit of the dApp connection system has been successfully completed. All critical issues have been identified and corrected. The code now:
 
 1. ✅ **Eliminates ALL security vulnerabilities** (fallback chainIds)
-2. ✅ **Implements Professionally Standardized mutual exclusion** correctly
+2. ✅ **Implements MetaMask-style mutual exclusion** correctly
 3. ✅ **Provides deterministic network handling** without silent fallbacks
 4. ✅ **Follows professional patterns** throughout the code
 5. ✅ **Complies 100%** with documented architecture

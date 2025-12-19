@@ -14,7 +14,7 @@ SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implem
 
 - **✅ Professionally Standardized Architecture**: Service worker as single source of truth
 - **✅ Smart Native Connection**: Real chainIds only, zero compatibility hacks
-- **✅ Multichain Support**: 7 active networks (SuperSeed, Optimism, Ethereum, Base, BSC, Arbitrum, Shardeum)
+- **✅ Multichain Support**: 8 active networks (SuperSeed, Optimism, Ethereum, Base, BSC, Arbitrum, Monad, Shardeum)
 - **✅ Stream-Based Communication**: Native Chrome long-lived connections
 - **✅ Unified Vault System**: Military-grade AES-256-GCM encryption
 - **✅ Thin Client Pattern**: Frontend as lightweight presentation layer
@@ -23,17 +23,21 @@ SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implem
 - **✅ Relay.link Integration**: Cross-chain swaps across 85+ blockchains
 - **✅ WalletConnect V2**: Full Reown WalletKit implementation
 - **✅ Framework Detection**: Automatic dApp framework identification
+- **✅ One Window Policy**: Single active window enforcement (v3.1.3)
+- **✅ Responsive Design**: Adaptive layout for popup and fullpage modes (v3.1.3)
+- **✅ Gas Validation System**: Real-time scam detection and protection (v3.1.4)
 
 ### System Metrics
 
 ```
-Total Project Files: 183 JavaScript/JSX files
-Total Lines of Code: ~25,000 lines
+Total Project Files: 195 JavaScript/JSX files
+Total Lines of Code: ~33,000 lines
 Architecture Pattern: Professionally Standardized Service Worker
 Security Level: Military-grade encryption
-Supported Networks: 7 active networks
+Supported Networks: 8 active networks
 Response Time: <150ms average
 Vault Encryption: AES-256-GCM + PBKDF2
+UI Modes: Popup (375px) + Fullpage (adaptive)
 ```
 
 ---
@@ -426,7 +430,7 @@ Swap.jsx (~115 lines)              # Container/Orchestrator
 
 ### Overview
 
-SuperSafe Wallet implements a professional-grade transaction decoding system that transforms raw blockchain transactions into human-readable information. The system supports major DEX protocols (Uniswap V2/V3/V4, PancakeSwap Infinity, Velodrome, Aerodrome) across 7 EVM networks with a strict "no fallbacks" security policy.
+SuperSafe Wallet implements a professional-grade transaction decoding system that transforms raw blockchain transactions into human-readable information. The system supports major DEX protocols (Uniswap V2/V3/V4, PancakeSwap Infinity, Velodrome, Aerodrome) across 8 EVM networks with a strict "no fallbacks" security policy.
 
 ### Core Components
 
@@ -1096,6 +1100,132 @@ await preSwitchCoordinator.executeHandlers(targetNetworkKey, {
 
 ---
 
+## One Window Policy (v3.1.3)
+
+SuperSafe implements **single active window enforcement** to ensure consistent UX and prevent conflicts.
+
+### Design Principle
+
+Only ONE wallet window can be active at any time:
+- **Extension UI** (popup) OR **Popup window** (confirmation screens)
+- Never both simultaneously
+
+### Implementation
+
+**PopupManager Mutual Exclusion:**
+
+```javascript
+// When popup opens → Extension closes
+await PopupManager.openPopup('connection', { origin, tabId });
+// Automatically closes any existing extension window
+
+// When extension opens while popup active
+// → Extension closes, popup gains focus
+```
+
+**Priority Order for Popup Types:**
+1. Personal Sign requests
+2. Typed Data requests (Permit2)
+3. Transaction confirmations
+4. Network switch consent
+5. Connection requests
+6. Unlock prompts
+
+### Pre-render and Post-render Checks
+
+```javascript
+// Before rendering
+const shouldRender = await checkOneWindowPolicy();
+if (!shouldRender) {
+  window.close();
+  return;
+}
+
+// After rendering (periodic check)
+setInterval(enforceOneWindowPolicy, 1000);
+```
+
+### Benefits
+
+- ✅ **MetaMask-style UX**: Familiar behavior for users
+- ✅ **No stream disconnections**: Single point of communication
+- ✅ **No stuck requests**: Clear ownership of pending operations
+- ✅ **Reduced complexity**: Simpler state management
+
+---
+
+## Responsive Design System (v3.1.3)
+
+SuperSafe implements adaptive layouts for different viewport contexts.
+
+### Viewport Modes
+
+| Mode | Dimensions | Context |
+|------|------------|------|
+| **Popup** | 375px × 600px (fixed) | Browser action click |
+| **Fullpage** | Adaptive (min 800px width) | New tab / dashboard |
+
+### Detection
+
+```javascript
+const isPopupMode = () => {
+  return window.innerWidth <= 400 && window.innerHeight <= 650;
+};
+
+const isFullpageMode = () => {
+  return window.innerWidth > 600;
+};
+```
+
+### Responsive Components
+
+**Dashboard:**
+- Popup: Single-column token list
+- Fullpage: Multi-column grid with expanded details
+
+**Settings:**
+- Popup: Stacked sections
+- Fullpage: Sidebar navigation
+
+**Confirmation Screens:**
+- Popup: Scrollable compact layout
+- Fullpage: Expanded details with side-by-side comparisons
+
+### CSS Implementation
+
+```css
+/* Base: Mobile-first (popup) */
+.container {
+  width: 100%;
+  max-width: 375px;
+  padding: 16px;
+}
+
+/* Fullpage expansion */
+@media (min-width: 600px) {
+  .container {
+    max-width: 1200px;
+    padding: 24px 32px;
+  }
+  
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+```
+
+### Key Components
+
+| Component | Popup Behavior | Fullpage Behavior |
+|-----------|---------------|------------------|
+| **TokensList** | Compact rows | Expanded cards with charts |
+| **SwapPanel** | Stacked inputs | Side-by-side with details |
+| **TransactionConfirmation** | Scrollable | Fixed layout with expanded info |
+| **Settings** | Accordion sections | Sidebar + content pane |
+
+---
+
 ## Performance Metrics
 
 ### Response Times
@@ -1138,6 +1268,6 @@ Content Script: ~150 KB (minimal injection)
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
+**Document Status:** ✅ Current as of December 18, 2025  
+**Code Version:** v3.1.4  
 **Maintenance:** Review quarterly or after major architecture changes

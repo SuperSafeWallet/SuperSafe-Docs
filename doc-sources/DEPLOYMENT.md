@@ -1,10 +1,31 @@
 # SuperSafe Wallet - Deployment Guide
 
 **Created:** October 13, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
+**Last Updated:** November 19, 2025  
+**Version:** 3.0.3  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** November 19, 2025
+
+## 🆕 What's New in v3.0.3 (November 19, 2025)
+
+### Unified Configuration System
+
+**CRITICAL CHANGE:** Configuration system completely refactored for security and maintainability.
+
+**Key Changes:**
+- ✅ **Two-tier configuration:** Public (frontend) + Sensitive (backend)
+- ✅ **Zero credentials in frontend:** All API keys isolated to background
+- ✅ **Single import point:** `import from '../config'` pattern
+- ✅ **Environment variables:** Only injected in background bundle
+
+**Impact on Deployment:**
+- All 10 `MORALIS_RPC_*` variables are now **REQUIRED** (fail-fast validation)
+- `.env` file must be complete before build
+- Configuration errors show clear messages at startup
+
+**Migration:** See [CONFIGURATION.md](./CONFIGURATION.md) for complete guide
+
+---
 
 ---
 
@@ -183,6 +204,19 @@ git push origin v3.0.1
 ```markdown
 # Changelog
 
+## [3.0.3] - 2025-11-19
+
+### Changed
+- **CRITICAL:** Unified Configuration System - Complete refactor for security and maintainability
+  - Two-tier configuration: Public (frontend) + Sensitive (backend)
+  - Zero credentials in frontend: All API keys isolated to background
+  - Single import point: `import from '../config'` pattern
+  - Environment variables: Only injected in background bundle
+- **REQUIRED:** All 10 `MORALIS_RPC_*` environment variables now mandatory (fail-fast validation)
+- `.env` file must be complete before build
+- Configuration errors show clear messages at startup
+- See [CONFIGURATION.md](./CONFIGURATION.md) for complete migration guide
+
 ## [3.0.2] - 2025-11-01
 
 ### Added
@@ -222,7 +256,7 @@ git push origin v3.0.1
 
 ### Added
 - Smart Native Connection architecture
-- Multi-network support (7 active networks: SuperSeed, Optimism, Ethereum, Base, BSC, Arbitrum, Shardeum)
+- Multi-network support (8 active networks: SuperSeed, Optimism, Ethereum, Base, BSC, Arbitrum, Monad, Shardeum)
 - Bebop swap integration with partner fees (JAM and RFQ)
 - Relay.link cross-chain swap integration (85+ blockchains)
 - WalletConnect v2 / Reown support
@@ -269,7 +303,7 @@ git push origin v3.0.1
 - [ ] Test token transfers (native and ERC20)
 - [ ] Test swap functionality (Bebop JAM/RFQ)
 - [ ] Test cross-chain swaps (Relay.link)
-- [ ] Test network switching (all 7 active networks)
+- [ ] Test network switching (all 8 active networks)
 - [ ] Test WalletConnect connection
 - [ ] Test transaction history across networks
 
@@ -279,7 +313,7 @@ git push origin v3.0.1
 - [ ] Environment variables properly configured (Alchemy keys, WalletConnect Project ID)
 - [ ] AllowList properly configured (`public/assets/allowlist.json`)
 - [ ] Fee receiver address verified (Bebop partner fees)
-- [ ] RPC endpoints functional (all 7 active networks)
+- [ ] RPC endpoints functional (all 8 active networks)
 - [ ] External API endpoints accessible (Bebop, Relay.link, SuperSafe Price API)
 - [ ] Content Security Policy (CSP) properly configured in manifest.json
 - [ ] Logger system eliminates sensitive data in production builds
@@ -368,7 +402,7 @@ const FEE_CONFIG = {
 
 ### Network Endpoints
 
-**Production RPC URLs** (`src/utils/networks.js`):
+**Production RPC URLs** (`src/background/config/networkConfig.js`):
 
 ```javascript
 NETWORKS = {
@@ -406,7 +440,7 @@ NETWORKS = {
 **⚠️ Important:** 
 - Update Alchemy API keys (`ALCHEMY_ETHEREUM_API_KEY`, `ALCHEMY_OPTIMISM_API_KEY`) in environment variables before production release
 - Verify all RPC endpoints are accessible and functional
-- Test network switching across all 7 active networks
+- Test network switching across all 8 active networks
 
 ---
 

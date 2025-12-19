@@ -20,7 +20,7 @@
 
 ## Blockchain Overview
 
-SuperSafe Wallet provides comprehensive blockchain operations across multiple EVM-compatible networks (currently **7 active networks**), implementing EIP-1193 and EIP-6963 provider specifications with ethers.js v6 integration.
+SuperSafe Wallet provides comprehensive blockchain operations across multiple EVM-compatible networks (currently **8 active networks**), implementing EIP-1193 and EIP-6963 provider specifications with ethers.js v6 integration.
 
 ### Supported Operations
 
@@ -65,7 +65,7 @@ SuperSafe Wallet provides comprehensive blockchain operations across multiple EV
 
 ### Network Configuration
 
-**Location:** `src/utils/networks.js`
+**Location:** `src/config/networks.config.js`
 
 **Complete Network Structure:**
 
@@ -355,7 +355,7 @@ export async function sendTransaction(txRequest, privateKey, provider) {
 
 ### ERC20 Token Operations
 
-**Location:** `src/utils/networks.js` (ERC20_ABI exported)
+**Location:** `src/config/networks.config.js` (ERC20_ABI exported)
 
 **Complete ERC20 ABI:**
 

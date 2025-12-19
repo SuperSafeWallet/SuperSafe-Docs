@@ -15,12 +15,13 @@
 2. [Security Model](#security-model)
 3. [Cryptographic Implementation](#cryptographic-implementation)
 4. [Unified Vault System](#unified-vault-system)
-5. [Session Security](#session-security)
-6. [Memory Protection](#memory-protection)
-7. [dApp Security](#dapp-security)
-8. [Network Security](#network-security)
-9. [Attack Mitigation](#attack-mitigation)
-10. [Security Best Practices](#security-best-practices)
+5. [Allowlist Security System](#allowlist-security-system)
+6. [Session Security](#session-security)
+7. [Memory Protection](#memory-protection)
+8. [dApp Security](#dapp-security)
+9. [Network Security](#network-security)
+10. [Attack Mitigation](#attack-mitigation)
+11. [Security Best Practices](#security-best-practices)
 
 ---
 
@@ -427,6 +428,337 @@ export default {
 
 ---
 
+## Allowlist Security System
+
+**Version:** 3.1 (Enhanced - November 2025)  
+**Status:** ✅ PRODUCTION  
+**Security Level:** Enterprise-Grade
+
+SuperSafe implements a multi-layered allowlist system to control which dApps can connect to the wallet. This prevents phishing attacks and unauthorized access.
+
+### Architecture
+
+**Three-Layer Protection:**
+
+1. **Provider Injection Gate** - Prevents provider injection for unauthorized origins
+2. **Connection Authorization** - Validates origin against allowlist on connection requests  
+3. **WalletConnect Validation** - Strict origin matching for mobile connections
+
+```
+┌────────────────────────────────────────────────────────┐
+│                  Allowlist Security Layers             │
+├────────────────────────────────────────────────────────┤
+│ Layer 1: Provider Injection Prevention                 │
+│   - Content script queries background before inject    │
+│   - CS_CAN_INJECT message validation                   │
+│   - No provider = dApp cannot detect wallet            │
+├────────────────────────────────────────────────────────┤
+│ Layer 2: Connection Request Validation                 │
+│   - ETH_REQUEST_ACCOUNTS authorization                 │
+│   - Strict origin-only matching                        │
+│   - Rate limiting (5 attempts/minute)                  │
+├────────────────────────────────────────────────────────┤
+│ Layer 3: WalletConnect Authorization                   │
+│   - Origin-based validation                            │
+│   - No name-based fallbacks                            │
+│   - URL format validation                              │
+│   - Rate limiting + logging                            │
+└────────────────────────────────────────────────────────┘
+```
+
+### Allowlist Format
+
+**Location:** `public/assets/allowlist.json`
+
+**Structure:**
+
+```json
+{
+  "version": "3.1.0",
+  "globalSettings": {
+    "defaultChainIdHex": "0x14d2",
+    "defaultChainIdDecimal": 5330,
+    "unauthorizedOriginMessage": "This dApp is not authorized to connect to SuperSafe Wallet."
+  },
+  "dapps": [
+    {
+      "origin": "https://app.uniswap.org",
+      "name": "Uniswap",
+      "description": "Swap anything, anywhere",
+      "supportedChains": [1, 10, 56, 8453, 42161],
+      "defaultChain": 1
+    }
+  ]
+}
+```
+
+### Wildcard Support
+
+Allows authorization of all subdomains without individual entries:
+
+```json
+{
+  "origin": "*.uniswap.org",
+  "name": "Uniswap (All Subdomains)",
+  "description": "Official Uniswap interfaces and subdomains",
+  "supportedChains": [1, 10, 56, 8453, 42161],
+  "defaultChain": 1
+}
+```
+
+**Matching Examples:**
+- ✅ `app.uniswap.org` → Matches `*.uniswap.org`
+- ✅ `interface.uniswap.org` → Matches `*.uniswap.org`
+- ✅ `v3.uniswap.org` → Matches `*.uniswap.org`
+- ❌ `fake-uniswap.org` → Does NOT match `*.uniswap.org`
+- ❌ `uniswap.org.phishing.com` → Does NOT match `*.uniswap.org`
+
+### Rate Limiting
+
+**Protection:** Prevents brute-force connection attempts and automated scanning
+
+**Configuration:**
+- **Max attempts:** 5 per origin per minute
+- **Block duration:** 5 minutes
+- **Window:** 60 seconds sliding window
+- **Cleanup:** Automatic every 10 minutes
+
+**Behavior:**
+1. **Attempts 1-5:** Allowed with logging
+2. **Attempt 6+:** Blocked with retry-after time
+3. **Successful connection:** Counter reset
+4. **Window expired:** Counter reset
+
+**Implementation:** `src/background/security/ConnectionRateLimiter.js`
+
+### Blocked Attempts Monitoring
+
+**Purpose:** Track and analyze unauthorized connection attempts for security forensics
+
+**Storage:** `chrome.storage.local.blockedAttempts`
+
+**Data Collected:**
+- Origin URL
+- Timestamp
+- Connection type (web/walletconnect)
+- Attempt count
+- dApp name and metadata
+- First and last attempt timestamps
+
+**Retention:** Last 100 attempts per origin
+
+**Statistics API:**
+
+```javascript
+import { getBlockedAttemptsStats } from './policy/AllowListManager';
+
+const stats = await getBlockedAttemptsStats();
+// {
+//   totalOrigins: 15,
+//   totalAttempts: 247,
+//   recentAttempts: [        // Last 24h
+//     { origin: 'https://phishing.com', count: 42 },
+//     { origin: 'https://scam.xyz', count: 18 }
+//   ],
+//   topOffenders: [          // Top 10 by count
+//     { origin: 'https://attacker.com', count: 156, lastAttempt: 1700000000000 }
+//   ]
+// }
+```
+
+**Maintenance:**
+
+```javascript
+import { clearBlockedAttemptsLog } from './policy/AllowListManager';
+
+// Clear all blocked attempts (for maintenance/testing)
+await clearBlockedAttemptsLog();
+```
+
+### Security Properties
+
+1. **No Name-Based Fallbacks**
+   - Only origin matching accepted
+   - WalletConnect uses same validation as web
+   - No spoofing via dApp name possible
+
+2. **Strict Format Validation**
+   - All origins normalized during loading
+   - Protocol whitelist (http/https only)
+   - Invalid entries skipped with warnings
+   - Trailing slashes removed
+   - Paths removed (origin only)
+
+3. **Rate Limiting**
+   - Prevents automated attacks
+   - Per-origin tracking
+   - Minimal UX impact on legitimate users
+   - Automatic cleanup
+
+4. **Comprehensive Logging**
+   - Full visibility into blocked attempts
+   - Attack pattern detection
+   - Forensics capability
+   - Privacy-preserving (local only)
+
+5. **Fail-Safe Default**
+   - Empty allowlist on load failure
+   - Deny-all fallback behavior
+   - All errors result in denial, not acceptance
+
+### Origin Validation Process
+
+```javascript
+// Loading validation (during allowlist load)
+for (const dapp of policy.dapps) {
+  // 1. Check presence
+  if (!dapp?.origin) {
+    logger.warn('Skipping entry with missing origin');
+    continue;
+  }
+  
+  // 2. Parse and validate URL
+  try {
+    const url = new URL(dapp.origin);
+    const normalizedOrigin = url.origin; // "https://domain.com"
+    
+    // 3. Protocol validation
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+      logger.error('Invalid protocol');
+      continue;
+    }
+    
+    // 4. Store normalized
+    allowlist.set(normalizedOrigin, dapp);
+  } catch (err) {
+    logger.error('Invalid URL format');
+    continue;
+  }
+}
+```
+
+### Connection Flow with Allowlist
+
+**Web Connection:**
+
+```mermaid
+sequenceDiagram
+    participant D as dApp
+    participant C as Content Script
+    participant BG as Background
+    participant RL as Rate Limiter
+    participant AL as AllowList
+    participant U as User
+
+    D->>C: eth_requestAccounts
+    C->>BG: Request connection
+    BG->>RL: Check rate limit
+    alt Rate Limited
+        RL->>BG: Blocked (retry after X seconds)
+        BG->>C: Error 4100
+        C->>D: Reject
+    else Not Rate Limited
+        BG->>AL: Check allowlist
+        alt Not Authorized
+            AL->>RL: Record attempt
+            AL->>BG: Log blocked attempt
+            BG->>C: Error 4100
+            C->>D: Reject
+        else Authorized
+            RL->>BG: Clear limit
+            BG->>U: Show connection request
+            U->>BG: Approve/Reject
+            BG->>C: Return accounts / Error
+            C->>D: Resolve/Reject
+        end
+    end
+```
+
+**WalletConnect Connection:**
+
+```mermaid
+sequenceDiagram
+    participant M as Mobile dApp
+    participant WC as WalletConnect
+    participant BG as Background
+    participant RL as Rate Limiter
+    participant AL as AllowList
+    participant U as User
+
+    M->>WC: Session proposal
+    WC->>BG: Proposal received
+    BG->>BG: Extract origin from metadata
+    BG->>BG: Normalize origin (URL.origin)
+    BG->>RL: Check rate limit
+    alt Rate Limited
+        RL->>BG: Blocked
+        BG->>WC: Reject session
+        WC->>M: Connection failed
+    else Not Rate Limited
+        BG->>AL: Check allowlist
+        alt Not Authorized
+            AL->>RL: Record attempt
+            AL->>BG: Log blocked attempt (WC)
+            BG->>WC: Reject session
+            WC->>M: Connection failed
+        else Authorized
+            RL->>BG: Clear limit
+            BG->>U: Show approval request
+            U->>BG: Approve/Reject
+            BG->>WC: Approve/Reject session
+            WC->>M: Session established / Failed
+        end
+    end
+```
+
+### Adding New dApps
+
+**Process:**
+
+1. Update `public/assets/allowlist.json`
+2. Add origin (exact or wildcard)
+3. Specify supported chains
+4. Test locally (`npm run build:dev`)
+5. Build for production (`npm run build`)
+6. Submit to Chrome Web Store
+7. Auto-update for users within 24-48h
+
+**No hot-reload needed** - Extension lifecycle handles updates via Chrome Web Store distribution.
+
+**Security Review Checklist:**
+- [ ] Origin is correct and verified
+- [ ] Origin uses HTTPS (HTTP only for localhost)
+- [ ] Supported chains are accurate
+- [ ] dApp reputation verified
+- [ ] No homograph attacks in domain
+- [ ] Wildcard is appropriately scoped
+
+### Security Audit Results
+
+**Date:** November 21, 2025  
+**Version:** 3.1  
+**Status:** ✅ PASSED
+
+| Component | Score | Notes |
+|-----------|-------|-------|
+| Origin Validation | 10/10 | Strict URL parsing + normalization |
+| Rate Limiting | 9/10 | Effective against brute-force |
+| Logging & Monitoring | 9/10 | Comprehensive, privacy-preserving |
+| Wildcard Security | 9/10 | Safe implementation, opt-in per domain |
+| WalletConnect | 9/10 | Critical vulnerability fixed |
+
+**Overall Score:** 9.2/10 (Excellent)
+
+**Vulnerabilities Addressed:**
+- ✅ WalletConnect name-based fallback (CRITICAL) - FIXED
+- ✅ Format-based bypasses (MEDIUM) - FIXED
+- ✅ Brute-force discovery (MEDIUM) - MITIGATED
+- ✅ Zero visibility into attacks (LOW) - IMPROVED
+
+See [Allowlist Security Enhancements Audit](./Audits/2025-11-21_ALLOWLIST_SECURITY_ENHANCEMENTS.md) for complete details.
+
+---
+
 ## Session Security
 
 ### Session Architecture
@@ -518,7 +850,7 @@ resumeAutoLock() {
 
 ### Session Persistence
 
-**Expert-Recommended Approach (Professionally Standardized):**
+**Expert-Recommended Approach (MetaMask-style):**
 - **Memory:** Sensitive data (keys, decrypted vaultData)
 - **Session Storage:** Login credentials (loginToken + tempPassword)
 - **Local Storage:** Encrypted vault only
@@ -819,7 +1151,7 @@ Resolution: Strict "No Fallbacks" policy implemented
 Status: ✅ Resolved
 Extension-Popup Coexistence (HIGH)
 Risk: Stream disconnections, stuck requests
-Resolution: Professionally Standardized mutual exclusion implemented
+Resolution: MetaMask-style mutual exclusion implemented
 Status: ✅ Resolved
 eth_sign Enabled (MEDIUM)
 Risk: Blind signing vulnerability
@@ -953,7 +1285,7 @@ async lock() {
   - `supportedChains`: Array of supported chain IDs (decimal numbers)
   - `defaultChain`: Default chain ID to use when connecting
 
-**Supported Networks:** Each dApp can specify any of the **7 active networks** (SuperSeed: 5330, Ethereum: 1, Optimism: 10, Base: 8453, BNB Chain: 56, Arbitrum: 42161, Shardeum: 8118) in their `supportedChains` array.
+**Supported Networks:** Each dApp can specify any of the **8 active networks** (SuperSeed: 5330, Ethereum: 1, Optimism: 10, Base: 8453, BNB Chain: 56, Arbitrum: 42161, Monad: 143, Shardeum: 8118) in their `supportedChains` array.
 
 **Validation Flow:**
 ```javascript
@@ -1279,7 +1611,7 @@ SuperSafe decodes 9 common transaction types, but many contracts use custom func
 
 **Before Signing ANYTHING:**
 1. ✅ Verify the origin (is it the correct dApp URL?)
-2. ✅ Check the network (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Shardeum)
+2. ✅ Check the network (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad, Shardeum)
 3. ✅ Verify network matches dApp's supported networks (shown in popup)
 4. ✅ Read the decoded transaction details
 5. ✅ Understand what you're authorizing

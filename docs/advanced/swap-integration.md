@@ -553,10 +553,35 @@ To add a new swap provider (e.g., Uniswap):
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v5.0.0+ (Unified Panel Architecture)  
-**Last Code Update:** November 15, 2025  
+## Gas Validation System
+
+SuperSafe implements a comprehensive gas validation system that protects users during swaps:
+
+- **✅ Real-time Gas Monitoring**: Fetches current network gas prices
+- **✅ Scam Detection**: Blocks transactions with gas > 50% of swap value
+- **✅ Balance Validation**: Ensures sufficient native tokens for gas
+- **✅ Button-Integrated UI**: Alerts shown directly on swap button
+
+### Alert Levels
+
+| Level | Condition | Button Action |
+|-------|-----------|---------------|
+| **BLOCKING** | Insufficient balance for gas | ❌ Button Disabled |
+| **BLOCKING** | Gas > 50% of swap value | ❌ Button Disabled |
+| **CRITICAL** | Gas anomalous or > 20% | ✅ Enabled (warning logged) |
+| **WARNING** | Gas > 5% or high congestion | ✅ Enabled (warning logged) |
+
+:::tip Complete Documentation
+For comprehensive gas validation documentation, see **[Gas Validation System](/docs/advanced/gas-validation)**.
+:::
+
+---
+
+**Document Status:** ✅ Current as of December 18, 2025  
+**Code Version:** v3.1.4 (Unified Panel Architecture)  
+**Last Code Update:** December 18, 2025  
 **Major Changes:** 
+- **🆕 Gas Validation System**: Real-time scam detection and protection
 - **🆕 Unified Panel Architecture**: Refactored monolithic Swap.jsx (2,206 lines) into clean architecture
 - **🆕 Relay.link Integration**: Cross-chain swaps across 85+ blockchains
 - **Updated Network Support**: Bebop supports 6 active networks, Relay supports 6 active networks

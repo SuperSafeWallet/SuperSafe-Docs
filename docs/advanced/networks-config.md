@@ -14,21 +14,38 @@ SuperSafe Wallet supports multiple blockchain networks with a **Smart Native Con
 
 ```
 Network Architecture:
-├── Active Networks (2)
+├── Active Networks (8)
 │   ├── SuperSeed (Chain ID: 5330)
-│   └── Optimism (Chain ID: 10)
-├── Planned Networks (5)
 │   ├── Ethereum (Chain ID: 1)
+│   ├── Optimism (Chain ID: 10)
 │   ├── Base (Chain ID: 8453)
-│   ├── BSC (Chain ID: 56)
+│   ├── BNB Chain (Chain ID: 56)
+│   ├── Arbitrum One (Chain ID: 42161)
+│   ├── Monad (Chain ID: TBD)
+│   └── Shardeum (Chain ID: 8118)
+├── Inactive/Testnet Networks
 │   ├── Ethereum Sepolia (Chain ID: 11155111)
 │   └── SuperSeed Sepolia (Chain ID: 53302)
 └── Network Features
-    ├── Swap Support
+    ├── Swap Support (Bebop: 6 networks, Relay: 6 networks)
+    ├── Fiat On-Ramp (Tradesilvania: 3 networks)
     ├── RPC Endpoints
     ├── Block Explorers
     └── Native Currencies
 ```
+
+## Active Networks Summary
+
+| Network | Chain ID | Bebop Swap | Relay Swap | Fiat On-Ramp | Status |
+|---------|----------|------------|------------|--------------|--------|
+| **SuperSeed** | 5330 | ✅ JAM | ✅ Enabled | ❌ | ✅ Active |
+| **Ethereum** | 1 | ✅ JAM+RFQ | ✅ Enabled | ✅ Tradesilvania | ✅ Active |
+| **Optimism** | 10 | ✅ JAM+RFQ | ✅ Enabled | ⏳ Coming | ✅ Active |
+| **Base** | 8453 | ✅ JAM+RFQ | ✅ Enabled | ⏳ Coming | ✅ Active |
+| **BNB Chain** | 56 | ✅ JAM+RFQ | ✅ Enabled | ✅ Tradesilvania | ✅ Active |
+| **Arbitrum One** | 42161 | ✅ JAM+RFQ | ✅ Enabled | ✅ Tradesilvania | ✅ Active |
+| **Monad** | TBD | ❌ | ❌ | ❌ | ✅ Active |
+| **Shardeum** | 8118 | ❌ | ❌ | ❌ | ✅ Active |
 
 ## Active Networks
 

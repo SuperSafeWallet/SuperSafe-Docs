@@ -31,6 +31,7 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 4. **✅ Defense-in-Depth**: Multiple security layers with failsafe mechanisms
 5. **✅ Principle of Least Privilege**: Minimal permissions and access control
 6. **✅ Cryptographic Isolation**: All crypto operations in background only
+7. **✅ Gas Validation**: Real-time scam detection and transaction protection (NEW!)
 
 ---
 
@@ -76,6 +77,12 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 │   - Blacklist Management                                    │
 │   - Request Deduplication                                   │
 │   - Phishing Protection                                     │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 7: Transaction Protection (NEW!)                      │
+│   - Gas Validation System                                   │
+│   - Scam Detection (>50% gas blocks tx)                     │
+│   - Balance Validation                                      │
+│   - Network-specific thresholds                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -190,7 +197,7 @@ graph TB
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
+**Document Status:** ✅ Current as of December 18, 2025  
+**Code Version:** v3.1.4  
 **Next Security Audit:** January 2026  
 **Maintenance:** Review after security audits or major security changes

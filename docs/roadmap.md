@@ -6,11 +6,11 @@ sidebar_position: 3
 
 SuperSafe Wallet's development roadmap and future plans.
 
-## Current Version: v3.0.0+
+## Current Version: v3.1.4
 
-### What's New in v3.0.0+
+### What's New in v3.1.4
 
-SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with significant improvements in security, performance, and user experience.
+SuperSafe Wallet v3.1.4 represents a **complete architectural overhaul** with significant improvements in security, performance, and user experience.
 
 #### 🏗️ Architecture Improvements
 - **Professionally Standardized Service Worker**: Familiar, reliable architecture
@@ -27,7 +27,7 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Defense-in-Depth**: Multiple security layers
 
 #### 🌐 Multi-Chain Support
-- **Active Networks**: 7 active networks (Ethereum, BSC, Arbitrum, Optimism, Base, SuperSeed, Shardeum)
+- **Active Networks**: 8 active networks (Ethereum, BSC, Arbitrum, Optimism, Base, SuperSeed, Monad, Shardeum)
 - **Smart Native Connection**: Seamless dApp integration
 - **Network Switching**: Easy network switching with pre-switch coordination
 - **Cross-Chain Support**: Relay.link integration for cross-chain swaps across 85+ blockchains
@@ -45,6 +45,12 @@ SuperSafe Wallet v3.0.0+ represents a **complete architectural overhaul** with s
 - **Comprehensive Documentation**: Complete developer guides
 - **API Reference**: Detailed API documentation
 - **Code Examples**: Practical integration examples
+
+#### 🆕 New in v3.1.x
+- **💳 Fiat On-Ramp**: Buy crypto with fiat via Tradesilvania (Ethereum, BSC, Arbitrum)
+- **⛽ Gas Validation**: Real-time scam detection and gas price monitoring
+- **📱 One Window Policy**: Single active window enforcement for consistent UX
+- **🖥️ Responsive Design**: Adaptive layout for popup (375px) and fullpage modes
 
 ## Short-Term Roadmap (Q4 2025)
 

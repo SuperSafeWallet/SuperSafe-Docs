@@ -26,7 +26,7 @@
 
 SuperSafe Wallet implements a sophisticated network switching system that ensures all components are synchronized and ready before, during, and after network changes. The system prevents race conditions, maintains state consistency, and provides robust error handling.
 
-**Supported Networks:** Currently supports **7 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Shardeum) with extensible architecture for adding new networks.
+**Supported Networks:** Currently supports **8 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad, Shardeum) with extensible architecture for adding new networks.
 
 ### Key Features
 

@@ -25,7 +25,7 @@
 
 ## Overview
 
-Implementation of a multichain system for transaction history visualization that supports different types of blockchain explorers depending on the network. Currently supports **7 active networks** with extensible adapter architecture for easy addition of new networks.
+Implementation of a multichain system for transaction history visualization that supports different types of blockchain explorers depending on the network. Currently supports **8 active networks** with extensible adapter architecture for easy addition of new networks.
 
 ## Architecture
 
@@ -181,7 +181,7 @@ Explorer API
 
 ### Option 1: Network with Blockscout
 
-1. Add API configuration in `apiConfig.js`:
+1. Add API configuration in `apis.config.js` (EXPLORER_APIS section):
 ```javascript
 NEW_NETWORK: {
   API_KEY: null,
@@ -204,7 +204,7 @@ NEW_NETWORK: {
 
 ### Option 2: Network with Moralis
 
-1. Add API configuration in `apiConfig.js`:
+1. Add API configuration in `apis.config.js` (EXPLORER_APIS section):
 ```javascript
 NEW_NETWORK_MORALIS: {
   API_KEY: process.env.MORALIS_API_KEY,  // Can be array for rotation
@@ -267,7 +267,7 @@ To test the multichain system:
 
 ### Testing Checklist
 
-- [ ] Test transaction history on all 7 active networks
+- [ ] Test transaction history on all 8 active networks
 - [ ] Verify token transfers load correctly
 - [ ] Test combined history (transactions + token transfers)
 - [ ] Verify network switching updates transaction history
@@ -381,7 +381,7 @@ Checks if transaction history is supported for a chainId.
 ### Rate limit errors
 - Each adapter has independent rate limiting
 - Default: 300 requests per 60 seconds
-- Adjust in `apiConfig.js` if needed
+- Adjust in `apis.config.js` if needed
 
 ---
 

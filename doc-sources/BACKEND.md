@@ -1,10 +1,10 @@
 # SuperSafe Wallet - Backend Architecture
 
 **Created:** October 13, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.2+  
+**Last Updated:** December 8, 2025  
+**Version:** 3.1.2  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** December 8, 2025
 
 ---
 
@@ -27,12 +27,12 @@
 
 ## Backend Overview
 
-SuperSafe Wallet's backend implements a **Professionally Standardized Service Worker architecture** as the single source of truth for all wallet operations. The backend is built on Chrome Extension Manifest V3 with persistent service workers.
+SuperSafe Wallet's backend implements a **MetaMask-style Service Worker architecture** as the single source of truth for all wallet operations. The backend is built on Chrome Extension Manifest V3 with persistent service workers.
 
 ### Key Characteristics
 
 - **✅ Single Source of Truth**: All state management centralized
-- **✅ Professionally Standardized Controllers**: Modular controller pattern
+- **✅ MetaMask-Style Controllers**: Modular controller pattern
 - **✅ Stream-Based Communication**: Long-lived Chrome connections
 - **✅ Enterprise Managers**: Robust signing and popup management
 - **✅ Zero Frontend Logic**: All business logic in background
@@ -381,7 +381,7 @@ async restoreSessionWithLoginToken(loginTokenData, timeElapsed) {
 ```
 
 **Key Points:**
-- Session persists through Service Worker restarts (Professionally Standardized)
+- Session persists through Service Worker restarts (MetaMask-style)
 - Uses `loginToken` metadata (no password export) for security
 - Automatically restores `vaultData` and decrypted keys
 - Maintains remaining auto-lock time
@@ -680,6 +680,114 @@ export function setupSessionStreamHandler(backgroundStreamManager, dependencies)
 }
 ```
 
+### Stream Connection Health & Heartbeat System
+
+**Added:** November 22, 2025
+
+SuperSafe implements an intelligent heartbeat system to maintain stream connections and handle Chrome MV3 service worker lifecycle gracefully.
+
+#### Adaptive Heartbeat Strategy
+
+The heartbeat system uses adaptive frequencies based on Web3 activity:
+
+```javascript
+// Heartbeat Configuration
+{
+  heartbeatFrequency: 60000,        // 60s passive (no Web3 activity)
+  activeHeartbeatFrequency: 15000,  // 15s active (during Web3 operations)
+  web3ActivityWindow: 300000,       // 5 min activity window
+  pongTimeout: 5000                 // 5s timeout for pong responses
+}
+```
+
+**Heartbeat States:**
+- **Disabled**: No connections active, heartbeat off to save resources
+- **Passive (60s)**: Connection exists but no recent Web3 activity
+- **Active (15s)**: Active Web3 operations (transactions, swaps, signatures)
+
+#### Extension Context Validation
+
+**Problem:** Chrome MV3 service workers can become dormant after 30 seconds of inactivity. Attempting to send messages to a dormant worker generates console errors: `"Could not establish connection. Receiving end does not exist."`
+
+**Solution:** Multi-layer context validation before message sending:
+
+```javascript
+// Layer 1: NativeStreamManager.sendRequest() validation
+async sendRequest(channelId, message, timeout = 16000) {
+  // * CRITICAL: Check extension context BEFORE attempting communication
+  if (!this.isBackground) {
+    if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.id) {
+      reject(new Error('Extension context invalidated - cannot send request'));
+      return;
+    }
+  }
+  // ... proceed with message sending
+}
+
+// Layer 2: ContentScript heartbeat validation
+_sendPing() {
+  // * CRITICAL: Check context before sending heartbeat ping
+  if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.id) {
+    logger.debug('Extension context unavailable - skipping heartbeat ping');
+    this._disableHeartbeat();
+    return;
+  }
+  // ... send ping
+}
+
+// Layer 3: Error handling for dormant worker detection
+.catch((error) => {
+  if (error.message?.includes('Extension context invalidated') || 
+      error.message?.includes('Could not establish connection')) {
+    logger.debug('Service worker appears dormant - disabling heartbeat temporarily');
+    this._disableHeartbeat();
+  }
+});
+```
+
+#### Auto-Recovery System
+
+The heartbeat system includes automatic recovery when the service worker wakes:
+
+```javascript
+// Re-enable heartbeat when Web3 activity is detected
+_markWeb3Activity() {
+  this.lastWeb3Activity = Date.now();
+  
+  // * Try to re-enable heartbeat if it was disabled
+  this._tryReenableHeartbeat();
+  
+  if (!this.isWeb3Active) {
+    this.isWeb3Active = true;
+    this._restartHeartbeat(); // Switch to active frequency
+  }
+  
+  this._enableHeartbeat();
+}
+
+// Smart re-enablement logic
+_tryReenableHeartbeat() {
+  if (!this.heartbeatEnabled && connectionState.isConnected()) {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      logger.debug('Extension context restored - re-enabling heartbeat');
+      this._enableHeartbeat();
+    }
+  }
+}
+```
+
+#### Benefits
+
+1. **Zero Console Spam**: Eliminates thousands of connection errors in dev console
+2. **Resource Efficient**: Heartbeat disabled when not needed, active during operations
+3. **Graceful Degradation**: System continues working even when service worker sleeps
+4. **Auto-Recovery**: Automatically resumes when user interacts with wallet
+5. **MV3 Compliant**: Works seamlessly with Chrome's service worker lifecycle
+
+**Implementation Files:**
+- `src/utils/NativeStreamManager.js` - Context validation in stream manager
+- `src/content-script.js` - Adaptive heartbeat system and recovery logic
+
 ---
 
 ## Manager System
@@ -867,7 +975,7 @@ class SigningRequestManager {
 
 **Location:** `src/background/managers/PopupManager.js`
 
-**Purpose:** Orchestrate popup windows for different contexts with mutual exclusion (Professionally Standardized UX).
+**Purpose:** Orchestrate popup windows for different contexts with mutual exclusion (MetaMask-style UX).
 
 **Key Features:**
 - ✅ Mutual exclusion with extension UI

@@ -110,7 +110,7 @@ if (!initialNetwork) {
 
 ## Critical UX/Stability Fixes Applied
 
-### FIX 5: Professionally Standardized Extension-Popup Mutual Exclusion
+### FIX 5: MetaMask-Style Extension-Popup Mutual Exclusion
 **Issue:** ISSUE 2.1.1 - Extension and Popup Can Coexist
 **Files Modified:** 
 - `src/background/managers/PopupManager.js`
@@ -134,9 +134,9 @@ if (popupType === this.POPUP_TYPES.NETWORK_SWITCH) {
 
 **Code After:**
 ```javascript
-// ! Professionally Standardized: ALL popup types should close extension and focus popup
+// ! METAMASK-STYLE: ALL popup types should close extension and focus popup
 // Extension and popups should NEVER coexist simultaneously
-console.log('[PopupManager] ✅ Professionally Standardized: Closing extension to focus', popupType, 'popup');
+console.log('[PopupManager] ✅ METAMASK-STYLE: Closing extension to focus', popupType, 'popup');
 return {
   shouldClose: true,
   focusedPopup: popupType
@@ -253,7 +253,7 @@ useEffect(() => {
 1. `src/content-script.js` - Critical security fix (2 locations)
 2. `src/background.js` - Security clarifications and network switch rejection fix
 3. `src/controllers/NetworkController.js` - Comment improvements
-4. `src/background/managers/PopupManager.js` - Professionally Standardized behavior
+4. `src/background/managers/PopupManager.js` - MetaMask-style behavior
 5. `src/hooks/usePortfolioData.js` - Network change listener
 6. `src/App.jsx` - Secondary popup detection
 7. `src/components/screens/NetworkSwitchConfirmationScreen.jsx` - UX improvement

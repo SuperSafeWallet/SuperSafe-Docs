@@ -36,26 +36,36 @@ SuperSafe Wallet integrates **Bebop's JAM (Just Another Market) protocol** for g
 - **Value Sharing**: Share in protocol value
 - **Sustainable Model**: Long-term sustainability
 
+### ⛽ **Gas Validation System** (NEW!)
+- **Scam Detection**: Blocks transactions with gas > 50% of swap value
+- **Balance Validation**: Ensures sufficient native tokens for gas
+- **Real-time Monitoring**: Fetches current network gas prices
+- **Button-Integrated Alerts**: Visual feedback on swap button
+
+:::tip Protection Levels
+If a swap is blocked, check the button text for details:
+- "Insufficient ETH for Gas" = You need more native tokens
+- "Gas Fee Too High - Possible Scam" = Transaction may be malicious
+
+See [Gas Validation System](/docs/advanced/gas-validation) for details.
+:::
+
 ## Supported Networks
 
-### Active Networks
+### Active Swap Networks (6)
 
-#### SuperSeed (Chain ID: 5330)
-- **Protocol**: Bebop JAM
-- **API**: `https://api.bebop.xyz/jam/superseed/v2/`
-- **Contracts**: Custom SuperSeed deployment
-- **Tokens**: ETH, SUPR, USDC, custom ERC-20
+| Network | Chain ID | Protocol | Status |
+|---------|----------|----------|--------|
+| **SuperSeed** | 5330 | Bebop JAM | ✅ Active |
+| **Ethereum** | 1 | Bebop JAM + RFQ | ✅ Active |
+| **Optimism** | 10 | Bebop JAM + RFQ | ✅ Active |
+| **Base** | 8453 | Bebop JAM + RFQ | ✅ Active |
+| **BNB Chain** | 56 | Bebop JAM + RFQ | ✅ Active |
+| **Arbitrum One** | 42161 | Bebop JAM + RFQ | ✅ Active |
 
-#### Optimism (Chain ID: 10)
-- **Protocol**: Bebop JAM + RFQ
-- **API**: JAM + RFQ endpoints
-- **Contracts**: Standard EVM contracts
-- **Tokens**: ETH, OP, USDC, L2 tokens
-
-### Planned Networks
-- **Ethereum** (Chain ID: 1): JAM + RFQ support
-- **Base** (Chain ID: 8453): JAM + RFQ support
-- **BSC** (Chain ID: 56): JAM + RFQ support
+:::note
+Monad and Shardeum are active networks but do not currently support Bebop swaps.
+:::
 
 ## Swap Interface
 

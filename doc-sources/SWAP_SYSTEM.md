@@ -16,7 +16,8 @@
 4. [Relay.link Integration](#relaylink-integration)
 5. [Swap Flow](#swap-flow)
 6. [Partner Fee System](#partner-fee-system)
-7. [Multi-Chain Support](#multi-chain-support)
+7. [Gas Validation System](#gas-validation-system) 🆕
+8. [Multi-Chain Support](#multi-chain-support)
 
 ---
 
@@ -310,7 +311,7 @@ describe('Swap Container', () => {
 ### Bebop Contracts
 
 ```javascript
-// Location: src/utils/networks.js
+// Location: src/config/networks.config.js
 export const BEBOP_CONTRACTS = {
   // Standard EVM chains
   STANDARD_EVM: {
@@ -534,12 +535,113 @@ Fee is taken from buy token (ETH in this case)
 
 ---
 
+## Gas Validation System
+
+**Version:** 1.0.0  
+**Implemented:** November 17, 2025
+
+### Overview
+
+SuperSafe implements a comprehensive gas validation system that protects users from insufficient balance, scam contracts, and uneconomical transactions.
+
+### Key Features
+
+- **✅ Real-time Gas Monitoring**: Fetches current network gas prices via Moralis RPC
+- **✅ Scam Detection**: Identifies malicious contracts with abnormally high gas costs
+- **✅ Balance Validation**: Ensures users can afford gas + swap value
+- **✅ Multi-Network Support**: Network-specific thresholds for all 6 active swap networks
+- **✅ Progressive Alerts**: 5-level alert system (NONE → BLOCKING)
+- **✅ Button-Integrated UI**: Alerts shown directly on swap button
+
+### Alert Levels
+
+| Level | Condition | Button Action |
+|-------|-----------|---------------|
+| **BLOCKING** | Insufficient balance for gas | ❌ Disabled |
+| **BLOCKING** | Gas > 50% of swap value | ❌ Disabled |
+| **CRITICAL** | Gas anomalous or > 20% | ✅ Enabled (logged) |
+| **WARNING** | Gas > 5% or high congestion | ✅ Enabled (logged) |
+| **INFO** | Moderate network congestion | ✅ Enabled (logged) |
+| **NONE** | All clear | ✅ Enabled |
+
+### Gas Price Thresholds (Q4 2025)
+
+Based on current market data:
+
+| Network | Low | Medium | High | Extreme |
+|---------|-----|--------|------|---------|
+| **Ethereum** | 5 Gwei | 20 Gwei | 60 Gwei | 120 Gwei |
+| **Optimism** | 0.001 Gwei | 0.01 Gwei | 0.1 Gwei | 0.5 Gwei |
+| **Arbitrum** | 0.01 Gwei | 0.1 Gwei | 1 Gwei | 5 Gwei |
+| **Base** | 0.001 Gwei | 0.01 Gwei | 0.1 Gwei | 0.5 Gwei |
+| **BSC** | 0.05 Gwei | 0.5 Gwei | 2 Gwei | 5 Gwei |
+| **SuperSeed** | 0.001 Gwei | 0.01 Gwei | 0.1 Gwei | 0.5 Gwei |
+
+### Integration
+
+Both `BebopSwapPanel.jsx` and `RelaySwapPanel.jsx` integrate gas validation:
+
+```javascript
+// Automatic validation on quote change
+useEffect(() => {
+  const validation = await validateSwapGas({
+    quote,
+    payToken,
+    receiveToken,
+    payAmount,
+    swapValueUsd,
+    gasCostUsd,
+    userAddress,
+    networkKey,
+    provider: 'bebop' // or 'relay'
+  });
+  
+  setGasValidation(validation);
+}, [quote, payToken, receiveToken, payAmount]);
+
+// Button logic
+disabled={gasValidation && !gasValidation.isValid}
+
+getButtonText() {
+  if (gasValidation?.alert?.level === 'blocking') {
+    if (gasValidation.alert.message.includes('Insufficient')) {
+      return "Insufficient ETH for Gas";
+    }
+    return "Gas Fee Too High - Possible Scam";
+  }
+  // ... other states
+}
+```
+
+### Architecture
+
+- **Backend**: `GasPriceService.js` fetches gas prices from Moralis RPC
+- **Stream Handler**: `GasStreamHandler.js` validates balance and returns gas data
+- **Frontend**: `gasMonitor.js` performs comprehensive validation
+- **Integration**: Both swap panels automatically validate before enabling swap button
+
+### dApp Protection
+
+The gas validation system protects users across all transaction types. When external dApps (Uniswap, PancakeSwap, Velodrome, etc.) initiate transactions via `eth_sendTransaction`, the system validates gas costs using the same thresholds and blocks suspicious transactions. The validation appears in `TransactionConfirmationScreen` with enhanced gas display, color-coded alerts, and automatic button blocking for unsafe transactions.
+
+**Coverage:**
+- **Internal swaps:** BebopSwapPanel, RelaySwapPanel
+- **External dApps:** TransactionConfirmationScreen (eth_sendTransaction)
+- **Not covered:** TypedDataConfirmationScreen, SigningConfirmationScreen (no gas consumption)
+
+### Complete Documentation
+
+For detailed information about gas validation, see:
+- **[GAS_VALIDATION_SYSTEM.md](./GAS_VALIDATION_SYSTEM.md)** - Complete gas validation documentation
+
+---
+
 ## Multi-Chain Support
 
 ### Network-Specific Configuration
 
 ```javascript
-// Location: src/utils/networks.js
+// Location: src/config/networks.config.js
 export const NETWORKS = {
   superseed: {
     // ... network config
@@ -605,6 +707,7 @@ export function validateSwapNetwork(networkKey) {
 
 ## Related Documentation
 
+- [GAS_VALIDATION_SYSTEM.md](./GAS_VALIDATION_SYSTEM.md) - Gas validation and scam detection
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture
 - [BLOCKCHAIN_OPERATIONS.md](./BLOCKCHAIN_OPERATIONS.md) - Blockchain operations
 - [FRONTEND.md](./FRONTEND.md) - Swap UI components
@@ -907,7 +1010,7 @@ Fees are:
 | File | Purpose | Key Contents |
 |------|---------|--------------|
 | `src/background/config/relayConfig.js` | Relay configuration | Reads from `.env`, unified fees with Bebop |
-| `src/utils/networks.js` | Network config | `relay` section in each network (single source of truth) |
+| `src/config/networks.config.js` | Network config | `relay` section in each network (single source of truth) |
 | `src/background/utils/feeConfig.js` | Fee configuration | Shared fee system for Bebop and Relay |
 | `src/background.js` | Background setup | Registered RelayStreamHandler |
 | `.env` | Environment variables | `RELAY_PARTNER_SOURCE`, `RELAY_API_BASE_URL`, unified fees |
@@ -1044,10 +1147,17 @@ Support for complex swap routes:
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
+**Document Status:** ✅ Current as of November 17, 2025  
 **Code Version:** v5.0.0+ (Unified Panel Architecture)  
-**Last Code Update:** November 15, 2025  
+**Last Code Update:** November 17, 2025  
 **Major Changes:** 
+- **🆕 Gas Validation System (v1.0.0)**: Comprehensive gas validation and scam detection (November 17, 2025)
+  - Real-time gas price monitoring via Moralis RPC
+  - Balance validation for native token swaps
+  - Anomaly detection (scam contracts)
+  - 5-level progressive alert system
+  - Button-integrated UI (no separate components)
+  - See [GAS_VALIDATION_SYSTEM.md](./GAS_VALIDATION_SYSTEM.md)
 - **🆕 Unified Panel Architecture**: Refactored monolithic Swap.jsx (2,206 lines) into clean architecture
   - `Swap.jsx` reduced to 115 lines (container/orchestrator only)
   - `BebopSwapPanel.jsx` extracted (~1,400 lines, self-contained)
@@ -1057,5 +1167,5 @@ Support for complex swap routes:
 - Relay origin network fixed to active network (v2.0.0)
 - Enhanced documentation with architectural diagrams and testing strategies
 - **Updated Network Support**: Bebop now supports 6 active networks (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum)
-- **Relay.link Support**: All 7 active networks supported except Shardeum (no cross-chain support)
+- **Relay.link Support**: All 8 active networks supported except Shardeum (no cross-chain support)
 

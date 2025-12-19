@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
@@ -9,7 +9,7 @@ import Heading from '@theme/Heading';
 import styles from './index.module.css';
 
 function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <header className={clsx('hero', styles.heroBanner)}>
       <div className="container">
@@ -22,38 +22,46 @@ function HomepageHeader() {
               className={styles.logo}
             />
             <div className={styles.versionBadge}>
-              v3.0.0+
+              v3.1.4
             </div>
-            
+
             {/* Network Status */}
             <div className={styles.networkStatus}>
               <div className={styles.networkItem}>
-                <div className={styles.networkDot} style={{backgroundColor: '#627EEA'}}></div>
+                <div className={styles.networkDot} style={{ backgroundColor: '#627EEA' }}></div>
                 <span>Ethereum (Chain ID: 1)</span>
               </div>
               <div className={styles.networkItem}>
-                <div className={styles.networkDot} style={{backgroundColor: '#F3BA2F'}}></div>
+                <div className={styles.networkDot} style={{ backgroundColor: '#F3BA2F' }}></div>
                 <span>Binance Smart Chain (Chain ID: 56)</span>
               </div>
               <div className={styles.networkItem}>
-                <div className={styles.networkDot} style={{backgroundColor: '#28A0F0'}}></div>
+                <div className={styles.networkDot} style={{ backgroundColor: '#28A0F0' }}></div>
                 <span>Arbitrum (Chain ID: 42161)</span>
               </div>
               <div className={styles.networkItem}>
-                <div className={styles.networkDot} style={{backgroundColor: '#FF0420'}}></div>
+                <div className={styles.networkDot} style={{ backgroundColor: '#FF0420' }}></div>
                 <span>Optimism (Chain ID: 10)</span>
               </div>
               <div className={styles.networkItem}>
-                <div className={styles.networkDot} style={{backgroundColor: '#0052FF'}}></div>
+                <div className={styles.networkDot} style={{ backgroundColor: '#0052FF' }}></div>
                 <span>Base (Chain ID: 8453)</span>
               </div>
               <div className={styles.networkItem}>
-                <div className={styles.networkDot} style={{backgroundColor: '#10b981'}}></div>
+                <div className={styles.networkDot} style={{ backgroundColor: '#10b981' }}></div>
                 <span>SuperSeed (Chain ID: 5330)</span>
               </div>
               <div className={styles.networkItem}>
-                <div className={styles.networkDot} style={{backgroundColor: '#6b7280'}}></div>
-                <span>More networks coming soon...</span>
+                <div className={styles.networkDot} style={{ backgroundColor: '#9D4EDD' }}></div>
+                <span>Shardeum (Chain ID: 8118)</span>
+              </div>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{ backgroundColor: '#836EF9' }}></div>
+                <span>Monad (Chain ID: TBD)</span>
+              </div>
+              <div className={styles.networkItem}>
+                <div className={styles.networkDot} style={{ backgroundColor: '#6b7280' }}></div>
+                <span>+ More networks coming soon...</span>
               </div>
             </div>
           </div>
@@ -75,7 +83,7 @@ function HomepageHeader() {
               </div>
               <div className={styles.featureItem}>
                 <span className={styles.featureIcon}>🌐</span>
-                <span className={styles.featureText}>7 Active Networks</span>
+                <span className={styles.featureText}>8 Active Networks</span>
               </div>
               <div className={styles.featureItem}>
                 <span className={styles.featureIcon}>⚡</span>
@@ -120,7 +128,7 @@ function StatsSection() {
             <div className={styles.statLabel}>Security Score</div>
           </div>
           <div className={styles.statItem}>
-            <div className={styles.statNumber}>7</div>
+            <div className={styles.statNumber}>8</div>
             <div className={styles.statLabel}>Active Networks</div>
           </div>
           <div className={styles.statItem}>
@@ -128,7 +136,7 @@ function StatsSection() {
             <div className={styles.statLabel}>Response Time</div>
           </div>
           <div className={styles.statItem}>
-            <div className={styles.statNumber}>30K+</div>
+            <div className={styles.statNumber}>33K+</div>
             <div className={styles.statLabel}>Lines of Code</div>
           </div>
         </div>
@@ -138,7 +146,7 @@ function StatsSection() {
 }
 
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
       title="SuperSafe Wallet - Professionally Standardized Service Worker Architecture"

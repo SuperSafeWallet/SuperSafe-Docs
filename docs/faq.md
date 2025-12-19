@@ -38,8 +38,10 @@ SuperSafe Wallet offers several unique advantages:
 **Features**:
 - **Gasless swaps**: No gas fees for token swaps
 - **MEV protection**: Protection against Maximal Extractable Value
-- **Multi-chain ready**: 6 active networks
+- **Multi-chain ready**: 8 active networks
 - **Partner fees**: 1% configurable partner fee
+- **Buy Crypto**: Purchase crypto with fiat (card, bank, digital wallets)
+- **Gas Validation**: Real-time scam detection and transaction protection
 
 ### Is SuperSafe Wallet free to use?
 
@@ -192,14 +194,17 @@ The **AllowList system** is a whitelist-based security feature that only allows 
 
 SuperSafe Wallet supports multiple networks with **Smart Native Connection**:
 
-**Active Networks**:
+**Active Networks (8)**:
 - **SuperSeed** (Chain ID: 5330): Layer 1 blockchain
-- **Optimism** (Chain ID: 10): Layer 2 (Optimistic Rollup)
-
-**Planned Networks**:
 - **Ethereum** (Chain ID: 1): Layer 1 blockchain
+- **Optimism** (Chain ID: 10): Layer 2 (Optimistic Rollup)
 - **Base** (Chain ID: 8453): Layer 2 (Optimistic Rollup)
-- **BSC** (Chain ID: 56): Layer 1 blockchain
+- **BNB Chain** (Chain ID: 56): Layer 1 blockchain
+- **Arbitrum One** (Chain ID: 42161): Layer 2 (Optimistic Rollup)
+- **Monad** (Chain ID: TBD): Layer 1 blockchain
+- **Shardeum** (Chain ID: 8118): Layer 1 blockchain
+
+**Inactive/Testnet Networks**:
 - **Ethereum Sepolia** (Chain ID: 11155111): Testnet
 - **SuperSeed Sepolia** (Chain ID: 53302): Testnet
 
@@ -291,6 +296,68 @@ SuperSafe Wallet provides **gasless swaps** through Bebop's JAM protocol:
 - **Maintenance**: Covers maintenance costs
 - **Features**: Enables new features
 - **Support**: Provides user support
+
+## Buy Crypto Questions
+
+### How do I buy crypto with fiat?
+
+SuperSafe Wallet integrates **Tradesilvania** for fiat-to-crypto purchases:
+
+**Steps to Buy**:
+1. **Switch Network**: Ensure you're on Ethereum, BNB Chain, or Arbitrum
+2. **Click Buy**: Click the "Buy" button in the footer navigation
+3. **Select Amount**: Enter amount in EUR, USD, or RON
+4. **Choose Payment**: Select card, bank transfer, or digital wallet
+5. **Complete Purchase**: Follow the checkout process
+6. **Receive Crypto**: Crypto is sent directly to your wallet
+
+### Which networks support buying crypto?
+
+**Supported Networks for Fiat On-Ramp**:
+- ✅ **Ethereum** (Chain ID: 1)
+- ✅ **BNB Chain** (Chain ID: 56)
+- ✅ **Arbitrum One** (Chain ID: 42161)
+- ⏳ **Optimism** (Coming soon)
+- ⏳ **Base** (Coming soon)
+
+### What payment methods are available?
+
+**Payment Methods**:
+- **Credit/Debit Cards**: Visa, Mastercard (instant)
+- **Bank Transfer**: SEPA transfer (0-3 business days)
+- **Digital Wallets**: Neteller, Skrill (instant)
+
+### Why can't I buy crypto on SuperSeed?
+
+Fiat on-ramp is provided by Tradesilvania, which currently only supports:
+- Ethereum
+- BNB Chain
+- Arbitrum
+
+To buy crypto, switch to one of these networks first.
+
+## Gas Validation Questions
+
+### What is gas validation?
+
+SuperSafe implements a **gas validation system** that protects you from:
+- **Scam contracts**: Transactions with abnormally high gas costs
+- **Insufficient balance**: Not enough native tokens for gas
+- **Uneconomical swaps**: Gas costs exceeding reasonable percentages of swap value
+
+### Why is my swap blocked?
+
+Your swap may be blocked if:
+- **Insufficient balance**: You don't have enough ETH/BNB for gas
+- **Scam detection**: Gas cost exceeds 50% of swap value
+
+Check the button text for specific details.
+
+### How do I fix "Insufficient ETH for Gas"?
+
+1. Check your native token balance (ETH, BNB, etc.)
+2. Ensure you have enough for both swap value AND gas fees
+3. If swapping native tokens, ensure you keep enough for gas
 
 ## dApp Integration Questions
 

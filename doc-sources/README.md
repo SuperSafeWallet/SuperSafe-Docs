@@ -1,9 +1,9 @@
 # SuperSafe Wallet - Documentation Index
 
-**Version:** 3.0.0+  
-**Last Updated:** November 15, 2025  
+**Version:** 3.1.4  
+**Last Updated:** December 18, 2025  
 **Status:** ✅ Current  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** December 18, 2025
 
 ---
 
@@ -20,6 +20,7 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - 📋 [**Audits**](#audit-reports) - Security audits and compliance scorecard
 - 💻 [**Development**](#development-documentation) - Backend, frontend, and APIs
 - 🔗 [**Integration**](#integration-documentation) - dApp connections and blockchain operations
+- 💳 [**Fiat On-Ramp**](#fiat-on-ramp) - Tradesilvania buy crypto integration
 - 🛠️ [**Operations**](#operations-documentation) - Development setup and deployment
 
 ---
@@ -40,13 +41,17 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Technology stack
 - Directory structure
 - Performance metrics
+- **🆕 One Window Policy** (v3.1.3)
+- **🆕 Responsive Design System** (v3.1.3)
 
 **Key Topics:**
-- Professionally Standardized Service Worker architecture
+- MetaMask-style Service Worker architecture
 - Smart Native Connection design
 - Thin Client pattern
 - Stream-based communication
 - Controller system architecture
+- **🆕 One Window Policy implementation**
+- **🆕 Responsive viewport detection**
 
 ---
 
@@ -76,7 +81,7 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Automatic adapter selection based on network
 - Transaction and token transfer history
 - Combined history views with intelligent merging
-- Support for all 7 active networks (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Shardeum)
+- Support for all 8 active networks (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad, Shardeum)
 
 **Key Features:**
 - Network-agnostic architecture with pluggable adapters
@@ -205,12 +210,17 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Screen flows and user journeys
 - Custom hooks architecture
 - UI component organization
+- **🆕 Responsive Design Implementation** (v3.1.3)
+- **🆕 Viewport Detection Utilities** (v3.1.3)
+- **🆕 One Window Policy Enforcement** (v3.1.3)
 
 **Key Patterns:**
 - Presentational components only
 - Zero business logic in frontend
 - Stream-based state synchronization
 - Adapter abstraction layer
+- **🆕 Context-aware responsive layout**
+- **🆕 Single window enforcement**
 
 ### APIs
 
@@ -280,7 +290,7 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 #### [BLOCKCHAIN_OPERATIONS.md](./BLOCKCHAIN_OPERATIONS.md)
 **Multi-chain blockchain operations**
 
-- Multi-network support (7 active networks)
+- Multi-network support (8 active networks)
 - Network switching architecture
 - Transaction management and lifecycle
 - Smart contract interactions (ERC20, ERC721)
@@ -307,7 +317,7 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Unified Panel Architecture (v2.0.0)
 - Bebop JAM protocol integration (6 active networks)
 - Relay.link cross-chain swaps (6 active networks)
-- Multi-chain swap support (7 active networks total)
+- Multi-chain swap support (8 active networks total)
 - Quote fetching and validation
 - Gasless swaps with Permit2 (Bebop)
 - Cross-chain swaps (Relay.link)
@@ -321,6 +331,25 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Cross-chain support (Relay.link)
 - Unified fee system
 - Provider switching (Bebop ↔ Relay)
+- **Gas validation and scam detection** 🆕
+
+#### [GAS_VALIDATION_SYSTEM.md](./GAS_VALIDATION_SYSTEM.md) 🆕
+**Comprehensive gas validation and scam detection**
+
+- Real-time gas price monitoring via Moralis RPC
+- Balance validation for native token swaps
+- Anomaly detection (scam contracts)
+- Network-specific thresholds (Q4 2025 data)
+- 5-level progressive alert system
+- Button-integrated UI (no separate components)
+- Automatic blocking for unsafe transactions
+
+**Key Features:**
+- Insufficient balance detection
+- Gas > 50% of swap value = automatic block
+- Anomalous gas price detection
+- Network congestion warnings
+- Validated on 6 active swap networks
 
 ### Network Management
 
@@ -332,7 +361,7 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Context-aware switching
 - Network validation and error handling
 - State synchronization across contexts
-- Support for all 7 active networks
+- Support for all 8 active networks
 
 **Key Features:**
 - Pre-switch coordination (validation, handlers)
@@ -356,6 +385,50 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 - Configurable log levels per namespace
 - Performance metrics
 - Production-safe logging
+
+---
+
+## 💳 Fiat On-Ramp
+
+### [TRADESILVANIA_INTEGRATION.md](./TRADESILVANIA_INTEGRATION.md)
+**Comprehensive Tradesilvania RAMP integration (v3.1.4)**
+
+- Complete fiat-to-crypto on-ramp service integration
+- Iframe integration with full-screen widget (327px × 552px)
+- 3 active networks (Ethereum, BNB Chain, Arbitrum) + 2 pending (BASE, Optimism)
+- Real-time transaction polling system (every 2 seconds)
+- Backend webhook integration with RSA-SHA512 signature validation
+- Pre-filled wallet address (read-only security)
+- Default USDC/USDT selection per network
+- Multi-language support (EN, RO, FR, ES, DE, IT)
+- External transaction ID tracking
+- postMessage API support for real-time updates
+
+**Key Features:**
+- One-click access via footer "Buy" button
+- Network validation and compatibility checks
+- Polling timeout protection (30 minutes)
+- Status tracking (waiting, exchanging, sending, settled, rejected, expired)
+- Transaction result modal with blockchain explorer links
+- Rate limiting (30 req/min per installation token)
+- Installation token authentication
+- PostgreSQL + Redis caching on backend
+
+**Supported Payment Methods:**
+- Visa/Mastercard (instant, EUR/USD/RON)
+- SEPA bank transfer (0-3 days, EUR/RON)
+- Digital wallets: Neteller, Skrill (instant, EUR)
+
+**Documentation Sections:**
+- Integration architecture and data flow
+- Network support and configuration
+- Polling system implementation
+- Webhook solution and postMessage API
+- UI specifications and viewport constraints
+- Comprehensive testing guide
+- Tradesilvania API reference
+- Security (webhook signatures, rate limiting)
+- Troubleshooting and support
 
 ---
 
@@ -406,13 +479,18 @@ npm run zip          # Create distribution package
 ## 📊 Project Metrics
 
 ```
-Total Project Files: 183+ JavaScript/JSX files
-Total Lines of Code: ~30,000+ lines
-Documentation: 15+ comprehensive documents (~20,000+ lines)
-Supported Networks: 7 active networks
+Total Project Files: 195+ JavaScript/JSX files
+Total Lines of Code: ~33,000+ lines
+Documentation: 21+ comprehensive documents (~27,000+ lines)
+Supported Networks: 8 active networks
 Security Score: 96/100
-Architecture Pattern: Professionally Standardized Service Worker
+Architecture Pattern: MetaMask-style Service Worker
 Swap Providers: Bebop (6 networks) + Relay.link (6 networks)
+Swap Security: Gas validation + scam detection
+Fiat On-Ramp: Tradesilvania (3 active + 2 pending networks) - v3.1.4
+Fiat Documentation: Consolidated comprehensive guide
+UI/UX: Responsive design (popup + fullpage)
+Window Policy: One window enforcement
 ```
 
 ---
@@ -473,10 +551,17 @@ npm run build
 
 This documentation is maintained to reflect the current codebase state.
 
-**Last Major Update:** November 15, 2025  
-**Code Version:** v3.0.0+  
-**Last Code Update:** November 15, 2025  
-**Next Review:** January 2026
+**Last Major Update:** December 18, 2025  
+**Code Version:** v3.1.4  
+**Last Code Update:** December 18, 2025 (Tradesilvania Documentation Consolidation)  
+**Next Review:** February 2026
+
+**Recent Updates:**
+- December 18, 2025: Tradesilvania Documentation Consolidation (v3.1.4) 🆕
+- December 15, 2025: Tradesilvania Fiat On-Ramp Integration (v3.2.0)
+- December 10, 2025: One Window Policy + Responsive Design (v3.1.3)
+- December 8, 2025: Full Proxy Migration (v3.1.2)
+- November 17, 2025: Gas Validation System (v3.0.0+)
 
 **Update Process:**
 1. Code changes trigger documentation review
@@ -520,7 +605,7 @@ Previous versions of documentation are available in [`./olds/`](./olds/) directo
 ---
 
 **Document Index Status:** ✅ Complete and Current  
-**Total Documents:** 15+ comprehensive guides  
-**Coverage:** Architecture, Security, Development, Integration, Operations, Logging, Transactions, Signing, Swaps, Network Switching  
-**Maintenance:** Active and up-to-date (last review: November 15, 2025)
+**Total Documents:** 21+ comprehensive guides  
+**Coverage:** Architecture, Security, Development, Integration, Operations, Logging, Transactions, Signing, Swaps, Network Switching, Gas Validation, One Window Policy, Responsive Design, Fiat On-Ramp (Consolidated)  
+**Maintenance:** Active and up-to-date (last review: December 18, 2025)
 

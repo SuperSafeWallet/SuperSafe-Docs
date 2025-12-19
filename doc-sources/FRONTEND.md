@@ -1,8 +1,8 @@
 # SuperSafe Wallet - Frontend Architecture
 
 **Created:** October 13, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
+**Last Updated:** December 10, 2025  
+**Version:** 3.1.3  
 **Status:** ✅ CURRENT
 
 ---
@@ -17,6 +17,8 @@
 6. [Screen Flows](#screen-flows)
 7. [UI/UX Patterns](#uiux-patterns)
 8. [Hooks Architecture](#hooks-architecture)
+9. [One Window Policy](#one-window-policy) 🆕
+10. [Responsive Design System](#responsive-design-system) 🆕
 
 ---
 
@@ -27,12 +29,14 @@ SuperSafe Wallet's frontend implements a **Thin Client Pattern** where all busin
 ### Frontend Metrics
 
 ```
-Total Frontend Files: 61 JSX components
+Total Frontend Files: 64 JSX components
 Main App Component: 1,569 lines
-Total Frontend Code: ~8,000 lines
+Total Frontend Code: ~8,500 lines
 Framework: React 18.2.0
 Styling: TailwindCSS 3.3.3
 Build Tool: Vite 6.3.6
+Responsive: Popup (375px) + Fullpage (adaptive) 🆕
+Window Policy: One window enforcement 🆕
 ```
 
 ### Key Principles
@@ -42,6 +46,8 @@ Build Tool: Vite 6.3.6
 - **✅ Presentational Components**: Pure UI rendering
 - **✅ Centralized State**: WalletProvider context
 - **✅ Adapter Pattern**: Background communication abstraction
+- **✅ One Window Policy**: Single active window enforcement (v3.1.3) 🆕
+- **✅ Responsive Design**: Adaptive layout for popup and fullpage (v3.1.3) 🆕
 
 ---
 
@@ -2249,15 +2255,491 @@ export function useNetworkSwitchPreparation(componentName) {
 
 ---
 
+## One Window Policy
+
+**Version:** 3.1.3  
+**Implementation Date:** December 9, 2025  
+**Status:** ✅ Production
+
+### Overview
+
+The One Window Policy ensures only one main wallet window is active at any time, preventing:
+- ❌ Race conditions from multiple windows modifying state
+- ❌ Conflicting streams between popup and tab
+- ❌ Inconsistent UI state across windows
+- ❌ Transaction interruptions from window conflicts
+
+### Frontend Implementation
+
+**Location:** `src/main.jsx`
+
+**Enforcement Function:**
+```javascript
+async function enforceOneWindowPolicy() {
+  logger.debug('🪟 ONE WINDOW POLICY: Checking for existing windows...');
+  
+  try {
+    // Get current window info
+    const windowId = await new Promise((resolve) => {
+      chrome.windows.getCurrent((window) => resolve(window.id));
+    });
+    
+    const windowType = window.location.href.includes('?mode=') 
+      ? 'action-popup' 
+      : window.innerWidth <= 500 
+        ? 'popup' 
+        : 'tab';
+    
+    // Check if main window already exists
+    const existingWindow = await sessionStream.send({
+      type: 'CHECK_MAIN_WINDOW'
+    });
+    
+    if (existingWindow && existingWindow.exists && existingWindow.windowId !== windowId) {
+      logger.debug('🪟 ONE WINDOW POLICY: Found existing main window, focusing it...');
+      
+      // Focus existing window
+      await sessionStream.send({
+        type: 'FOCUS_MAIN_WINDOW',
+        windowId: existingWindow.windowId
+      });
+      
+      // Close this window
+      logger.debug('🪟 ONE WINDOW POLICY: Closing this window...');
+      window.close();
+      return;
+    }
+    
+    // Register as main window
+    logger.debug('🪟 ONE WINDOW POLICY: Registering as main window:', { windowId, windowType });
+    await sessionStream.send({
+      type: 'REGISTER_MAIN_WINDOW',
+      windowId,
+      windowType
+    });
+    
+    logger.debug('🪟 ONE WINDOW POLICY: Registration successful');
+  } catch (error) {
+    logger.error('🪟 ONE WINDOW POLICY: Error during enforcement:', error);
+  }
+}
+
+// Execute on app initialization
+enforceOneWindowPolicy();
+```
+
+### Behavioral Scenarios
+
+#### Scenario 1: Tab Open → Click Icon
+```
+Initial State: Tab open with Dashboard
+User Action: Clicks extension icon
+Expected Result:
+  ✅ Tab auto-focuses
+  ❌ Popup does NOT open
+  💡 User sees existing tab
+```
+
+#### Scenario 2: Popup Open → Open Tab
+```
+Initial State: Popup open (375px)
+User Action: Opens chrome-extension://[id]/index.html in new tab
+Expected Result:
+  ✅ Popup remains focused
+  ❌ Tab closes immediately
+  💡 User sees existing popup
+```
+
+#### Scenario 3: Tab Open → dApp Requests Signature
+```
+Initial State: Tab open with Dashboard
+External Event: dApp requests signature
+Expected Result:
+  ✅ Tab remains open (main window)
+  ✅ Action popup opens for confirmation
+  ⚠️ Two windows coexist (intentional)
+  💡 User can review dashboard while signing
+```
+
+### Window Type Classification
+
+**Main Windows** (only one allowed):
+- `popup` - Extension icon popup (375px)
+- `tab` - Full browser tab
+
+**Action Popups** (can coexist with main window):
+- Transaction confirmation (`?mode=transaction`)
+- Signing confirmation (`?mode=signing`)
+- Connection request (`?mode=connection`)
+- Network switch (`?mode=networkSwitch`)
+
+**Rationale:** Action popups are **read-only** until user approves/rejects, preventing state conflicts.
+
+### Stream Messages
+
+**CHECK_MAIN_WINDOW:**
+```javascript
+// Request
+{
+  type: 'CHECK_MAIN_WINDOW'
+}
+
+// Response
+{
+  exists: boolean,
+  windowId: number | null,
+  windowType: 'popup' | 'tab' | null,
+  timestamp: number | null
+}
+```
+
+**REGISTER_MAIN_WINDOW:**
+```javascript
+// Request
+{
+  type: 'REGISTER_MAIN_WINDOW',
+  windowId: number,
+  windowType: 'popup' | 'tab'
+}
+
+// Response
+{
+  success: boolean,
+  registered: boolean
+}
+```
+
+**FOCUS_MAIN_WINDOW:**
+```javascript
+// Request
+{
+  type: 'FOCUS_MAIN_WINDOW',
+  windowId: number
+}
+
+// Response
+{
+  success: boolean
+}
+```
+
+### Debugging
+
+**Console Logs:**
+```
+[main] 🪟 ONE WINDOW POLICY: Checking for existing windows...
+[main] 🪟 ONE WINDOW POLICY: Found existing main window, focusing it...
+[main] 🪟 ONE WINDOW POLICY: Registering as main window: { windowId: 123, windowType: 'tab' }
+[main] 🪟 ONE WINDOW POLICY: Registration successful
+```
+
+**Check State:**
+```javascript
+// In background console
+backgroundSessionController.popupManager.mainWindowId
+// → null or window ID
+
+backgroundSessionController.popupManager.mainWindowType
+// → null, 'popup', or 'tab'
+```
+
+**Related Documentation:** See also [One Window Policy Architecture in ARCHITECTURE.md](./ARCHITECTURE.md#one-window-policy-architecture) for complete architectural overview.
+
+---
+
+## Responsive Design System
+
+**Version:** 3.1.3  
+**Implementation Date:** December 9, 2025  
+**Status:** ✅ Production
+
+### Overview
+
+SuperSafe Wallet implements a professional responsive design system that seamlessly adapts between:
+- **Popup Mode** (375px) - Extension icon popup (original behavior preserved)
+- **Fullpage Mode** (responsive) - Browser tab with adaptive width
+
+This provides a MetaMask-style experience with flexibility for both use cases.
+
+### Viewport Detection Utilities
+
+**Location:** `src/utils/viewportUtils.js`
+
+**API:**
+```javascript
+/**
+ * Check if currently in popup view (≤400px)
+ */
+export function isPopupView(): boolean
+
+/**
+ * Check if currently in fullpage view (>400px)
+ */
+export function isFullPageView(): boolean
+
+/**
+ * Get current view mode
+ */
+export function getViewMode(): 'popup' | 'fullpage'
+
+/**
+ * Get CSS class for current view mode
+ */
+export function getViewModeClass(): 'context-popup' | 'context-fullpage'
+
+/**
+ * Listen for view mode changes (window resize)
+ */
+export function onViewModeChange(callback: (mode: string) => void): () => void
+```
+
+**Implementation:**
+```javascript
+// src/utils/viewportUtils.js
+
+const POPUP_BREAKPOINT = 400; // px
+
+export function isPopupView() {
+  return window.innerWidth <= POPUP_BREAKPOINT;
+}
+
+export function isFullPageView() {
+  return window.innerWidth > POPUP_BREAKPOINT;
+}
+
+export function getViewMode() {
+  return isPopupView() ? 'popup' : 'fullpage';
+}
+
+export function getViewModeClass() {
+  return isPopupView() ? 'context-popup' : 'context-fullpage';
+}
+
+export function onViewModeChange(callback) {
+  let previousMode = getViewMode();
+  
+  function handleResize() {
+    const currentMode = getViewMode();
+    if (currentMode !== previousMode) {
+      previousMode = currentMode;
+      callback(currentMode);
+    }
+  }
+  
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}
+```
+
+### Dynamic Class Application
+
+**Location:** `src/main.jsx`
+
+**Implementation:**
+```javascript
+import { getViewModeClass, onViewModeChange } from './utils/viewportUtils.js';
+
+function applyViewModeClass() {
+  const viewModeClass = getViewModeClass();
+  document.body.classList.remove('context-popup', 'context-fullpage');
+  document.body.classList.add(viewModeClass);
+  logger.debug(`🪟 Responsive mode detected: ${viewModeClass}`);
+}
+
+// Apply initial view mode class
+applyViewModeClass();
+
+// Listen for window resize and update class if mode changes
+const cleanupViewModeListener = onViewModeChange((newMode) => {
+  logger.debug(`🪟 View mode changed to: ${newMode}`);
+  applyViewModeClass();
+});
+
+// Cleanup on unmount (if needed)
+// cleanupViewModeListener();
+```
+
+### CSS System
+
+**Location:** `src/index.css`
+
+**Base Responsive Layout:**
+```css
+body {
+  /* 🪟 RESPONSIVE: Default to fullpage mode */
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* * POPUP MODE: Small window (≤400px) - Fixed width */
+@media (max-width: 400px) {
+  body {
+    width: 375px;
+    max-width: 375px;
+  }
+}
+
+/* * FULLPAGE MODE: Large window (>400px) - Responsive */
+@media (min-width: 401px) {
+  body {
+    width: 100%;
+    max-width: 100vw;
+  }
+}
+```
+
+**Context-Based Classes:**
+```css
+/* * CSS CLASS-BASED RESPONSIVE */
+body.context-popup {
+  width: 375px;
+  max-width: 375px;
+}
+
+body.context-fullpage {
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Responsive containers for modals and screens */
+body.context-fullpage .modal-container,
+body.context-fullpage .screen-container {
+  max-width: min(90vw, 500px) !important;
+  width: 100% !important;
+  margin: 0 auto;
+}
+
+/* Larger on tablets+ (≥768px) */
+@media (min-width: 768px) {
+  body.context-fullpage .modal-container,
+  body.context-fullpage .screen-container {
+    max-width: min(80vw, 600px) !important;
+  }
+}
+
+/* Even larger on desktops (≥1024px) */
+@media (min-width: 1024px) {
+  body.context-fullpage .modal-container,
+  body.context-fullpage .screen-container {
+    max-width: min(70vw, 700px) !important;
+  }
+}
+```
+
+### Responsive Breakpoints
+
+| Breakpoint | Width | Mode | Container Width | Use Case |
+|------------|-------|------|-----------------|----------|
+| Mobile Popup | ≤400px | `popup` | Fixed 375px | Extension popup |
+| Mobile Fullpage | 401-767px | `fullpage` | 90vw (max 500px) | Phone tab |
+| Tablet | 768-1023px | `fullpage` | 80vw (max 600px) | Tablet tab |
+| Desktop | ≥1024px | `fullpage` | 70vw (max 700px) | Desktop tab |
+
+### Component Updates
+
+**Components with Responsive Support:**
+```javascript
+// ConnectionRequestScreen.jsx
+<div className="connection-screen screen-container">
+  {/* content */}
+</div>
+
+// UnsupportedNetworkScreen.jsx
+<div className="unsupported-network screen-container">
+  {/* content */}
+</div>
+
+// StyledModal.jsx
+<div className="modal-overlay">
+  <div className="modal-content modal-container">
+    {/* content */}
+  </div>
+</div>
+```
+
+**Pattern:**
+- Add `.screen-container` class to full-screen views
+- Add `.modal-container` class to modal dialogs
+- Existing Tailwind responsive utilities work out-of-the-box
+
+### Responsive Behavior
+
+#### Popup Mode (≤400px)
+```
+Window Width: 375px (fixed)
+Body Class: .context-popup
+Container Width: 375px
+Layout: Original design preserved
+Scroll: Vertical if content overflows
+Use Case: Extension icon popup
+```
+
+#### Fullpage Mode (>400px)
+```
+Window Width: 100vw (responsive)
+Body Class: .context-fullpage
+Container Width:
+  - Mobile (401-767px): 90vw, max 500px
+  - Tablet (768-1023px): 80vw, max 600px
+  - Desktop (≥1024px): 70vw, max 700px
+Layout: Responsive, centered
+Scroll: Vertical if content overflows
+Use Case: Browser tab
+```
+
+### Debugging
+
+**Check Current Mode:**
+```javascript
+// In browser console
+import { getViewMode, getViewModeClass } from './utils/viewportUtils.js';
+
+console.log('Current mode:', getViewMode());
+// → 'popup' or 'fullpage'
+
+console.log('Current class:', getViewModeClass());
+// → 'context-popup' or 'context-fullpage'
+
+console.log('Window width:', window.innerWidth);
+// → Current viewport width in pixels
+
+console.log('Body classes:', document.body.classList);
+// → Should include 'context-popup' or 'context-fullpage'
+```
+
+**View Console Logs:**
+```
+[main] 🪟 Responsive mode detected: context-fullpage
+[main] 🪟 View mode changed to: context-popup
+```
+
+### Advantages
+
+- ✅ **Backwards Compatible** - Popup mode (375px) works exactly as before
+- ✅ **Industry Standard** - Matches MetaMask and other professional wallets
+- ✅ **Easy to Maintain** - Centralized CSS with clear breakpoints
+- ✅ **Flexible** - Easily adjust breakpoints or container sizes
+- ✅ **No Breaking Changes** - Original popup behavior preserved 100%
+- ✅ **Professional UX** - Adaptive layout improves usability in fullpage mode
+- ✅ **Performance** - No runtime overhead, pure CSS + class toggling
+
+**Related Documentation:** See also [Responsive Design Architecture in ARCHITECTURE.md](./ARCHITECTURE.md#responsive-design-architecture) for complete architectural overview.
+
+---
+
 ## Related Documentation
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - Overall system architecture
 - [BACKEND.md](./BACKEND.md) - Backend implementation
 - [DAPP_CONNECTIONS.md](./DAPP_CONNECTIONS.md) - dApp integration
 - [SWAP_SYSTEM.md](./SWAP_SYSTEM.md) - Swap functionality
+- [ARCHITECTURE.md#one-window-policy-architecture](./ARCHITECTURE.md#one-window-policy-architecture) - Complete architectural overview 🆕
+- [ARCHITECTURE.md#responsive-design-architecture](./ARCHITECTURE.md#responsive-design-architecture) - Complete architectural overview 🆕
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+
+**Document Status:** ✅ Current as of December 10, 2025  
+**Code Version:** v3.1.3
 

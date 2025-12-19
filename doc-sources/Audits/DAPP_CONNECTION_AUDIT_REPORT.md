@@ -100,7 +100,7 @@ This audit examines the entire dApp connection system including:
    - PopupManager.activePopups Map tracks all open popups by type
    - Location: `src/background/managers/PopupManager.js:20`
 
-2. **Professionally Standardized Focus Management** ❌ NOT IMPLEMENTED
+2. **MetaMask-Style Focus Management** ❌ NOT IMPLEMENTED
    - **CRITICAL ISSUE:** No mechanism to detect when extension icon is clicked while popup is open
    - **CRITICAL ISSUE:** Extension doesn't close and focus popup when user clicks extension icon
    - **Expected Behavior:** Click extension → check for active popups → close extension → focus popup

@@ -425,7 +425,7 @@ Badges: [Uniswap V3] [Multi-hop] [Fees: 0.05%, 0.3%]
 - Zero frontend crypto/business logic
 - Internal swap untouched (separate code path via SwapStreamHandler)
 
-✅ **Professionally Standardized Service Worker Pattern:**
+✅ **MetaMask-Style Service Worker Pattern:**
 - Background script is single source of truth
 - Native Chrome long-lived connections
 - Stream-based communication between frontend and background

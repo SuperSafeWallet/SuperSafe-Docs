@@ -26,7 +26,7 @@ SuperSafe Wallet implements a professional-grade transaction decoding system tha
 ### Key Features
 
 - **✅ Multi-Protocol Support** - Uniswap, PancakeSwap, Velodrome, Aerodrome, and more
-- **✅ Multi-Network** - Currently supports **7 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Shardeum)
+- **✅ Multi-Network** - Currently supports **8 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad, Shardeum)
 - **✅ Strict Security** - No fallbacks for critical parameters
 - **✅ Token Metadata** - Multi-layer lookup with caching
 - **✅ Universal Router** - Full command decoding and execution tracking
@@ -510,7 +510,7 @@ const symbol = metadata?.symbol || 'Unknown'; // WRONG!
 | **Arbitrum One** | 42161 | Uniswap V2/V3, Universal Router | ✅ Active |
 | **Shardeum** | 8118 | Limited DEX support (transaction decoding available) | ✅ Active |
 
-**Note:** Transaction decoding is available on all 7 active networks. DEX protocol support varies by network based on available liquidity and protocol deployments.
+**Note:** Transaction decoding is available on all 8 active networks. DEX protocol support varies by network based on available liquidity and protocol deployments.
 
 ### Future Protocol Roadmap
 

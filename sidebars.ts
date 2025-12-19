@@ -34,6 +34,7 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'using-supersafe/token-management', label: '🪙 Token Management'},
         {type: 'doc', id: 'using-supersafe/swapping-tokens', label: '🔄 Swapping Tokens'},
         {type: 'doc', id: 'using-supersafe/network-switching', label: '🌐 Network Switching'},
+        {type: 'doc', id: 'using-supersafe/buy-crypto', label: '💳 Buy Crypto'},
       ],
     },
     {
@@ -115,6 +116,7 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'advanced/networks-config', label: '🌐 Networks Configuration'},
         {type: 'doc', id: 'advanced/storage', label: '📦 Storage Architecture'},
         {type: 'doc', id: 'advanced/swap-integration', label: '🔄 Swap Integration'},
+        {type: 'doc', id: 'advanced/gas-validation', label: '⛽ Gas Validation System'},
         {type: 'doc', id: 'advanced/transaction-decoding', label: '🔍 Transaction Decoding'},
         {type: 'doc', id: 'advanced/transaction-history', label: '📜 Transaction History'},
         {type: 'doc', id: 'advanced/signing-system', label: '✍️ Signing System'},

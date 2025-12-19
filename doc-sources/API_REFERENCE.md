@@ -1192,6 +1192,135 @@ Token: NOPRICE (not curated, no price data)
 
 ---
 
+## Gas Validation API
+
+**Version:** 1.1.0  
+**Added:** November 17, 2025
+
+### validateDAppTransactionGas
+
+**Location:** `src/utils/gasMonitor.js`
+
+**Purpose:** Validate gas costs for `eth_sendTransaction` requests from external dApps
+
+**Usage:** Automatically called in `ProviderStreamHandler` for all dApp-initiated transactions
+
+**Parameters:**
+
+```javascript
+{
+  gasEstimateWei: string,       // Gas cost in wei (gasLimit * gasPrice)
+  gasEstimateUnits: string,     // Gas limit in units
+  transactionValue: string,     // Value being sent in wei
+  swapValueUsd: string,         // Transaction value in USD
+  gasCostUsd: string,           // Gas cost in USD
+  userAddress: string,          // User wallet address
+  networkKey: string,           // Network identifier (ethereum, optimism, etc.)
+  transactionType: string       // Transaction type (swap, approve, transfer, etc.)
+}
+```
+
+**Returns:**
+
+```javascript
+{
+  isValid: boolean,             // Whether transaction can proceed (false = blocked)
+  alert: {
+    level: string,              // 'none' | 'info' | 'warning' | 'critical' | 'blocking'
+    message: string,            // User-facing message
+    details: string,            // Detailed explanation
+    gasPercentage: number       // Gas as percentage of transaction value
+  },
+  gasAnalysis: {
+    networkGasPriceGwei: number,      // Current network gas price
+    impliedGasPriceGwei: number,      // Gas price from transaction
+    congestionLevel: string,          // Network congestion level
+    priceLevel: string,               // Price level of transaction
+    isPriceAnomalous: boolean,        // Whether gas price is suspicious
+    isLimitAnomalous: boolean         // Whether gas limit is suspicious
+  },
+  balanceValidation: {
+    hasSufficientGas: boolean,  // Whether user can afford gas
+    deficit: string,            // Amount short (if insufficient)
+    currentBalance: string,     // User's current balance
+    required: string            // Total required (gas + value)
+  },
+  recommendedGasLimit: string,  // Adjusted gas limit with safety margin
+  transactionType: string       // Echo of input transaction type
+}
+```
+
+**Example Response (Insufficient Balance):**
+
+```javascript
+{
+  isValid: false,
+  alert: {
+    level: 'blocking',
+    message: 'Insufficient balance to cover gas fees',
+    details: 'You need 0.00032 ETH more to complete this transaction.',
+    gasPercentage: 0
+  },
+  gasAnalysis: {
+    networkGasPriceGwei: 5.2,
+    impliedGasPriceGwei: 5.5,
+    congestionLevel: 'normal',
+    priceLevel: 'low',
+    isPriceAnomalous: false,
+    isLimitAnomalous: false
+  },
+  balanceValidation: {
+    hasSufficientGas: false,
+    deficit: '320000000000000',
+    currentBalance: '500000000000000',
+    required: '820000000000000'
+  },
+  recommendedGasLimit: '180000'
+}
+```
+
+**Example Response (Gas Too High - Scam Detection):**
+
+```javascript
+{
+  isValid: false,
+  alert: {
+    level: 'blocking',
+    message: 'Gas Fee Extremely High',
+    details: 'Gas fee ($60) is 60% of your swap value ($100). This is highly unusual and the transaction may not be worth it or may involve a problematic contract. Proceed only if you understand the risk.',
+    gasPercentage: 60
+  },
+  gasAnalysis: {
+    networkGasPriceGwei: 5,
+    impliedGasPriceGwei: 200,
+    congestionLevel: 'normal',
+    priceLevel: 'extreme',
+    isPriceAnomalous: true,
+    isLimitAnomalous: false
+  },
+  balanceValidation: {
+    hasSufficientGas: true,
+    deficit: '0'
+  }
+}
+```
+
+**Integration:** Called automatically in `ProviderStreamHandler` (line ~1368) for all `eth_sendTransaction` requests before showing `TransactionConfirmationScreen`.
+
+**Error Handling:** Follows "No Fallbacks" policy - validation errors don't block transactions, only insufficient balance or extreme gas (>50% of value) block.
+
+**UI Integration:** Results displayed in `TransactionConfirmationScreen.jsx` with:
+- Button disabled for `isValid: false`
+- Color-coded gas section (red/orange/yellow based on alert level)
+- Expandable details showing network comparison
+- Alert badges and warning messages
+
+**See Also:**
+- [GAS_VALIDATION_SYSTEM.md](./GAS_VALIDATION_SYSTEM.md#dapp-transaction-integration) - Complete dApp integration documentation
+- [SWAP_SYSTEM.md#gas-validation-system](./SWAP_SYSTEM.md#gas-validation-system) - Gas validation overview
+
+---
+
 ## External APIs
 
 ### Bebop API
@@ -1545,7 +1674,7 @@ SuperSafe implements an **automatic API key rotation system** with **random init
 
 **Components:**
 
-1. **`buildApiKeyArray(...apiKeys)`** (`src/background/config/apiConfig.js`)
+1. **`buildApiKeyArray(...apiKeys)`** (`src/background/config/apis.config.js`)
    - Helper function to construct key arrays
    - Accepts variable number of API keys using rest parameters
    - Filters out null/empty values automatically
@@ -1563,16 +1692,23 @@ SuperSafe implements an **automatic API key rotation system** with **random init
    - Rotation happens on **every request** (not just retries)
    - Logs key rotation every 10 requests for monitoring
 
-4. **`SecureApiClient._makeRequest()`** (`src/background/services/SecureApiClient.js`)
-   - Legacy system for other APIs (non-Moralis)
-   - Implements retry-based rotation
-   - Formula: `keyIndex = attemptNumber % config.API_KEY.length`
+4. **`SecureApiClient.constructor()`** (`src/background/services/SecureApiClient.js`)
+   - Initializes with random starting key index for each service with multiple keys
+   - Formula: `randomStartIndex = Math.floor(Math.random() * config.API_KEY.length)`
+   - Tracks key indices and request counts per service
+   - Logs initialization with starting key index
+
+5. **`SecureApiClient._makeRequest()`** (`src/background/services/SecureApiClient.js`)
+   - Uses stored key index for the service (starts random, rotates on every request)
+   - Rotates to next key: `nextIndex = (keyIndex + 1) % config.API_KEY.length`
+   - Rotation happens on **every request** (not just retries)
+   - Logs key rotation every 10 requests for monitoring
 
 #### How It Works
 
-**Random Start + Round-Robin Algorithm (Moralis)**
+**Random Start + Round-Robin Algorithm (All Adapters)**
 
-MoralisAdapter uses a sophisticated load balancing system:
+Both MoralisAdapter and SecureApiClient use the same sophisticated load balancing system:
 
 ```
 INITIALIZATION (once per adapter instance):
@@ -1628,10 +1764,10 @@ MORALIS_API_KEY_BACKUP2=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.backup_key_2_here
 
 **Code Configuration**
 
-In `src/background/config/apiConfig.js`:
+In `src/background/config/apis.config.js`:
 
 ```javascript
-import { buildApiKeyArray } from './apiConfig.js';
+// Note: buildApiKeyArray is defined in apis.config.js
 
 export const API_CONFIG = {
   // Example with 3 Moralis API keys (recommended)
@@ -1784,6 +1920,30 @@ This confirms the adapter is using 3 keys and started randomly at key #2 (index 
 ```
 This shows automatic round-robin rotation is working correctly.
 
+**Log Messages (SecureApiClient)**
+
+**Initialization (Multiple Keys):**
+```
+[SecureApiClient] BSC initialized with 3 API keys, starting at index 2
+[SecureApiClient] OPTIMISM_MORALIS initialized with 3 API keys, starting at index 0
+[SecureApiClient] ARBITRUM_MORALIS initialized with 3 API keys, starting at index 1
+```
+Each service with multiple keys gets its own random starting index.
+
+**Rotation Monitoring (Every 10 Requests):**
+```
+[SecureApiClient] 🔄 BSC - API key rotation: 10 requests processed, using key-2 for next request
+[SecureApiClient] 🔄 BSC - API key rotation: 20 requests processed, using key-3 for next request
+[SecureApiClient] 🔄 BSC - API key rotation: 30 requests processed, using key-1 for next request
+```
+
+**Retry with Key Rotation:**
+```
+[SecureApiClient] 🔑 BSC - Retry 1 using key-2 (2/3)
+[SecureApiClient] 🔑 BSC - Retry 2 using key-3 (3/3)
+```
+On retries, the rotation continues with the next key in sequence.
+
 **Error Scenarios:**
 ```
 [MoralisAdapter] ❌ Moralis API Error: {
@@ -1798,9 +1958,11 @@ This shows automatic round-robin rotation is working correctly.
 
 | Log Message | Meaning |
 |------------|---------|
-| `initialized with X API keys, starting at index Y` | Adapter created, random start selected |
+| `initialized with X API keys, starting at index Y` | Adapter/Client created, random start selected |
 | `API key rotation: N requests processed` | Every 10 requests, confirms rotation working |
-| `using key X/Y for next request` | Shows which key will be used next |
+| `using key X/Y for next request` (MoralisAdapter) | Shows which key will be used next |
+| `using key-X for next request` (SecureApiClient) | Shows which key will be used next |
+| `🔑 SERVICE - Retry N using key-X` | Retry attempt using rotated key |
 | `Moralis API Error: status: 429` | Rate limit hit (load balancing helps prevent) |
 | `Moralis API Error: status: 401` | Invalid API key (check `.env`) |
 | `HTTP 401: {"message":"Token is invalid format"}` | API key in wrong format (check array handling) |
@@ -2171,7 +2333,7 @@ async createConnectionPopup(origin, networkKey, supportedNetworks)
 
 ### PopupManager.checkAndFocusExistingPopups()
 
-**Purpose:** Verify no extension-popup coexistence (Professionally Standardized).
+**Purpose:** Verify no extension-popup coexistence (MetaMask-style).
 
 **Returns:**
 ```javascript
