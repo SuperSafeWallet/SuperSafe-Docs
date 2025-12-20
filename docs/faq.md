@@ -125,7 +125,7 @@ SuperSafe Wallet implements **enterprise-grade security** with a security score 
 
 **Security Features**:
 - **AES-256-GCM Encryption**: Enterprise-grade encryption
-- **PBKDF2 Key Derivation**: 10,000 iterations
+- **PBKDF2 Key Derivation**: 600,000 iterations
 - **Unified Vault System**: All data encrypted together
 - **Memory-First Security**: Sensitive data in memory only
 - **AllowList System**: Whitelist-based dApp security

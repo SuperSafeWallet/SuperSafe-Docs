@@ -48,7 +48,7 @@ SuperSafe is more than just a wallet; it's your gateway to the **SuperSeed ecosy
 
 ### 🛡️ **Enterprise-Grade Security**
 - **Security Score**: 96/100
-- **AES-256-GCM Encryption** with PBKDF2 key derivation (10,000 iterations)
+- **AES-256-GCM Encryption** with PBKDF2 key derivation (600,000 iterations)
 - **Unified Vault System**: All sensitive data encrypted locally
 - **Memory-First Security**: Auto-lock after 15 minutes of inactivity
 - **Zero-Knowledge Architecture**: Complete local-only security model

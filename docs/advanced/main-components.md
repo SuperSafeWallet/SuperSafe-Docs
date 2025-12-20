@@ -153,7 +153,7 @@ class VaultEncryption {
       version: '1.0',
       algorithm: 'AES-256-GCM',
       keyDerivation: 'PBKDF2',
-      iterations: 10000,
+      iterations: 600000,
       salt: this.salt,
       iv: Array.from(iv),
       data: Array.from(new Uint8Array(encryptedData)),

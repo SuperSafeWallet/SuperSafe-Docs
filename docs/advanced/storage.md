@@ -46,7 +46,7 @@ const VAULT_STRUCTURE = {
   version: '1.0',
   algorithm: 'AES-256-GCM',
   keyDerivation: 'PBKDF2',
-  iterations: 10000,
+  iterations: 600000,
   salt: '32-byte-random-salt',
   iv: '12-byte-random-iv',
   data: 'encrypted-vault-data',
@@ -151,7 +151,7 @@ class VaultManager {
       {
         name: 'PBKDF2',
         salt: salt,
-        iterations: 10000,
+        iterations: 600000,
         hash: 'SHA-256'
       },
       keyMaterial,
@@ -196,7 +196,7 @@ class VaultEncryption {
         version: '1.0',
         algorithm: 'AES-256-GCM',
         keyDerivation: 'PBKDF2',
-        iterations: 10000,
+        iterations: 600000,
         salt: Array.from(salt),
         iv: Array.from(iv),
         data: Array.from(new Uint8Array(encryptedData)),

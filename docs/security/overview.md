@@ -13,7 +13,7 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 ║      SuperSafe Security Assessment             ║
 ╠════════════════════════════════════════════════╣
 ║ Encryption:          AES-256-GCM     [100/100] ║
-║ Key Derivation:      PBKDF2-10k      [98/100]  ║
+║ Key Derivation:      PBKDF2-600k     [100/100] ║
 ║ Session Security:    Memory-Only     [100/100] ║
 ║ Memory Protection:   Auto-Cleanup    [95/100]  ║
 ║ Rate Limiting:       Adaptive        [90/100]  ║
@@ -56,7 +56,7 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 3: Cryptographic Protection                           │
 │   - AES-256-GCM Encryption                                  │
-│   - PBKDF2 Key Derivation (10,000 iterations)               │
+│   - PBKDF2 Key Derivation (600,000 iterations)              │
 │   - Random Salt & IV Generation                             │
 │   - Non-Extractable Keys                                    │
 ├─────────────────────────────────────────────────────────────┤

@@ -125,7 +125,7 @@ SuperSafe supports multiple wallets in one vault:
 Your wallet uses **enterprise-grade encryption**:
 
 - **Algorithm**: AES-256-GCM (Galois/Counter Mode)
-- **Key Derivation**: PBKDF2 with 10,000 iterations
+- **Key Derivation**: PBKDF2 with 600,000 iterations
 - **Salt**: 32-byte random salt per vault
 - **Authentication**: Built-in authentication prevents tampering
 

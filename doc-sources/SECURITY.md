@@ -36,7 +36,7 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 ║      SuperSafe Security Assessment             ║
 ╠════════════════════════════════════════════════╣
 ║ Encryption:          AES-256-GCM     [100/100] ║
-║ Key Derivation:      PBKDF2-10k      [98/100]  ║
+║ Key Derivation:      PBKDF2-600k     [100/100] ║
 ║ Session Security:    Memory-Only     [100/100] ║
 ║ Memory Protection:   Auto-Cleanup    [95/100]  ║
 ║ Rate Limiting:       Adaptive        [90/100]  ║
@@ -78,7 +78,7 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 3: Cryptographic Protection                           │
 │   - AES-256-GCM Encryption                                  │
-│   - PBKDF2 Key Derivation (10,000 iterations)               │
+│   - PBKDF2 Key Derivation (600,000 iterations)              │
 │   - Random Salt & IV Generation                             │
 │   - Non-Extractable Keys                                    │
 ├─────────────────────────────────────────────────────────────┤
@@ -154,7 +154,7 @@ graph TB
 
 **Key Derivation:** PBKDF2 (Password-Based Key Derivation Function 2)
 - **Hash Function**: SHA-256
-- **Iterations**: 10,000 (MetaMask-compatible)
+- **Iterations**: 600,000 (MetaMask-compatible, OP-001 security fix)
 - **Salt**: 32 bytes random per vault
 - **Output**: 256-bit AES key
 
@@ -172,7 +172,7 @@ sequenceDiagram
     VM->>WC: Generate random IV (16 bytes)
     
     Note over VM,WC: Key Derivation
-    VM->>WC: PBKDF2(password, salt, 10k iterations)
+    VM->>WC: PBKDF2(password, salt, 600k iterations)
     WC->>VM: Return CryptoKey (non-extractable)
     
     Note over VM,WC: Encryption
@@ -241,7 +241,7 @@ async encryptVault(vaultData, password) {
       { 
         name: "PBKDF2", 
         salt: saltBytes, 
-        iterations: 10000,  // MetaMask-compatible
+        iterations: 600000,  // MetaMask-compatible (OP-001 security fix)
         hash: "SHA-256" 
       },
       pwKey,
@@ -867,7 +867,7 @@ supersafe_session_state = {
   // Credentials (temporary, in-memory only)
   loginToken: {
     salt: base64String,
-    iterations: 10000,
+    iterations: 600000,
     algorithm: 'PBKDF2',
     keyLength: 256,
     verified: true
