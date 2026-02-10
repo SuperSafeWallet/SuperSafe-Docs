@@ -1,9 +1,10 @@
 # SuperSafe Wallet - API Reference
 
 **Created:** October 13, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.2+  
-**Status:** ✅ CURRENT
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
+**Status:** ✅ CURRENT  
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -140,6 +141,33 @@ Unlock vault with password.
   data: {
     wallets: Array,
     currentWalletIndex: number
+  }
+}
+```
+
+### CHECK_BACKEND_HEALTH 🆕 (v3.1.8)
+
+Checks health of backend services.
+
+**Request:**
+```javascript
+{
+  type: 'CHECK_BACKEND_HEALTH'
+}
+```
+
+**Response:**
+```javascript
+{
+  success: true,
+  data: {
+    status: 'healthy', // healthy | degraded | critical
+    services: {
+      moralis: { status: 'healthy', latency: 150 },
+      bebop: { status: 'healthy', latency: 200 },
+      relay: { status: 'healthy', latency: 180 }
+    },
+    timestamp: 1737676800000
   }
 }
 ```
@@ -765,6 +793,179 @@ Check order status.
   }
 }
 ```
+
+---
+
+## Blockchain Security API
+
+### Overview
+
+SuperSafe implements real-time token security verification using GoPlus Labs API. This system analyzes ERC-20 tokens for security risks including honeypots, high taxes, hidden owners, and other malicious patterns.
+
+**Provider:** GoPlus Labs Security API  
+**Integration:** Phase 3 of progressive loading (background, non-blocking)  
+**Supported Networks:** Ethereum (1), BSC (56), Optimism (10), Arbitrum (42161), Base (8453)
+
+### VERIFY_TOKEN_SECURITY
+
+Batch verify token security for multiple addresses on a specific chain.
+
+**Channel:** `blockchain`  
+**Handler:** `BlockchainStreamHandler.js`  
+**Service:** `GoPlusSecurityService.js`
+
+**Request:**
+```javascript
+{
+  type: 'VERIFY_TOKEN_SECURITY',
+  payload: {
+    chainId: 1,  // Ethereum mainnet
+    tokenAddresses: [
+      '0x6B175474E89094C44Da98b954EedeAC495271d0F',  // DAI
+      '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'   // USDC
+    ]
+  }
+}
+```
+
+**Response:**
+```javascript
+{
+  success: true,
+  data: {
+    securityResults: {
+      '0x6b175474e89094c44da98b954eedeac495271d0f': {
+        isSafe: true,
+        riskLevel: 'SAFE',
+        reasons: [],
+        details: {
+          is_honeypot: '0',
+          buy_tax: '0',
+          sell_tax: '0',
+          is_open_source: '1',
+          holder_count: '285432'
+        }
+      },
+      '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': {
+        isSafe: true,
+        riskLevel: 'SAFE',
+        reasons: [],
+        details: { /* ... */ }
+      }
+    },
+    summary: {
+      total: 2,
+      safe: 2,
+      medium: 0,
+      high: 0,
+      critical: 0
+    }
+  }
+}
+```
+
+**Security Result Structure:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `isSafe` | boolean | Overall safety assessment |
+| `riskLevel` | string | 'SAFE', 'MEDIUM', 'HIGH', 'CRITICAL' |
+| `reasons` | string[] | Human-readable risk reasons |
+| `details` | object | Raw GoPlus API response data |
+
+**Risk Levels:**
+
+- **CRITICAL**: Honeypot, cannot sell, hidden owner → Permanently removed from UI
+- **HIGH**: High taxes (>10%), modifiable → Hidden in safe mode
+- **MEDIUM**: Not open source, proxy contract → Hidden in safe mode
+- **SAFE**: All checks passed → Always visible
+
+**Behavior:**
+
+- **Unsupported chains**: Verification skipped, returns `{ summary: { skipped: true } }`
+- **API failure**: Fail-open (tokens display without security flags)
+- **Cache**: Results cached for 5 minutes
+- **Rate limiting**: 5 requests/second, batched processing
+
+**Example with High-Risk Token:**
+
+```javascript
+// Request
+{
+  type: 'VERIFY_TOKEN_SECURITY',
+  payload: {
+    chainId: 56,  // BSC
+    tokenAddresses: ['0x...']  // Known scam token
+  }
+}
+
+// Response
+{
+  success: true,
+  data: {
+    securityResults: {
+      '0x...': {
+        isSafe: false,
+        riskLevel: 'HIGH',
+        reasons: [
+          'High sell tax (15%)',
+          'Slippage can be modified',
+          'Hidden owner detected'
+        ],
+        details: {
+          is_honeypot: '0',
+          buy_tax: '0.05',
+          sell_tax: '0.15',
+          slippage_modifiable: '1',
+          hidden_owner: '1',
+          is_open_source: '1'
+        }
+      }
+    },
+    summary: {
+      total: 1,
+      safe: 0,
+      medium: 0,
+      high: 1,
+      critical: 0
+    }
+  }
+}
+```
+
+**Error Handling:**
+
+```javascript
+{
+  success: false,
+  error: 'GoPlus API unavailable'
+}
+// Tokens will display without security verification (fail-open)
+```
+
+**Security Indicators Reference:**
+
+Complete list of checks performed:
+- `is_honeypot` - Cannot sell after buy (CRITICAL)
+- `honeypot_with_same_creator` - Creator history (CRITICAL)
+- `cannot_sell_all` - Forced partial sells (CRITICAL)
+- `cannot_buy` - Buying disabled (CRITICAL)
+- `buy_tax` - Buy transaction fee (HIGH if >10%)
+- `sell_tax` - Sell transaction fee (HIGH if >10%)
+- `slippage_modifiable` - Dynamic tax changes (HIGH)
+- `hidden_owner` - Hidden ownership (HIGH)
+- `can_take_back_ownership` - Ownership reclaimable (HIGH)
+- `trading_cooldown` - Artificial delays (HIGH)
+- `gas_abuse` - Excessive gas patterns (HIGH)
+- `is_open_source` - Verified source code (MEDIUM if false)
+- `is_proxy` - Upgradeable contract (MEDIUM if true)
+- `is_anti_whale` - Whale protections (MEDIUM)
+- `is_blacklisted` - Known blacklist (MEDIUM)
+- `holder_count` - Total holders (MEDIUM if <100)
+
+**See Also:**
+- [SECURITY.md - Token Security Verification](./SECURITY.md#token-security-verification)
+- [EXTERNAL_API_REFERENCE.md - GoPlus Labs API](./EXTERNAL_API_REFERENCE.md#goplus-labs-security-api)
 
 ---
 
@@ -2358,7 +2559,3 @@ async createConnectionPopup(origin, networkKey, supportedNetworks)
 - [SWAP_SYSTEM.md](./SWAP_SYSTEM.md) - Swap functionality
 
 ---
-
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.2+
-

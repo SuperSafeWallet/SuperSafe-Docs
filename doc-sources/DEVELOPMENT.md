@@ -1,10 +1,10 @@
 # SuperSafe Wallet - Development Guide
 
 **Created:** October 13, 2025  
-**Last Updated:** November 19, 2025  
-**Version:** 3.0.3  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 19, 2025
+**Last Code Update:** February 9, 2026
 
 ## 🆕 What's New in v3.0.3 (November 19, 2025)
 
@@ -162,6 +162,12 @@ localStorage.setItem('SUPERSAFE_DEBUG', 'true');
 // Check logs
 console.log('[Component] Debug message');
 ```
+
+**Health Monitoring:**
+SuperSafe includes a `BackendHealthService` to monitor the availability of external APIs (Moralis, Bebop, Uniswap).
+- **Uniswap Check**: Verifies proxy health via lightweight order fetch (v3.1.8)
+- **Duplicate Prevention**: Optimized `fetchInitialHealth` to run once per session (v3.1.8)
+Use the `CHECK_BACKEND_HEALTH` message to retrieve system status.
 
 ---
 
@@ -1116,8 +1122,4 @@ BEBOP_PARTNER_FEE_BPS=100
 - **Frontend**: Must request via stream messages (security)
 
 ---
-
-**Document Status:** ✅ Current as of November 19, 2025  
-**Code Version:** v3.0.3+  
-**Maintenance:** Review after major dependency updates
 

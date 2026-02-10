@@ -378,3 +378,6 @@ Now that you understand key encryption:
 ---
 
 **Ready to learn about dApp security?** Continue to [Safe dApp Interaction](./safe-dapp-interaction.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

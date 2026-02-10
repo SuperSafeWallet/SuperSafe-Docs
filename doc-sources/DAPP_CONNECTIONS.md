@@ -1,41 +1,41 @@
 # SuperSafe Wallet - dApp Connections
 
 **Created:** October 13, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
 ## Table of Contents
 
 1. [Connection Overview](#connection-overview)
-2. [Smart Native Connection](#smart-native-connection)
-3. [AllowList System](#allowlist-system)
-4. [Connection Mechanisms](#connection-mechanisms)
-5. [WalletConnect V2](#walletconnect-v2)
-6. [Network Management](#network-management)
-7. [Popup Management](#popup-management)
-8. [Error Handling](#error-handling)
-9. [Framework Detection](#framework-detection)
+2. [Handshake Strategy](#handshake-strategy)
+3. [Smart Native Connection](#smart-native-connection)
+4. [AllowList System](#allowlist-system)
+5. [Connection Mechanisms](#connection-mechanisms)
+6. [WalletConnect V2](#walletconnect-v2)
+7. [Network Management](#network-management)
+8. [Popup Management](#popup-management)
+9. [Error Handling](#error-handling)
+10. [Framework Detection](#framework-detection)
 
 ---
 
 ## Connection Overview
 
-SuperSafe Wallet implements **Smart Native Connection Architecture** supporting multiple dApp connection methods: direct injection (RainbowKit, Wagmi), WalletConnect v2/Reown, EIP-6963 provider discovery, and Dynamic framework.
+SuperSafe Wallet implements **Hybrid EIP-6963/Legacy Coexistence** supporting multiple dApp connection methods: direct injection, WalletConnect v2/Reown, EIP-6963 provider discovery, and legacy browser wallet detection.
 
 ### Supported Connection Methods
 
-- **✅ Direct Injection**: window.ethereum EIP-1193 provider
-- **✅ EIP-6963**: Provider discovery standard (RainbowKit, Wagmi compatibility)
+- **✅ EIP-6963**: Provider discovery standard (RainbowKit, Wagmi, Dynamic compatibility)
+- **✅ Legacy Injection**: window.ethereum for dApps without wallet selectors
 - **✅ WalletConnect V2**: Reown WalletKit integration
 - **✅ RainbowKit**: Full compatibility
 - **✅ Dynamic**: Framework detection and adaptation
 - **✅ Wagmi**: React hooks compatibility
 
-### Supported Networks
 
 SuperSafe supports **8 active networks** for dApp connections:
 - SuperSeed (5330)
@@ -44,12 +44,171 @@ SuperSafe supports **8 active networks** for dApp connections:
 - Base (8453)
 - BNB Chain (56)
 - Arbitrum One (42161)
-- Monad (143) - Added 2025-11-26, [Official Docs](https://docs.monad.xyz/developer-essentials/network-information)
+- Monad (10143)
 - Shardeum (8118)
 
 ---
 
+## Handshake Strategy
+
+**Version:** 3.1.7 (January 2026)  
+**Status:** ✅ PRODUCTION
+
+### Overview
+
+SuperSafe implements a **hybrid coexistence strategy** to work alongside other wallets (MetaMask, Coinbase Wallet, Rabby). The behavior is controlled by the `handshake` field in the allowlist.
+
+### Handshake Modes
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `eip6963` | Only announce via EIP-6963, don't touch `window.ethereum` | dApps with wallet selectors (RainbowKit, Dynamic) |
+| `legacy` | Take control of `window.ethereum` | dApps without wallet selectors (Aerodrome, Velodrome) |
+
+### EIP-6963 Mode
+
+For dApps that support EIP-6963 provider discovery (modern wallet selectors):
+
+```javascript
+// SuperSafe behavior when handshake: "eip6963"
+// ✅ Announce via EIP-6963 standard
+window.dispatchEvent(new CustomEvent('eip6963:announceProvider', { detail: { ... } }));
+
+// ✅ DO NOT touch window.ethereum
+// MetaMask (or other wallet) remains as window.ethereum
+// User can freely choose between wallets in dApp's selector
+```
+
+**dApps with this mode:**
+- Bebop (uses RainbowKit)
+- Uniswap (uses Dynamic/Wagmi)
+- PancakeSwap (wallet selector)
+- Relay Link (wallet selector)
+
+### Legacy Mode
+
+For dApps that only support `window.ethereum` detection ("Browser Wallet" button):
+
+```javascript
+// SuperSafe behavior when handshake: "legacy"
+// Store reference to original provider
+window.__supersafe_externalProvider = window.ethereum;
+
+// ✅ Take control of window.ethereum
+window.ethereum = superSafeProvider;
+
+// ✅ Create providers array with both wallets
+window.ethereum.providers = [superSafeProvider, window.__supersafe_externalProvider];
+```
+
+**dApps with this mode:**
+- Aerodrome (no wallet selector)
+- Velodrome (no wallet selector)
+- SuperSeed Seeds (simple connection)
+- SuperSeed Bridge (simple connection)
+
+### Configuration
+
+**Location:** `public/assets/allowlist.json`
+
+```json
+{
+  "dapps": [
+    {
+      "origin": "https://bebop.xyz",
+      "name": "Bebop Protocol",
+      "handshake": "eip6963",  // User chooses wallet
+      "supportedChains": [1, 10, 56, 5330, 8453, 42161]
+    },
+    {
+      "origin": "https://aerodrome.finance",
+      "name": "Aerodrome",
+      "handshake": "legacy",   // SuperSafe is default
+      "supportedChains": [8453]
+    }
+  ]
+}
+```
+
+### Decision Matrix
+
+| dApp Characteristic | Handshake Mode |
+|---------------------|----------------|
+| Has wallet selector (RainbowKit, Dynamic) | `eip6963` |
+| Only "Connect Wallet" / "Browser Wallet" button | `legacy` |
+| Uses EIP-6963 discovery | `eip6963` |
+| Uses `window.ethereum` directly | `legacy` |
+| Unknown dApp (not in allowlist) | Not injected |
+
+### Implementation
+
+**Location:** `src/utils/provider.js` (function `injectSuperSafeProvider`)
+
+```javascript
+// Read handshake strategy from policy (default to 'legacy')
+const handshakeStrategy = policy?.handshake || 'legacy';
+
+// ============================================================================
+// EIP-6963 MODE: Only announce, don't touch window.ethereum
+// ============================================================================
+if (window.ethereum && handshakeStrategy === 'eip6963') {
+  logger.debug('🎯 EIP-6963 MODE: Announcing only - user can choose wallet');
+  
+  // Store reference to external provider
+  window.__supersafe_externalProvider = window.ethereum;
+  
+  // IMPORTANT: announceEIP6963Provider is called for discovery
+  announceEIP6963Provider(superSafeProvider);
+  
+  return; // Exit without modifying window.ethereum
+}
+
+// ============================================================================
+// LEGACY MODE: SuperSafe takes control of window.ethereum
+// ============================================================================
+if (window.ethereum && handshakeStrategy === 'legacy') {
+  logger.debug('🎯 LEGACY MODE: SuperSafe takes control of window.ethereum');
+  
+  // Preserve existing provider
+  window.__supersafe_externalProvider = window.ethereum;
+  
+  // Take control of window.ethereum
+  window.ethereum = superSafeProvider;
+  
+  // Create providers array for compatibility (e.g., Dynamic, RainbowKit)
+  const providersArray = [superSafeProvider, window.__supersafe_externalProvider];
+  Object.defineProperty(window.ethereum, 'providers', {
+    value: providersArray,
+    writable: false,
+    configurable: false
+  });
+}
+
+// ============================================================================
+// NO PROVIDER: Inject when window.ethereum is missing
+// ============================================================================
+if (!window.ethereum) {
+  logger.debug('🎯 NO PROVIDER: Injecting SuperSafe as window.ethereum');
+  
+  window.ethereum = superSafeProvider;
+  
+  // Always announce via EIP-6963 as well
+  announceEIP6963Provider(superSafeProvider);
+}
+```
+
+### Benefits
+
+- ✅ **MetaMask coexistence:** Both wallets work independently
+- ✅ **No popup blocking:** Each wallet handles its own connection flow
+- ✅ **User choice:** EIP-6963 dApps let user pick wallet
+- ✅ **Legacy support:** Aerodrome/Velodrome still work with SuperSafe
+- ✅ **Flexible configuration:** Per-dApp handshake mode
+
+---
+
 ## Smart Native Connection
+
 
 ### Architecture Principles
 
@@ -148,10 +307,6 @@ sequenceDiagram
 ---
 
 ## Allowlist Security (Enhanced - Nov 2025)
-
-**Version:** 3.1 (Security Enhancements)  
-**Status:** ✅ PRODUCTION  
-**Last Updated:** November 21, 2025
 
 ### Overview
 
@@ -1016,8 +1171,4 @@ export function getConnectionStrategy(framework) {
 - [BLOCKCHAIN_OPERATIONS.md](./BLOCKCHAIN_OPERATIONS.md) - Blockchain operations
 
 ---
-
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
-**Maintenance:** Review after major connection system changes
 

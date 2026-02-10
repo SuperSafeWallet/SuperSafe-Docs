@@ -1,10 +1,10 @@
 # SuperSafe Wallet - Backend Architecture
 
 **Created:** October 13, 2025  
-**Last Updated:** December 8, 2025  
-**Version:** 3.1.2  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** December 8, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -106,6 +106,7 @@ Architecture Pattern: MetaMask-compatible
 │  │  • Relay.link Integration - Cross-chain swaps            │ │
 │  │  • Secure API Client - HTTP client with security         │ │
 │  │  • SuperSeed API Wrapper - RPC abstraction               │ │
+│  │  • BackendHealthService - Service monitoring             │ │
 │  └──────────────────────────────────────────────────────────┘ │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
@@ -156,8 +157,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   // Initialize allowlist
   await loadAllowlist();
   
-  // Initialize WalletConnect
-  await initializeWalletConnect();
+  // Note: WalletConnect is lazy-initialized on first use (v3.1.8)
+  // via INITIALIZE_WALLETCONNECT message
   
   // Set up badge
   chrome.action.setBadgeText({ text: '' });
@@ -200,6 +201,8 @@ const connectedSites = {};
 let pendingWCProposal = null;
 let pendingWCRequest = null;
 let wcPopupId = null;
+let wcInitAttempted = false;
+let isBackgroundInitSucceeded = false;
 
 // Security
 const secureApiClient = new SecureApiClient(API_CONFIG);
@@ -623,6 +626,7 @@ Frontend/Content Script
 | **SendStreamHandler** | `send` | Token transfer operations | SEND_ESTIMATE_GAS, SEND_TRANSACTION |
 | **BlockchainStreamHandler** | `blockchain` | Blockchain queries | GET_BALANCE, GET_TOKENS, GET_NFTS, GET_TRANSACTION_HISTORY |
 | **ApiStreamHandler** | `api` | External API calls (SuperSafe Price API) | API_CALCULATE_PORTFOLIO_CHANGE_24H, API_CALCULATE_TOKEN_CHANGE_24H, API_FORMAT_TOKEN_AMOUNT, API_GET_TRANSACTION_HISTORY, API_GET_TOKEN_TRANSFERS, API_GET_COMBINED_HISTORY |
+| **UniswapStreamHandler** | `uniswap` | Uniswap DEX operations | UNISWAP_GET_QUOTE, UNISWAP_EXECUTE_SWAP, UNISWAP_CHECK_APPROVAL, UNISWAP_GET_ORDER_STATUS |
 
 ### Stream Handler Implementation
 
@@ -1467,6 +1471,293 @@ function setupAllStreamHandlers() {
 
 ## Services
 
+### GoPlus Security Service (v3.1.6)
+
+**Location:** `src/background/services/GoPlusSecurityService.js`
+
+**Purpose:** Real-time token security verification to protect users from scam tokens, honeypots, and high-risk contracts using GoPlus Labs Security API.
+
+**Integration:** Phase 3 of progressive portfolio loading (non-blocking, fail-open).
+
+**Class Structure:**
+```javascript
+class GoPlusSecurityService {
+  constructor() {
+    // API configuration
+    this.baseURL = 'https://api.gopluslabs.io';
+    this.timeout = 10000; // 10s
+    
+    // Supported networks (GoPlus API coverage)
+    this.supportedChains = {
+      1: '1',      // Ethereum
+      56: '56',    // BSC
+      10: '10',    // Optimism
+      42161: '42161', // Arbitrum
+      8453: '8453'    // Base
+    };
+    
+    // Cache configuration
+    this.cache = new Map();
+    this.cacheTTL = 5 * 60 * 1000; // 5 minutes
+    
+    // Rate limiting
+    this.requestsPerSecond = 5;
+    this.lastRequestTime = 0;
+  }
+}
+```
+
+**Key Methods:**
+
+1. **Single Token Verification:**
+```javascript
+async checkTokenSecurity(chainId, tokenAddress) {
+  // 1. Validate chain support
+  if (!this.isSupportedChain(chainId)) {
+    return null; // Skip verification for unsupported chains
+  }
+  
+  // 2. Check cache
+  const cacheKey = `${chainId}:${tokenAddress.toLowerCase()}`;
+  const cached = this._getFromCache(cacheKey);
+  if (cached) return cached;
+  
+  // 3. Rate limiting
+  await this._enforceRateLimit();
+  
+  // 4. API call
+  const url = `${this.baseURL}/api/v1/token_security/${chainId}?contract_addresses=${tokenAddress.toLowerCase()}`;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(this.timeout)
+    });
+    
+    const data = await response.json();
+    
+    // 5. Parse and analyze
+    const result = this._parseGoPlusResponse(data, tokenAddress);
+    
+    // 6. Cache and return
+    this._addToCache(cacheKey, result);
+    return result;
+    
+  } catch (error) {
+    // Fail-open: don't block UI on errors
+    console.error('[GoPlusSecurityService] Error:', error);
+    return null;
+  }
+}
+```
+
+2. **Batch Verification with Rate Limiting:**
+```javascript
+async batchCheckTokens(chainId, tokenAddresses) {
+  if (!this.isSupportedChain(chainId)) {
+    return { summary: { skipped: true } };
+  }
+  
+  const results = {};
+  const uncachedAddresses = [];
+  
+  // 1. Check cache first
+  for (const address of tokenAddresses) {
+    const cacheKey = `${chainId}:${address.toLowerCase()}`;
+    const cached = this._getFromCache(cacheKey);
+    
+    if (cached) {
+      results[address.toLowerCase()] = cached;
+    } else {
+      uncachedAddresses.push(address);
+    }
+  }
+  
+  // 2. Batch uncached addresses in groups of 5 (rate limit)
+  const batchSize = 5;
+  for (let i = 0; i < uncachedAddresses.length; i += batchSize) {
+    const batch = uncachedAddresses.slice(i, i + batchSize);
+    const addresses = batch.map(a => a.toLowerCase()).join(',');
+    
+    await this._enforceRateLimit();
+    
+    // API call for batch
+    const url = `${this.baseURL}/api/v1/token_security/${chainId}?contract_addresses=${addresses}`;
+    
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      // Parse results for each token in batch
+      if (data.result) {
+        for (const [address, goPlusData] of Object.entries(data.result)) {
+          const analyzedResult = this.analyzeRisk(goPlusData);
+          results[address] = analyzedResult;
+          
+          // Cache individual result
+          const cacheKey = `${chainId}:${address}`;
+          this._addToCache(cacheKey, analyzedResult);
+        }
+      }
+    } catch (error) {
+      console.error('[GoPlusSecurityService] Batch error:', error);
+      // Continue with next batch on error
+    }
+    
+    // Wait 1s between batches (5 req/s limit)
+    if (i + batchSize < uncachedAddresses.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  
+  // 3. Calculate summary
+  const summary = {
+    total: Object.keys(results).length,
+    safe: Object.values(results).filter(r => r.riskLevel === 'SAFE').length,
+    medium: Object.values(results).filter(r => r.riskLevel === 'MEDIUM').length,
+    high: Object.values(results).filter(r => r.riskLevel === 'HIGH').length,
+    critical: Object.values(results).filter(r => r.riskLevel === 'CRITICAL').length
+  };
+  
+  return { securityResults: results, summary };
+}
+```
+
+3. **Risk Analysis:**
+```javascript
+analyzeRisk(goPlusData) {
+  if (!goPlusData) {
+    return { isSafe: true, riskLevel: 'SAFE', reasons: [] };
+  }
+  
+  const reasons = [];
+  let riskLevel = 'SAFE';
+  
+  // CRITICAL risk indicators
+  if (goPlusData.is_honeypot === '1') {
+    reasons.push('Honeypot detected - cannot sell after buy');
+    riskLevel = 'CRITICAL';
+  }
+  if (goPlusData.honeypot_with_same_creator === '1') {
+    reasons.push('Creator has honeypot history');
+    riskLevel = 'CRITICAL';
+  }
+  if (goPlusData.cannot_sell_all === '1') {
+    reasons.push('Cannot sell all tokens');
+    riskLevel = 'CRITICAL';
+  }
+  if (goPlusData.cannot_buy === '1') {
+    reasons.push('Buying disabled');
+    riskLevel = 'CRITICAL';
+  }
+  
+  // HIGH risk indicators
+  if (parseFloat(goPlusData.buy_tax) > 0.10) {
+    reasons.push(`High buy tax (${(parseFloat(goPlusData.buy_tax) * 100).toFixed(1)}%)`);
+    if (riskLevel !== 'CRITICAL') riskLevel = 'HIGH';
+  }
+  if (parseFloat(goPlusData.sell_tax) > 0.10) {
+    reasons.push(`High sell tax (${(parseFloat(goPlusData.sell_tax) * 100).toFixed(1)}%)`);
+    if (riskLevel !== 'CRITICAL') riskLevel = 'HIGH';
+  }
+  if (goPlusData.slippage_modifiable === '1') {
+    reasons.push('Slippage can be modified');
+    if (riskLevel !== 'CRITICAL') riskLevel = 'HIGH';
+  }
+  if (goPlusData.hidden_owner === '1') {
+    reasons.push('Hidden owner detected');
+    if (riskLevel !== 'CRITICAL') riskLevel = 'HIGH';
+  }
+  
+  // MEDIUM risk indicators
+  if (goPlusData.is_open_source === '0') {
+    reasons.push('Contract not verified');
+    if (riskLevel === 'SAFE') riskLevel = 'MEDIUM';
+  }
+  if (goPlusData.is_proxy === '1') {
+    reasons.push('Upgradeable proxy contract');
+    if (riskLevel === 'SAFE') riskLevel = 'MEDIUM';
+  }
+  if (parseInt(goPlusData.holder_count) < 100) {
+    reasons.push(`Low holder count (${goPlusData.holder_count})`);
+    if (riskLevel === 'SAFE') riskLevel = 'MEDIUM';
+  }
+  
+  return {
+    isSafe: riskLevel === 'SAFE',
+    riskLevel,
+    reasons,
+    details: goPlusData
+  };
+}
+```
+
+4. **Chain Support Check:**
+```javascript
+isSupportedChain(chainId) {
+  return this.supportedChains.hasOwnProperty(chainId);
+}
+```
+
+**Cache Implementation:**
+- In-memory Map with 5-minute TTL
+- Cache key format: `{chainId}:{tokenAddress}` (lowercase)
+- Automatic expiration on next access
+- ~90% hit rate for typical usage
+
+**Rate Limiting:**
+- 5 requests per second maximum
+- Enforced via `_enforceRateLimit()` method
+- Batches processed with 1s delay between groups
+- Prevents API throttling/blocking
+
+**Handler Integration - BlockchainStreamHandler:**
+
+```javascript
+// Location: src/background/handlers/streams/BlockchainStreamHandler.js
+
+case 'VERIFY_TOKEN_SECURITY': {
+  const { chainId, tokenAddresses } = message.payload;
+  
+  if (!goPlusSecurityService) {
+    return { success: false, error: 'GoPlus service not initialized' };
+  }
+  
+  // Check if chain is supported
+  if (!goPlusSecurityService.isSupportedChain(chainId)) {
+    console.log(`[BlockchainStreamHandler] Chain ${chainId} not supported by GoPlus - skipping verification`);
+    return { 
+      success: true, 
+      data: { summary: { skipped: true, reason: 'Chain not supported' } }
+    };
+  }
+  
+  try {
+    const results = await goPlusSecurityService.batchCheckTokens(chainId, tokenAddresses);
+    return { success: true, data: results };
+    
+  } catch (error) {
+    // Fail-open: return error but don't block UI
+    console.error('[BlockchainStreamHandler] Security verification failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+```
+
+**Error Handling Strategy:**
+- **Fail-Open**: Errors don't prevent token display
+- **Graceful Degradation**: Unsupported chains skip verification
+- **Retry Logic**: NO automatic retries (fail fast)
+- **Timeout**: 10s per request, AbortSignal cleanup
+
+**See Also:**
+- [ SECURITY.md - Token Security Verification](./SECURITY.md#token-security-verification)
+- [API_REFERENCE.md - VERIFY_TOKEN_SECURITY](./API_REFERENCE.md#verify_token_security)
+- [EXTERNAL_API_REFERENCE.md - GoPlus Labs API](./EXTERNAL_API_REFERENCE.md#goplus-labs-security-api)
+
+---
+
 ### Token Metadata Service
 
 **Location:** `src/background/services/TokenMetadataService.js`
@@ -1844,8 +2135,4 @@ class UniversalRouterDecoderPancake {
 - [DAPP_CONNECTIONS.md](./DAPP_CONNECTIONS.md) - dApp connection handling
 
 ---
-
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
-**Maintenance:** Review after major backend changes
 

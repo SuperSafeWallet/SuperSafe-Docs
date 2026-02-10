@@ -1,8 +1,12 @@
 # External API Reference
 
-> **Version:** 2.0.0  
-> **Last Updated:** 2025-12-05  
-> **Scope:** Complete inventory of all external API calls made by the SuperSafe Wallet extension
+**Created:** October 13, 2025  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
+**Status:** ✅ CURRENT  
+**Last Code Update:** February 9, 2026
+
+**Scope:** Complete inventory of all external API calls made by the SuperSafe Wallet extension
 
 This document provides a comprehensive reference of all external API services consumed by the SuperSafe Wallet extension, including endpoints, parameters, and authentication requirements.
 
@@ -65,8 +69,9 @@ The installation token is:
 7. [CoinGecko API](#7-coingecko-api)
 8. [WalletConnect / Reown](#8-walletconnect--reown)
 9. [Token Logo Providers](#9-token-logo-providers)
-10. [RPC Endpoints (Moralis Nodes)](#10-rpc-endpoints-moralis-nodes)
-11. [Deprecated / Unused APIs](#11-deprecated--unused-apis)
+10. [GoPlus Labs Security API](#10-goplus-labs-security-api)
+11. [RPC Endpoints (Moralis Nodes)](#11-rpc-endpoints-moralis-nodes)
+12. [Deprecated / Unused APIs](#12-deprecated--unused-apis)
 
 ---
 
@@ -761,31 +766,287 @@ GET /blockchains/{chainSlug}/info/logo.png
 
 ### 9.3 Bebop S3 Images
 
-**Base URL:** `https://bebop-public-images.s3.eu-west-2.amazonaws.com`
-
-```
-GET /{chainId}-{address}.svg
-```
-
-**Note:** Address must be EIP-55 checksummed (case-sensitive)
-
-**Usage in codebase:** `src/utils/logoProviders/logoFromBebop.js`
+**Status:** ❌ **REMOVED in v3.1.8**
+**Reason:** S3 bucket deprecated/inaccessible.
+**Replacement:** Use curated logo orchestrator.
 
 ---
 
 ### 9.4 Dune Echo (Native Token Logos)
 
-**Base URL:** `https://api.dune.com/api/echo/beta`
-
-```
-GET /token/logo/{chainId}
-```
-
-**Usage in codebase:** `src/utils/bebopTokenService.js` - `getTokenLogoUrl()` (legacy)
+**Status:** ❌ **REMOVED in v3.1.8**
+**Reason:** Legacy API dependency removed.
+**Replacement:** Use curated logo orchestrator.
 
 ---
 
-## 10. RPC Endpoints (Moralis Nodes)
+## 10. GoPlus Labs Security API
+
+**Base URL:** `https://api.gopluslabs.io`  
+**Authentication:** None (Public API)  
+**Purpose:** Real-time token security verification (honeypot detection, tax analysis, ownership checks)
+
+### Overview
+
+GoPlus Labs provides comprehensive token security analysis for ERC-20 tokens across multiple EVM chains. SuperSafe uses this API in Phase 3 of progressive loading to verify token safety before displaying them to users.
+
+**Integration**: Non-blocking background verification (fail-open strategy)  
+**Cache TTL**: 5 minutes  
+**Rate Limit**: 5 requests/second (implemented client-side)
+
+### Supported Networks
+
+| Chain ID | Network | Status |
+|----------|---------|--------|
+| 1 | Ethereum | ✅ Supported |
+| 56 | BSC | ✅ Supported |
+| 10 | Optimism | ✅ Supported |
+| 42161 | Arbitrum One | ✅ Supported |
+| 8453 | Base | ✅ Supported |
+| 5330 | SuperSeed | ❌ Not supported (verification skipped) |
+| 8118 | Shardeum | ❌ Not supported (verification skipped) |
+| 143 | Monad | ❌ Not supported (verification skipped) |
+
+### 10.1 Token Security Check
+
+```
+GET /api/v1/token_security/{chainId}
+```
+
+**Parameters:**
+| Parameter | Type | Location | Required | Description |
+|-----------|------|----------|----------|-------------|
+| `chainId` | string | path | Yes | Network chain ID (1, 56, 10, 42161, 8453) |
+| `contract_addresses` | string | query | Yes | Comma-separated token addresses (lowercase) |
+
+**Example Request:**
+```
+GET https://api.gopluslabs.io/api/v1/token_security/1?contract_addresses=0x6b175474e89094c44da98b954eedeac495271d0f,0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+```
+
+**Response Structure:**
+```json
+{
+  "code": 1,
+  "message": "OK",
+  "result": {
+    "0x6b175474e89094c44da98b954eedeac495271d0f": {
+      "is_honeypot": "0",
+      "honeypot_with_same_creator": "0",
+      "buy_tax": "0",
+      "sell_tax": "0",
+      "slippage_modifiable": "0",
+      "is_open_source": "1",
+      "is_proxy": "0",
+      "can_take_back_ownership": "0",
+      "hidden_owner": "0",
+      "trading_cooldown": "0",
+      "cannot_buy": "0",
+      "cannot_sell_all": "0",
+      "is_anti_whale": "0",
+      "is_blacklisted": "0",
+      "holder_count": "285432",
+      "total_supply": "5183805150714820000000000000",
+      "lp_holder_count": "158",
+      "lp_total_supply": "12345678",
+      "is_true_token": "1",
+      "is_airdrop_scam": "0",
+      "trust_list": "1",
+      "gas_abuse": null,
+      "note": "",
+      "fake_token": null,
+      "contract_name": "Dai Stablecoin",
+      "token_name": "Dai",
+      "token_symbol": "DAI",
+      "creator_address": "0x9759a6ac90977b93b58547b4a71c78317f391a28",
+      "creator_balance": "0",
+      "creator_percent": "0",
+      "owner_address": null,
+      "owner_balance": "0",
+      "owner_percent": "0",
+      "owner_change_balance": "0",
+      "holders": [
+        {
+          "address": "0x...",
+          "tag": "Binance",
+          "is_contract": 0,
+          "balance": "123456789",
+          "percent": "0.0234",
+          "is_locked": 0
+        }
+      ]
+    }
+  }
+}
+```
+
+### Security Indicators Reference
+
+**CRITICAL Risk Indicators**:
+- `is_honeypot`: "1" = Token cannot be sold after purchase (CRITICAL)
+- `honeypot_with_same_creator`: "1" = Creator has honeypot history (CRITICAL)
+- `cannot_sell_all`: "1" = Forced partial sells only (CRITICAL)
+- `cannot_buy`: "1" = Buying disabled (CRITICAL)
+
+**HIGH Risk Indicators**:
+- `buy_tax`: Percentage (HIGH if > 0.10, i.e., 10%)
+- `sell_tax`: Percentage (HIGH if > 0.10, i.e., 10%)
+- `slippage_modifiable`: "1" = Taxes can be dynamically changed (HIGH)
+- `hidden_owner`: "1" = Ownership hidden but still active (HIGH)
+- `can_take_back_ownership`: "1" = Ownership can be reclaimed (HIGH)
+- `trading_cooldown`: "1" = Artificial trading restrictions (HIGH)
+- `gas_abuse`: "1" = Excessive gas consumption patterns (HIGH)
+
+**MEDIUM Risk Indicators**:
+- `is_open_source`: "0" = Contract not verified (MEDIUM)
+- `is_proxy`: "1" = Upgradeable proxy contract (MEDIUM)
+- `is_anti_whale`: "1" = Whale manipulation protections (MEDIUM, can be abused)
+- `is_blacklisted`: "1" = Token on known blacklists (MEDIUM)
+- `holder_count`: Number (MEDIUM if < 100)
+
+**Additional Metadata**:
+- `token_name`, `token_symbol`: Token identification
+- `contract_name`: Contract name from source code
+- `total_supply`: Total token supply
+- `creator_address`, `creator_balance`, `creator_percent`: Creator info
+- `owner_address`, `owner_balance`, `owner_percent`: Current owner info
+- `trust_list`: "1" = Token on GoPlus trust list
+- `is_airdrop_scam`: "1" = Known airdrop scam
+- `fake_token`: "1" = Impersonation/fake token
+- `holders`: Array of top holders with tags (exchanges, etc.)
+
+### SuperSafe Risk Classification
+
+SuperSafe maps GoPlus indicators to 4 risk levels:
+
+**CRITICAL** (Permanently Removed):
+- `is_honeypot` === "1" OR
+- `honeypot_with_same_creator` === "1" OR
+- `cannot_sell_all` === "1" OR
+- `cannot_buy` === "1"
+
+**HIGH** (Hidden in Safe Mode):
+- `buy_tax` > 0.10 OR
+- `sell_tax` > 0.10 OR
+- `slippage_modifiable` === "1" OR
+- `hidden_owner` === "1" OR
+- `can_take_back_ownership` === "1" OR
+- `trading_cooldown` === "1" OR
+- `gas_abuse` === "1"
+
+**MEDIUM** (Hidden in Safe Mode):
+- `is_open_source` === "0" OR
+- `is_proxy` === "1" OR
+- `is_anti_whale` === "1" OR
+- `is_blacklisted` === "1" OR
+- `holder_count` < 100
+
+**SAFE** (Always Visible):
+- None of the above conditions met
+
+### Rate Limiting
+
+**Client-Side Implementation**:
+- Maximum 5 requests per second
+- Batching: Process 5 tokens, wait 1 second, next batch
+- Typical portfolio (10-20 tokens): 2-4 seconds total
+
+**Behavior on Rate Limit**:
+- API returns HTTP 429
+- Client retries with exponential backoff
+- Falls back to fail-open (displays tokens without security flags)
+
+### Error Handling
+
+**Network Errors**:
+```json
+{
+  "code": 0,
+  "message": "Network error",
+  "result": null
+}
+```
+**Action**: Fail-open, display tokens without security verification
+
+**Invalid Chain**:
+```json
+{
+  "code": 0,
+  "message": "Chain not supported",
+  "result": null
+}
+```
+**Action**: Skip verification, return empty results
+
+**Invalid Address**:
+```json
+{
+  "code": 0,
+  "message": "Invalid contract address",
+  "result": {}
+}
+```
+**Action**: Mark token as SAFE (no data = no risk detected)
+
+### Caching Strategy
+
+**Cache Key**: `{chainId}:{tokenAddress}` (lowercase)
+**TTL**: 5 minutes (300,000ms)
+**Storage**: In-memory Map in GoPlusSecurityService
+**Invalidation**: Automatic on expiry, manual on network switch
+
+**Cache Hit Rate**: ~90% (typical usage)
+**Cache Miss Latency**: 500-2000ms (API call + processing)
+
+### Usage in SuperSafe
+
+**Service**: `src/background/services/GoPlusSecurityService.js`
+
+**Methods**:
+- `checkTokenSecurity(chainId, tokenAddress)` - Single token check
+- `batchCheckTokens(chainId, tokenAddresses[])` - Batch verification
+- `analyzeRisk(goPlusData)` - Map indicators to risk level
+- `isSupportedChain(chainId)` - Check chain support
+
+**Stream Handler**: `src/background/handlers/streams/BlockchainStreamHandler.js`
+- Message type: `VERIFY_TOKEN_SECURITY`
+- Payload: `{ chainId, tokenAddresses[] }`
+
+**Frontend Integration**: `src/hooks/usePortfolioData.js`
+- Phase 3: Async IIFE after Phase 2 completes
+- Non-blocking background execution
+- Security flags applied: `is_dangerous`, `is_suspicious`, `is_critical_risk`
+
+### API Documentation
+
+**Official Docs**: https://docs.gopluslabs.io/
+**API Status**: No status page available
+**Support**: https://gopluslabs.io/
+
+### Privacy & Security
+
+**Data Sent to GoPlus**:
+- Token contract addresses (public blockchain data)
+- Chain ID (public information)
+
+**Data NOT Sent**:
+- User wallet addresses
+- User balances
+- User transaction history
+- Any personal information
+
+**HTTPS**: Required via CSP (`connect-src https://api.gopluslabs.io`)
+**No Tracking**: GoPlus does not track individual users
+**No Authentication**: Public API, no API key required
+
+### See Also
+
+- [SECURITY.md - Token Security Verification](./SECURITY.md#token-security-verification)
+- [API_REFERENCE.md - VERIFY_TOKEN_SECURITY](./API_REFERENCE.md#verify_token_security)
+
+---
+
+## 11. RPC Endpoints (Moralis Nodes)
 
 RPC calls are made via Moralis node endpoints for blockchain operations.
 
@@ -802,7 +1063,7 @@ RPC calls are made via Moralis node endpoints for blockchain operations.
 - SuperSeed
 - Monad
 
-### 10.1 eth_gasPrice
+### 11.1 eth_gasPrice
 
 ```json
 POST {rpcUrl}
@@ -815,7 +1076,7 @@ POST {rpcUrl}
 
 **Usage in codebase:** `src/background/services/GasPriceService.js`
 
-### 10.2 Standard EVM RPC Methods
+### 11.2 Standard EVM RPC Methods
 
 Used for:
 - Transaction sending (`eth_sendRawTransaction`)
@@ -839,9 +1100,8 @@ Used for:
 
 ### 11.2 Dune SIM API
 
-**Base URL:** `https://api.sim.dune.com/v1/evm`  
-**Status:** Configured but not actively used  
-**Authentication:** `X-Sim-Api-Key` header
+**Status:** ❌ **REMOVED in v3.1.8**
+**Reason:** Legacy dependency removed from send form.
 
 ---
 
@@ -863,7 +1123,7 @@ Used for:
 | `SUPERSAFE_API_KEY` | SuperSafe | No |
 | `COINGECKO_API_KEY` | CoinGecko | No |
 | `DEXTOOLS_API_KEY` | DexTools | No |
-| `SIM_API_KEY` | Dune SIM | No |
+| `DEXTOOLS_API_KEY` | DexTools | No |
 
 ---
 
@@ -891,5 +1151,4 @@ Used for:
 
 ---
 
-*Document generated from codebase analysis on 2025-12-04*
 

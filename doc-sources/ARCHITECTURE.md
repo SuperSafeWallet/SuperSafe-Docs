@@ -1,9 +1,10 @@
 # SuperSafe Wallet - Architecture Documentation
 
 **Created:** October 13, 2025  
-**Version:** 3.1.3  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** December 10, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -41,9 +42,12 @@ SuperSafe Wallet is a modern Ethereum-compatible browser extension wallet implem
 - **✅ Thin Client Pattern**: Frontend as lightweight presentation layer
 - **✅ Enterprise Signing System**: Robust request management and recovery
 - **✅ Bebop Integration**: Native swap support with partner fees
+- **✅ Uniswap Integration**: UniswapX and Classic routing (v3.1.6+)
 - **✅ Relay.link Integration**: Cross-chain swaps across 85+ blockchains
 - **✅ WalletConnect V2**: Full Reown WalletKit implementation
 - **✅ Framework Detection**: Automatic dApp framework identification
+- **✅ Backend Health Monitoring**: Real-time service status alerts (v3.1.8) 🆕
+
 
 ### System Metrics
 
@@ -369,6 +373,8 @@ autoEscalationManager      // Auto-approval for trusted dApps
 // External Integrations
 walletConnectManager       // WalletConnect v2 / Reown
 secureApiClient           // Secure external API calls
+backendHealthService       // Backend health monitoring (v3.1.8) 🆕
+                             // Includes Uniswap proxy health checks & duplicate fetch prevention
 bebopTokenService         // Bebop token list management
 ```
 
@@ -516,7 +522,7 @@ Swap.jsx (~115 lines)              # Container/Orchestrator
 | **PopupManager** | Popup window management | Mutual exclusion, priority system |
 | **EIP1193EventsManager** | Event broadcasting | accountsChanged, chainChanged |
 | **AutoEscalationManager** | Auto-approval system | Trusted dApp whitelist |
-| **WalletConnectManager** | WalletConnect v2 | Session management, request handling |
+| **WalletConnectManager** | WalletConnect v2 | Lazy-initialized session management (v3.1.8) |
 
 ### Services
 
@@ -1195,7 +1201,7 @@ sequenceDiagram
 
 ### Relay Network Selection Architecture
 
-**Last Updated:** November 12, 2025
+**Last Updated:** January 11, 2026
 
 #### Design Philosophy
 
@@ -1858,8 +1864,8 @@ See [CONFIGURATION.md](./CONFIGURATION.md) for complete documentation.
 
 ## One Window Policy Architecture
 
-**Version:** 3.1.3  
-**Implementation Date:** December 9, 2025  
+**Version:** 3.1.6  
+**Implementation Date:** January 11, 2026  
 **Status:** ✅ Production
 
 ### Overview
@@ -2081,8 +2087,8 @@ backgroundSessionController.popupManager.mainWindowTimestamp
 
 ## Responsive Design Architecture
 
-**Version:** 3.1.3  
-**Implementation Date:** December 9, 2025  
+**Version:** 3.1.6  
+**Implementation Date:** January 11, 2026  
 **Status:** ✅ Production
 
 ### Overview
@@ -2378,8 +2384,4 @@ console.log('Body classes:', document.body.classList);
 - [API_REFERENCE.md](./API_REFERENCE.md) - Complete API documentation
 
 ---
-
-**Document Status:** ✅ Current as of December 10, 2025  
-**Code Version:** v3.1.3  
-**Maintenance:** Review quarterly or after major architecture changes
 

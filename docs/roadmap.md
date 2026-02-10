@@ -6,13 +6,31 @@ sidebar_position: 3
 
 SuperSafe Wallet's development roadmap and future plans.
 
-## Current Version: v3.1.4
+## Current Version: v3.1.8
 
-### What's New in v3.1.4
+### What's New in v3.1.8
 
-SuperSafe Wallet v3.1.4 represents a **complete architectural overhaul** with significant improvements in security, performance, and user experience.
+SuperSafe Wallet v3.1.8 represents a **production-ready release** with professional external security audit, native Uniswap integration, and enhanced token protection.
 
-#### 🏗️ Architecture Improvements
+#### 🔒 External Security Audit
+- **Offensive Pulse Audit**: Professional security audit completed (December 2025)
+- **All Findings Resolved**: 2 MEDIUM severity issues resolved
+- **Industry Standard**: Certified to match MetaMask security controls
+- **Punycode Protection**: IDN homograph attack prevention added
+
+#### 🔄 Uniswap Integration  
+- **Native DEX Swaps**: Direct Uniswap integration on 4 networks
+- **UniswapX Support**: Dutch order protocol for better pricing
+- **Ethereum, Optimism, Base, Arbitrum**: Full Uniswap support
+- **Token Lists**: Curated token lists per network
+
+#### 🛡️ Enhanced Security
+- **Security Score**: 99/100 (A+)
+- **GoPlus Integration**: Scam token detection and verification
+- **Token Safety**: Real-time token security checks
+- **Improved Encryption**: Industry-standard key derivation
+
+#### 🏗️ Architecture Improvements (from v3.1.4)
 - **Professionally Standardized Service Worker**: Familiar, reliable architecture
 - **Smart Native Connection**: Real chainIds, no compatibility hacks
 - **Thin Client Pattern**: Frontend focuses on UI, backend handles logic
@@ -37,7 +55,7 @@ SuperSafe Wallet v3.1.4 represents a **complete architectural overhaul** with si
 - **MEV Protection**: Protection against Maximal Extractable Value
 - **Bebop Integration**: JAM protocol integration
 - **Multi-Chain Swaps**: Swaps across multiple networks
-- **Partner Fees**: 1% configurable partner fee
+- **Partner Fees**: 0.4% partner fee (Bebop/Relay), 0.2% + 0.2% Uniswap Labs (Uniswap)
 
 #### 👨‍💻 Developer Experience
 - **EIP-1193 Compliance**: Standard Ethereum provider
@@ -241,3 +259,6 @@ SuperSafe Wallet v3.1.4 represents a **complete architectural overhaul** with si
 
 ---
 
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Welcome to SuperSafe Wallet v3.1.4
+# Welcome to SuperSafe Wallet v3.1.8
 
 SuperSafe Wallet is a **modern EVM-compatible browser extension wallet** implementing a **industry-standard Service Worker architecture** with **Smart Native Connection** for seamless multichain dApp integration. Built with React 18, ethers.js v6, and Chrome Extension Manifest V3.
 
@@ -13,9 +13,9 @@ SuperSafe is more than just a wallet; it's your gateway to the **SuperSeed ecosy
 - **Take Full Control**: SuperSafe is non-custodial, meaning you, and only you, have access to your private keys and funds
 - **Manage Assets**: Easily send, receive, and manage ETH and various ERC-20 compatible tokens across multiple networks
 - **Connect to dApps**: Interact with dApps using the latest EIP-1193 standard with **Smart Native Connection** for secure and straightforward connection
-- **Swap Tokens**: Enjoy gasless, MEV-protected token swaps via **Bebop integration** with partner fee sharing
+- **Swap Tokens**: Trade tokens via **Uniswap** (4 networks), **Bebop** (gasless, MEV-protected, 6 networks), and **Relay.link** (cross-chain, 85+ blockchains)
 - **Buy Crypto**: Purchase cryptocurrency with fiat via **Tradesilvania integration** (card, bank transfer, digital wallets)
-- **Prioritize Security**: With enterprise-grade AES-256-GCM encryption, **gas validation & scam detection**, and user-controlled security settings
+- **Prioritize Security**: Externally audited by **Offensive Pulse**, with enterprise-grade AES-256-GCM encryption, **gas validation & scam detection**, and comprehensive security controls
 - **Use Multiple Networks**: Switch between **8 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad, Shardeum)
 
 ## Key Features at a Glance
@@ -30,7 +30,8 @@ SuperSafe is more than just a wallet; it's your gateway to the **SuperSeed ecosy
 - Real chainIds only, zero compatibility hacks
 - Automatic dApp framework detection (RainbowKit, Wagmi, Dynamic)
 - AllowList security system for trusted dApps
-- WalletConnect V2/Reown integration
+- WalletConnect V2/Reown integration (lazy initialized)
+- Backend Health Monitoring service
 
 ### 🌐 **Multi-Chain Support**
 - **Active Networks**: SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum One, Monad, Shardeum (8 networks)
@@ -39,15 +40,18 @@ SuperSafe is more than just a wallet; it's your gateway to the **SuperSeed ecosy
 - Support for 85+ blockchains via Relay.link cross-chain swaps
 
 ### 🔄 **Advanced Swap Integration**
+- **Uniswap Integration**: Native DEX swaps (Ethereum, Optimism, Base, Arbitrum)
 - **Bebop JAM Protocol**: Gasless swaps with MEV protection (6 networks)
 - **Relay.link Cross-Chain**: Cross-chain swaps across 85+ blockchains (6 networks)
 - **Unified Panel Architecture**: v2.0.0 unified swap interface
-- **Permit2 Integration**: Only pay for token approval
-- **Partner Fee System**: 1% configurable revenue sharing
-- **🆕 Gas Validation System**: Real-time scam detection and protection
+- **Permit2 Integration**: Gasless token approvals
+- **Partner Fee System**: Configurable revenue sharing
+- **Gas Validation System**: Real-time scam detection and balance validation
+- **Price Deviation Alerts**: Unfavorable quote warnings
 
 ### 🛡️ **Enterprise-Grade Security**
-- **Security Score**: 96/100
+- **Security Score**: 99/100 (A+)
+- **External Audit**: Professional security audit by Offensive Pulse (December 2025, all findings resolved)
 - **AES-256-GCM Encryption** with PBKDF2 key derivation (600,000 iterations)
 - **Unified Vault System**: All sensitive data encrypted locally
 - **Memory-First Security**: Auto-lock after 15 minutes of inactivity

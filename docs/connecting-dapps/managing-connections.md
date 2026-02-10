@@ -389,10 +389,12 @@ Each connection shows:
 Now that you can manage connections:
 
 1. **[Security Overview](../security/overview.md)** - Understand security features
-2. **[For Developers](../for-developers/integration-overview.md)** - Developer integration
 3. **[Advanced Topics](../advanced/architecture-deep-dive.md)** - Advanced topics
 4. **[Troubleshooting](../troubleshooting.md)** - Common issues and solutions
 
 ---
 
 **Ready to learn about security?** Continue to [Security Overview](../security/overview.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

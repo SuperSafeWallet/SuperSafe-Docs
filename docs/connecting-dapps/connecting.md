@@ -361,8 +361,10 @@ Now that you can connect to dApps:
 1. **[Approving Transactions](./approving-transactions.md)** - Learn transaction approval
 2. **[Managing Connections](./managing-connections.md)** - Learn connection management
 3. **[Security Overview](../security/overview.md)** - Understand security features
-4. **[For Developers](../for-developers/integration-overview.md)** - Developer integration
 
 ---
 
 **Ready to approve transactions?** Continue to [Approving Transactions](./approving-transactions.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

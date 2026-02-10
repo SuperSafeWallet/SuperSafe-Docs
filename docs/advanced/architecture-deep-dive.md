@@ -1258,16 +1258,12 @@ Content Script: ~150 KB (minimal injection)
 
 ## Related Documentation
 
-- [Backend Architecture](../for-developers/backend-architecture/service-worker.md) - Detailed backend architecture
-- [Frontend Architecture](../for-developers/frontend-architecture/thin-client.md) - React component architecture
 - [Security Overview](../security/overview.md) - Security implementation
 - [Transaction Decoding](./transaction-decoding.md) - Transaction decoder system
 - [Signing System](./signing-system.md) - Unified signing system
 - [Swap Integration](./swap-integration.md) - Bebop swap integration
-- [API Reference](../for-developers/api-reference/session-api.md) - Complete API documentation
 
 ---
 
-**Document Status:** ✅ Current as of December 18, 2025  
-**Code Version:** v3.1.4  
-**Maintenance:** Review quarterly or after major architecture changes
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

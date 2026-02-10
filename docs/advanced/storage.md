@@ -778,3 +778,6 @@ Now that you understand storage architecture:
 ---
 
 **Ready to learn about swap integration?** Continue to [Swap Integration](./swap-integration.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

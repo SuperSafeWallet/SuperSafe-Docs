@@ -371,3 +371,6 @@ Now that you understand the interface:
 ---
 
 **Ready to manage your wallets?** Continue to [Wallet Management](./wallet-management.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

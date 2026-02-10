@@ -1,10 +1,10 @@
 # SuperSafe Wallet - Signing System
 
 **Created:** October 26, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -32,6 +32,8 @@ SuperSafe Wallet implements a unified signing system that handles all types of s
 - **✅ Industry Compatibility** - Snake_case and camelCase method support
 - **✅ EIP-712 Support** - Full typed data parsing and display
 - **✅ Permit2 Integration** - Enhanced UI for gasless approvals
+- **✅ Unified Badge System** - Authority for pending signing requests (v3.1.7) 🆕
+
 
 ### System Metrics
 
@@ -1021,11 +1023,5 @@ src/components/
 - Expired request cleanup: ~1ms per request
 - Memory released immediately after completion
 
----
-
-**Document Status:** ✅ Complete and Current  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
-**Last Code Update:** November 15, 2025  
-**Maintenance:** Review after signing system changes or security audits
+---  
 

@@ -481,3 +481,6 @@ await preSwitchCoordinator.executeHandlers(targetNetworkKey, options)
 **Document Status:** ✅ Current as of December 18, 2025  
 **Code Version:** v3.1.4  
 **Maintenance:** Review after adding new networks or modifying switch flow
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

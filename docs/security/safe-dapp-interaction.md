@@ -10,15 +10,16 @@ Learn how SuperSafe's AllowList system and security features protect you when in
 
 SuperSafe Wallet implements multiple layers of security to protect you when connecting to and interacting with dApps, including the **AllowList system**, origin validation, and phishing protection.
 
-### Security Score: **96/100**
+### Security Score: **99/100**
 
 ```
 dApp Security Features:
-├── AllowList System: 98/100 ✅
-├── Origin Validation: 95/100 ✅
-├── Phishing Protection: 94/100 ✅
-├── Permission Management: 96/100 ✅
-└── Transaction Security: 97/100 ✅
+├── AllowList System: 100/100 ✅
+├── Origin Validation: 100/100 ✅
+├── Phishing Protection: 98/100 ✅
+├── Punycode Protection: 100/100 ✅ NEW!
+├── Permission Management: 98/100 ✅
+└── Transaction Security: 100/100 ✅
 ```
 
 ## AllowList Security System
@@ -146,10 +147,44 @@ Security Status Indicators:
 - **Known Malicious**: Known malicious domains
 
 #### Detection Methods
-- **Domain Analysis**: Analyze domain names
-- **Certificate Analysis**: Analyze SSL certificates
-- **Pattern Matching**: Match against known patterns
-- **Reputation Checking**: Check domain reputation
+- **Domain Analysis**: Analyze domain names for suspicious patterns
+- **Certificate Analysis**: Analyze SSL certificates for validity
+- **Pattern Matching**: Match against known phishing patterns
+- **Reputation Checking**: Check domain reputation databases
+- **Punycode Detection**: Detect IDN homograph attacks
+
+### Punycode / IDN Homograph Protection
+
+SuperSafe Wallet implements robust protection against **Internationalized Domain Name (IDN) homograph attacks** where malicious actors use visually similar Unicode characters to spoof trusted domains.
+
+#### What is Punycode?
+
+Punycode is an encoding method that represents Unicode characters in ASCII format for domain names. Attackers exploit this to create visually identical but technically different domains.
+
+**Example IDN Homograph Attack:**
+```
+Legitimate: https://uniswap.org
+Malicious:  https://uniswαp.org  (uses Greek 'α' instead of 'a')
+Punycode:   https://xn--uniswp-5wa.org
+```
+
+#### SuperSafe Protection
+
+- **Warning Display**: Shows clear warning when Punycode detected
+- **Punycode Reveal**: Displays the actual Punycode (xn--) representation
+- **User Decision**: User must explicitly acknowledge the warning
+- **AllowList Filtering**: Punycode domains not in AllowList are blocked
+
+#### User Experience
+
+When you connect to a dApp using Punycode/IDN:
+
+1. **Visual Alert**: Clear warning icon displayed
+2. **Original + Punycode**: Both representations shown for comparison
+3. **Risk Explanation**: Explains the homograph attack risk
+4. **Informed Choice**: You decide whether to proceed
+
+**This protection was added based on recommendations from the Offensive Pulse external security audit (December 2025).**
 
 ## Permission Management
 
@@ -364,6 +399,9 @@ Now that you understand dApp security:
 3. **[Connecting to dApps](../connecting-dapps/connecting.md)** - Learn connection process
 4. **[Advanced Topics](../advanced/architecture-deep-dive.md)** - Advanced security topics
 
----
 
 **Ready to configure security?** Continue to [Security Configurations](./configurations.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8  
+**External Audit:** ✅ Punycode protection recommended by Offensive Pulse

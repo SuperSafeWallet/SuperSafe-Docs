@@ -283,3 +283,6 @@ Checks if transaction history is supported for a chainId.
 **Code Version:** v3.0.0+  
 **Maintenance:** Review after adding new networks or explorer adapters
 
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

@@ -451,3 +451,6 @@ When requesting features, include:
 ---
 
 **Need more help?** Check out our [FAQ](./faq.md) or [contact support](mailto:support@supersafe.cool)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

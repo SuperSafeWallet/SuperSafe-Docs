@@ -31,7 +31,7 @@ SuperSafe Wallet integrates **Bebop's JAM (Just Another Market) protocol** for g
 - **Cross-Chain**: Future cross-chain swap support
 
 ### 💰 **Partner Fee System**
-- **1% Partner Fee**: Configurable revenue sharing
+- **0.4% Partner Fee**: Bebop/Relay (0.2% + 0.2% for Uniswap)
 - **Transparent Fees**: Clear fee breakdown
 - **Value Sharing**: Share in protocol value
 - **Sustainable Model**: Long-term sustainability
@@ -92,7 +92,7 @@ Monad and Shardeum are active networks but do not currently support Bebop swaps.
 │ │ 💰 Price Impact: 0.1%          │ │ ← Quote Details
 │ │ ⛽ Gas: 0.002 ETH (Approval)   │ │
 │ │ 🔄 Route: Bebop JAM            │ │
-│ │ 💸 Partner Fee: 1%             │ │
+│ │ 💸 Partner Fee: 0.4%           │ │
 │ └─────────────────────────────────┘ │
 │ [🔄 Swap Tokens]                   │ ← Action Button
 └─────────────────────────────────────┘
@@ -144,7 +144,7 @@ Quote Details:
 ├── Price Impact: 0.1%
 ├── Route: Bebop JAM
 ├── Gas Required: 0.002 ETH (Approval)
-├── Partner Fee: 1% (12 USDC)
+├── Partner Fee: 0.4% (4.8 USDC)
 └── Total Output: 1,188 USDC
 ```
 
@@ -230,13 +230,14 @@ Slippage Settings:
 ```
 Fee Structure:
 ├── Network Fee: 0 ETH (Gasless)
-├── Partner Fee: 1% (Configurable)
-├── Protocol Fee: 0% (Bebop)
-└── Total Fee: 1%
+├── SuperSafe Partner Fee (Bebop/Relay): 0.4%
+├── SuperSafe Fee (Uniswap): 0.2%
+├── Uniswap Labs Fee (Uniswap): 0.2%
+└── Total Fee: 0.4%
 ```
 
-#### Fee Management
-- **Partner Fee**: 1% default, configurable
+####Fee Management
+- **Partner Fee**: 0.4% supports SuperSafe development
 - **Fee Receiver**: SuperSafe fee address
 - **Transparent**: All fees clearly displayed
 - **Value Sharing**: Share in protocol value
@@ -390,8 +391,10 @@ Now that you can swap tokens:
 1. **[Switch Networks](./network-switching.md)** - Work with different networks
 2. **[Connect to dApps](../connecting-dapps/connecting.md)** - Use with dApps
 3. **[Security Overview](../security/overview.md)** - Learn about security
-4. **[For Developers](../for-developers/integration-overview.md)** - Developer integration
 
 ---
 
 **Ready to switch networks?** Continue to [Network Switching](./network-switching.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

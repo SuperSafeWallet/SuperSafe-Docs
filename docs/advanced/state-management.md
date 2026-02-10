@@ -874,3 +874,6 @@ Now that you understand state management:
 ---
 
 **Ready to learn about network configuration?** Continue to [Networks Configuration](./networks-config.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

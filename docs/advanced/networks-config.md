@@ -831,3 +831,6 @@ Now that you understand network configuration:
 ---
 
 **Ready to learn about storage architecture?** Continue to [Storage Architecture](./storage.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

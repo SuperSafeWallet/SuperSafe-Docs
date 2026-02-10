@@ -389,3 +389,6 @@ Now that you can manage tokens:
 ---
 
 **Ready to swap tokens?** Continue to [Swapping Tokens](./swapping-tokens.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

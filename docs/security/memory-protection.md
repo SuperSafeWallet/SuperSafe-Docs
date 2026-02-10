@@ -198,6 +198,7 @@ async lock() {
 ---
 
 **Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
+**Code Version:** v3.1.8  
+**Document Status:** ✅ Current as of February 10, 2026
 **Maintenance:** Review after memory security improvements
 

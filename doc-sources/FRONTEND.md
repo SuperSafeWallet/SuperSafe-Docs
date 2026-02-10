@@ -1,9 +1,10 @@
 # SuperSafe Wallet - Frontend Architecture
 
 **Created:** October 13, 2025  
-**Last Updated:** December 10, 2025  
-**Version:** 3.1.3  
-**Status:** ✅ CURRENT
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
+**Status:** ✅ CURRENT  
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -29,14 +30,15 @@ SuperSafe Wallet's frontend implements a **Thin Client Pattern** where all busin
 ### Frontend Metrics
 
 ```
-Total Frontend Files: 64 JSX components
-Main App Component: 1,569 lines
-Total Frontend Code: ~8,500 lines
+Total Frontend Files: 68 JSX components
+Main App Component: 1,620 lines
+Total Frontend Code: ~9,200 lines
 Framework: React 18.2.0
 Styling: TailwindCSS 3.3.3
-Build Tool: Vite 6.3.6
-Responsive: Popup (375px) + Fullpage (adaptive) 🆕
-Window Policy: One window enforcement 🆕
+Build Tool: Vite 6.0.0+
+Responsive: Popup (375px) + Fullpage (adaptive)
+Window Policy: One window enforcement
+Badge System: Unified Badge System (v3.1.7) 🆕
 ```
 
 ### Key Principles
@@ -645,13 +647,9 @@ function formatWei(weiStr) {
 **Token Logo Integration:**
 ```javascript
 function getTokenLogo(chainId, address, symbol) {
-  if (!address || address === 'NATIVE_TOKEN') {
-    // Native token logo (ETH, BNB, etc.)
-    return `https://api.dune.com/api/echo/beta/token/logo/${chainId}`;
-  }
-  
-  // ERC-20 token logo
-  return `https://api.dune.com/api/echo/beta/token/logo/${chainId}/${address}`;
+  // Use the curated logo orchestrator (v3.1.8)
+  // This handles local assets, TrustWallet, and other sources automatically
+  return logoOrchestrator.getLogo(chainId, address);
 }
 ```
 
@@ -953,7 +951,7 @@ The system tries providers in this order:
 1. **Backend** - Logos from Moralis/API (from existing metadata, fastest remote)
 2. **TrustWallet** - Official TrustWallet assets repository (high quality, EIP-55 compliant)
 3. **SmolDapp** - Community-maintained token assets (multiple formats)
-4. **Bebop** - Bebop aggregator S3 bucket (good fallback)
+4. **Bebop** - REMOVED in v3.1.8 (S3 bucket deprecated)
 
 First successful match wins!
 
@@ -1054,6 +1052,12 @@ export const CURATED_TOKEN_LOGOS = {
 - Avalanche (43114)
 - Fantom (250)
 - And more...
+-   EIP-55 checksummed addresses (using `js-sha3`)
+-   Native coin support with L2 special handling
+-   L2s using ETH (Optimism, Arbitrum, Base, etc.) return Ethereum logo
+-   PNG format from GitHub raw
+
+
 
 **Usage**:
 ```javascript
@@ -1079,9 +1083,9 @@ const logoUrl = getTokenLogoFromTrustWallet({
 **Location**: `src/utils/logoProviders/logoFromBackend.js`
 
 **Features**:
-- Extracts logos from existing token metadata
-- No external requests (fastest remote option)
-- Works with Moralis, SuperSafe API, and other backend sources
+-   Extracts logos from existing token metadata
+-   No external requests (fastest remote option)
+-   Works with Moralis, SuperSafe API, and other backend sources
 
 **Usage**:
 ```javascript
@@ -1099,17 +1103,17 @@ const logoUrl = getTokenLogoFromBackend({
 **Location**: `src/utils/logoProviders/logoFromSmolDapp.js`
 
 **Features**:
-- Multiple formats: PNG (32px, 128px), SVG
-- Community-maintained assets
-- Fast GitHub raw CDN
+-   Multiple formats: PNG (32px, 128px), SVG
+-   Community-maintained assets
+-   Fast GitHub raw CDN
 
 **Supported Chains**:
-- Ethereum (1)
-- BSC (56)
-- Polygon (137)
-- Optimism (10)
-- Arbitrum (42161)
-- And more...
+-   Ethereum (1)
+-   BSC (56)
+-   Polygon (137)
+-   Optimism (10)
+-   Arbitrum (42161)
+-   And more...
 
 **Usage**:
 ```javascript
@@ -1130,32 +1134,8 @@ const logoUrl = getTokenLogoFromSmolDapp({
 });
 ```
 
-##### 4. Bebop Provider
 
-**Location**: `src/utils/logoProviders/logoFromBebop.js`
 
-**Features**:
-- SVG format
-- S3 bucket (fast CDN)
-- **Important**: Requires case-sensitive addresses (EIP-55 checksum)
-
-**Supported Chains**:
-- Ethereum (1)
-- BSC (56)
-- Polygon (137)
-- Optimism (10)
-- Arbitrum (42161)
-- And more...
-
-**Usage**:
-```javascript
-import { getTokenLogoFromBebop } from '../utils/logoProviders/logoFromBebop';
-
-const logoUrl = getTokenLogoFromBebop({
-  chainId: 56,
-  address: '0x...', // Must be checksummed!
-});
-```
 
 #### Using the Logo Orchestrator
 
@@ -1759,6 +1739,48 @@ function SecurityNotice({ origin, warnings = [] }) {
 
 ---
 
+## Token Security UI (v3.1.6)
+
+### SecurityTooltip Component
+
+**Location:** `src/components/common/TokenListItem.jsx`
+
+**Purpose:** Display security warnings for HIGH/MEDIUM risk tokens with detailed risk reasons.
+
+**Implementation:**
+```javascript
+const SecurityTooltip = ({ balance }) => {
+  if (!balance.is_dangerous && !balance.is_suspicious) return null;
+
+  const isDangerous = balance.is_dangerous;
+  const riskColor = isDangerous ? 'text-red-500' : 'text-yellow-500';
+  const riskTitle = isDangerous ? '⚠️ High Risk Token' : '⚠️ Caution Advised';
+  const reasons = balance.security_reasons || [];
+
+  return (
+    <span className={`${riskColor} text-[11px] cursor-help mr-1`}>
+      ⚠️
+    </span>
+  );
+};
+```
+
+**Placement:** Security badge renders BEFORE token name for maximum visibility.
+
+**Conditional Rendering:**
+- Only appears if `is_dangerous` or `is_suspicious` flags are `true`
+- Color: Red for HIGH risk (`is_dangerous`), Yellow for MEDIUM risk (`is_suspicious`)
+- Icon: ⚠️ emoji
+- Tooltip shows `security_reasons` array on hover (implementation varies by component)
+
+**Risk Flags:**
+- `is_critical_risk`: Token permanently removed from UI (not displayed)
+- `is_dangerous`: HIGH risk (hidden in safe mode, ⚠️ badge when visible)
+- `is_suspicious`: MEDIUM risk (hidden in safe mode, ⚠️ badge when visible)
+- `security_reasons`: Array of human-readable reasons
+
+---
+
 ## Hooks Architecture
 
 ### Custom Hooks
@@ -1833,7 +1855,73 @@ export function useSwapLogic(network, currentWallet) {
   
   return { quote, fetchQuote, isLoadingQuote };
 }
+
+#### usePortfolioData (v3.1.6)
+
+**Location:** `src/hooks/usePortfolioData.js`
+
+**Purpose:** Portfolio data loading with 3-phase progressive enhancement including security verification.
+
+**Phase 3 Integration - Security Verification:**
+
+```javascript
+// Phase 2 complete - dispatch prices
+dispatch({ type: 'PORTFOLIO_PRICES_UPDATED', payload: enhancedBalances });
+
+// Phase 3 - GoPlus security verification (v3.1.6, non-blocking background)
+(async () => {
+  try {
+    const tokenAddresses = enhancedBalances
+      .filter(b => b.contractAddress && b.contractAddress !== '0x0000000000000000000000000000000000000000')
+      .map(b => b.contractAddress);
+    
+    if (tokenAddresses.length === 0) return;
+    
+    const response = await sendMessage('blockchain', {
+      type: 'VERIFY_TOKEN_SECURITY',
+      payload: { chainId, tokenAddresses }
+    });
+    
+    if (response.success) {
+      const { securityResults } = response.data;
+      
+      // Apply security flags to balances
+      const secureBalances = enhancedBalances.map(balance => {
+        const address = balance.contractAddress?.toLowerCase();
+        const result = securityResults[address];
+        
+        return {
+          ...balance,
+          is_dangerous: result?.riskLevel === 'HIGH',
+          is_suspicious: result?.riskLevel === 'MEDIUM',
+          is_critical_risk: result?.riskLevel === 'CRITICAL',
+          security_reasons: result?.reasons || []
+        };
+      });
+      
+      // Filter out CRITICAL risk tokens (permanently hidden)
+      const safeBalances = secureBalances.filter(b => !b.is_critical_risk);
+      
+      dispatch({ type: 'PORTFOLIO_SECURITY_VERIFIED', payload: safeBalances });
+    }
+  } catch (error) {
+    // Fail-open: don't block UI on security verification errors
+    console.error('[usePortfolioData] Security verification failed:', error);
+  }
+})();
 ```
+
+**Key Features:**
+- **Async IIFE**: Runs asynchronously without blocking Phase 2 completion
+- **Fail-open**: Errors don't prevent portfolio display
+- **Filtering**: CRITICAL risk tokens permanently removed from UI
+- **Security Flags**:
+  - `is_critical_risk`: Honeypots, scams (filtered out)
+  - `is_dangerous`: HIGH risk (hidden in safe mode)
+  - `is_suspicious`: MEDIUM risk (hidden in safe mode)
+  - `security_reasons`: Array of human-readable warnings
+
+**See:** [SECURITY.md - Token Security Verification](./SECURITY.md#token-security-verification)
 
 #### useTokenLogoNew
 
@@ -2258,7 +2346,7 @@ export function useNetworkSwitchPreparation(componentName) {
 ## One Window Policy
 
 **Version:** 3.1.3  
-**Implementation Date:** December 9, 2025  
+**Implementation Date:** January 11, 2026  
 **Status:** ✅ Production
 
 ### Overview
@@ -2450,7 +2538,7 @@ backgroundSessionController.popupManager.mainWindowType
 ## Responsive Design System
 
 **Version:** 3.1.3  
-**Implementation Date:** December 9, 2025  
+**Implementation Date:** January 11, 2026  
 **Status:** ✅ Production
 
 ### Overview
@@ -2739,7 +2827,3 @@ console.log('Body classes:', document.body.classList);
 - [ARCHITECTURE.md#responsive-design-architecture](./ARCHITECTURE.md#responsive-design-architecture) - Complete architectural overview 🆕
 
 ---
-
-**Document Status:** ✅ Current as of December 10, 2025  
-**Code Version:** v3.1.3
-

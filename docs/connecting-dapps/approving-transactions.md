@@ -405,9 +405,11 @@ Now that you can approve transactions:
 
 1. **[Managing Connections](./managing-connections.md)** - Learn connection management
 2. **[Security Overview](../security/overview.md)** - Understand security features
-3. **[For Developers](../for-developers/integration-overview.md)** - Developer integration
 4. **[Advanced Topics](../advanced/architecture-deep-dive.md)** - Advanced topics
 
 ---
 
 **Ready to manage connections?** Continue to [Managing Connections](./managing-connections.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

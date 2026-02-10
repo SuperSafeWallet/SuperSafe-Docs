@@ -1000,3 +1000,6 @@ Now that you understand the main components:
 ---
 
 **Ready to learn about state management?** Continue to [State Management](./state-management.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

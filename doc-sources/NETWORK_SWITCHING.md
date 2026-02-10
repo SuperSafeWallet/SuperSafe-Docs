@@ -1,10 +1,10 @@
 # SuperSafe Wallet - Network Switching System
 
 **Created:** November 3, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.1.0+  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -26,7 +26,7 @@
 
 SuperSafe Wallet implements a sophisticated network switching system that ensures all components are synchronized and ready before, during, and after network changes. The system prevents race conditions, maintains state consistency, and provides robust error handling.
 
-**Supported Networks:** Currently supports **8 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad, Shardeum) with extensible architecture for adding new networks.
+**Supported Networks:** Currently supports **7 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad) with extensible architecture for adding new networks.
 
 ### Key Features
 
@@ -790,8 +790,4 @@ function ConnectionHandler({ dappOrigin, requiredNetwork }) {
 - [DAPP_CONNECTIONS.md](./DAPP_CONNECTIONS.md) - dApp connection system
 
 ---
-
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.1.0+  
-**Maintenance:** Review after adding new networks or modifying switch flow
 

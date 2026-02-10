@@ -380,3 +380,6 @@ Now that you can manage wallets:
 ---
 
 **Ready to send funds?** Continue to [Sending and Receiving](./sending-receiving.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

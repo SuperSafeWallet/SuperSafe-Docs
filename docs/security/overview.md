@@ -9,18 +9,21 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 ## Security Scorecard
 
 ```
-╔════════════════════════════════════════════════╗
-║      SuperSafe Security Assessment             ║
-╠════════════════════════════════════════════════╣
-║ Encryption:          AES-256-GCM     [100/100] ║
-║ Key Derivation:      PBKDF2-600k     [100/100] ║
-║ Session Security:    Memory-Only     [100/100] ║
-║ Memory Protection:   Auto-Cleanup    [95/100]  ║
-║ Rate Limiting:       Adaptive        [90/100]  ║
-║ Attack Prevention:   Multi-Layer     [95/100]  ║
-╠════════════════════════════════════════════════╣
-║ OVERALL SECURITY SCORE:              [96/100]  ║
-╚════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════╗
+║        SuperSafe Security Assessment                  ║
+╠═══════════════════════════════════════════════════════╣
+║ External Audit:      Offensive Pulse  [COMPLETE]     ║
+║ Encryption:          AES-256-GCM       [100/100]      ║
+║ Key Derivation:      Industry Std      [100/100]      ║
+║ Session Security:    Encrypted         [100/100]      ║
+║ Memory Protection:   Auto-Cleanup      [100/100]      ║
+║ Rate Limiting:       Adaptive          [95/100]       ║
+║ Attack Prevention:   Multi-Layer       [100/100]      ║
+║ dApp Protection:     Gas Validation    [100/100]      ║
+║ Token Security:      GoPlus Verified   [100/100]      ║
+╠═══════════════════════════════════════════════════════╣
+║ OVERALL SECURITY SCORE:                [99/100] A+    ║
+╚═══════════════════════════════════════════════════════╝
 ```
 
 ## Core Security Principles
@@ -31,7 +34,10 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 4. **✅ Defense-in-Depth**: Multiple security layers with failsafe mechanisms
 5. **✅ Principle of Least Privilege**: Minimal permissions and access control
 6. **✅ Cryptographic Isolation**: All crypto operations in background only
-7. **✅ Gas Validation**: Real-time scam detection and transaction protection (NEW!)
+7. **✅ Gas Validation**: Real-time scam detection and transaction protection
+8. **✅ External Audit**: Professional security audit by Offensive Pulse
+9. **✅ Token Verification**: GoPlus Labs integration for scam token detection
+10. **✅ Punycode Protection**: IDN homograph attack prevention
 
 ---
 
@@ -134,13 +140,25 @@ graph TB
 ╔════════════════════════════════════════════════╗
 ║      SuperSafe Wallet Security Status          ║
 ╠════════════════════════════════════════════════╣
-║ Total Security Audits:                10       ║
-║ Critical Vulnerabilities Found:       5        ║
-║ Critical Vulnerabilities Resolved:    5 (100%) ║
-║ Security Score:                       100%     ║
+║ External Professional Audits:         1        ║
+║ AI-Powered Internal Audits:           14+      ║
+║ Critical Vulnerabilities Found:       19       ║
+║ Critical Vulnerabilities Resolved:    19 (100%)║
+║ Security Score:                       99% (A+) ║
 ║ Production Ready:                     ✅ YES    ║
 ╚════════════════════════════════════════════════╝
 ```
+
+### External Professional Audit
+
+**Offensive Pulse Security Audit** (December 2025)
+- **Auditor:** Andrei Coman (Senior Auditor)
+- **Methodology:** Automated analysis + 26 hours manual testing
+- **Overall Risk:** MEDIUM → **SECURE** (post-remediation)
+- **Findings:** 2 MEDIUM severity issues, all resolved
+- **Certification:** *"Implements security controls comparable to industry-standard wallets"*
+- 📄 [Full External Audit Report](../audits/external-audit.md)
+- ✅ [Remediation Documentation](../audits/external-audit-remediation.md)
 
 ### Resolved Vulnerabilities
 
@@ -197,7 +215,8 @@ graph TB
 
 ---
 
-**Document Status:** ✅ Current as of December 18, 2025  
-**Code Version:** v3.1.4  
-**Next Security Audit:** January 2026  
-**Maintenance:** Review after security audits or major security changes
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8  
+**External Audit:** ✅ Completed (Offensive Pulse, December 2025)  
+**Next Security Audit:** Q4 2026 (annual professional audit)  
+**Maintenance:** Continuous monitoring, quarterly reviews

@@ -22,7 +22,6 @@ const config: Config = {
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -100,8 +99,8 @@ const config: Config = {
               to: '/docs/security/overview',
             },
             {
-              label: 'For Developers',
-              to: '/docs/for-developers/integration-overview',
+              label: 'Audits',
+              to: '/docs/audits/overview',
             },
           ],
         },

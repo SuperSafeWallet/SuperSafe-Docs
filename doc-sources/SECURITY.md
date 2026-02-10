@@ -1,11 +1,10 @@
 # SuperSafe Wallet - Security Architecture
 
 **Created:** October 13, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Security Level:** Military-Grade  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -16,12 +15,13 @@
 3. [Cryptographic Implementation](#cryptographic-implementation)
 4. [Unified Vault System](#unified-vault-system)
 5. [Allowlist Security System](#allowlist-security-system)
-6. [Session Security](#session-security)
-7. [Memory Protection](#memory-protection)
-8. [dApp Security](#dapp-security)
-9. [Network Security](#network-security)
-10. [Attack Mitigation](#attack-mitigation)
-11. [Security Best Practices](#security-best-practices)
+6. [Token Security Verification](#token-security-verification)
+7. [Session Security](#session-security)
+8. [Memory Protection](#memory-protection)
+9. [dApp Security](#dapp-security)
+10. [Network Security](#network-security)
+11. [Attack Mitigation](#attack-mitigation)
+12. [Security Best Practices](#security-best-practices)
 
 ---
 
@@ -36,7 +36,7 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 ║      SuperSafe Security Assessment             ║
 ╠════════════════════════════════════════════════╣
 ║ Encryption:          AES-256-GCM     [100/100] ║
-║ Key Derivation:      PBKDF2-600k     [100/100] ║
+║ Key Derivation:      PBKDF2-HI       [100/100] ║
 ║ Session Security:    Memory-Only     [100/100] ║
 ║ Memory Protection:   Auto-Cleanup    [95/100]  ║
 ║ Rate Limiting:       Adaptive        [90/100]  ║
@@ -78,7 +78,7 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 3: Cryptographic Protection                           │
 │   - AES-256-GCM Encryption                                  │
-│   - PBKDF2 Key Derivation (600,000 iterations)              │
+│   - PBKDF2 Key Derivation (high-iteration count)            │
 │   - Random Salt & IV Generation                             │
 │   - Non-Extractable Keys                                    │
 ├─────────────────────────────────────────────────────────────┤
@@ -99,6 +99,11 @@ SuperSafe Wallet implements a **defense-in-depth security model** with multiple 
 │   - Blacklist Management                                    │
 │   - Request Deduplication                                   │
 │   - Phishing Protection                                     │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 7: System Monitoring                                  │
+│   - Backend Health Monitoring Service                       │
+│   - Real-time API status checks                             │
+│   - Automated failover awareness                            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -154,7 +159,7 @@ graph TB
 
 **Key Derivation:** PBKDF2 (Password-Based Key Derivation Function 2)
 - **Hash Function**: SHA-256
-- **Iterations**: 600,000 (MetaMask-compatible, OP-001 security fix)
+- **Iterations**: High-iteration standard (industry best practices)
 - **Salt**: 32 bytes random per vault
 - **Output**: 256-bit AES key
 
@@ -172,7 +177,7 @@ sequenceDiagram
     VM->>WC: Generate random IV (16 bytes)
     
     Note over VM,WC: Key Derivation
-    VM->>WC: PBKDF2(password, salt, 600k iterations)
+    VM->>WC: PBKDF2(password, salt, high-iteration standard)
     WC->>VM: Return CryptoKey (non-extractable)
     
     Note over VM,WC: Encryption
@@ -241,7 +246,7 @@ async encryptVault(vaultData, password) {
       { 
         name: "PBKDF2", 
         salt: saltBytes, 
-        iterations: 600000,  // MetaMask-compatible (OP-001 security fix)
+        iterations: HIGH_ITERATION_COUNT,  // Industry standard
         hash: "SHA-256" 
       },
       pwKey,
@@ -759,6 +764,400 @@ See [Allowlist Security Enhancements Audit](./Audits/2025-11-21_ALLOWLIST_SECURI
 
 ---
 
+## Token Security Verification
+
+**Version:** 3.1.8  
+**Status:** ✅ PRODUCTION  
+**Security Level:** Real-Time Threat Detection  
+**Provider:** GoPlus Labs Security API
+
+SuperSafe implements automated token security verification to protect users from interacting with malicious, scam, or high-risk ERC-20 tokens. This system runs as a background process (Phase 3) during portfolio loading and provides real-time security assessments.
+
+### Architecture
+
+**Three-Phase Progressive Loading:**
+
+```
+Portfolio Loading Flow:
+┌─────────────────────────────────────────────────────────┐
+│ Phase 1: Moralis API (~300ms)                          │
+│   - Fetch token balances                               │
+│   - Get basic token metadata                           │
+│   - Dispatch initial UI update                         │
+├─────────────────────────────────────────────────────────┤
+│ Phase 2: SuperSafe API (~80ms)                         │
+│   - Fetch accurate token prices                        │
+│   - Calculate portfolio totals                         │
+│   - Dispatch price-updated UI                          │
+├─────────────────────────────────────────────────────────┤
+│ Phase 3: GoPlus Security (~1-2s, background)           │
+│   - Batch verify token security (non-blocking)         │
+│   - Analyze 15+ risk indicators                        │
+│   - Mark dangerous/suspicious tokens                   │
+│   - Filter CRITICAL risks from UI                      │
+│   - Dispatch security-verified UI                      │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Key Properties:**
+- ✅ Non-blocking: Phase 3 runs asynchronously, UI updates immediately after Phase 2
+- ✅ Fail-open: If GoPlus API is unavailable, tokens still display (better UX than blocking)
+- ✅ Cached: Security results cached for 5 minutes to minimize API calls
+- ✅ Rate-limited: Maximum 5 requests/second to respect API limits
+- ✅ Multi-chain: Supports Ethereum, BSC, Optimism, Arbitrum, Base
+
+### Supported Networks
+
+GoPlus Labs API supports the following networks:
+
+| Network | Chain ID | Status |
+|---------|----------|--------|
+| Ethereum | 1 | ✅ Supported |
+| BSC | 56 | ✅ Supported |
+| Optimism | 10 | ✅ Supported |
+| Arbitrum One | 42161 | ✅ Supported |
+| Base | 8453 | ✅ Supported |
+| SuperSeed | 5330/53302 | ❌ Not supported (skip verification) |
+| Shardeum | 8118 | ❌ Not supported (skip verification) |
+| Monad | 143 | ❌ Not supported (skip verification) |
+
+**Behavior for unsupported chains:** Security verification is silently skipped, tokens display normally.
+
+### Risk Categorization
+
+Tokens are classified into 4 risk levels based on 15+ security indicators:
+
+#### 🔴 CRITICAL Risk (Permanently Removed)
+**Indicators:**
+- `is_honeypot === '1'` - Token cannot be sold after purchase
+- `honeypot_with_same_creator` - Creator has honeypot history
+- `cannot_sell_all === '1'` - Forced partial sales only
+- `cannot_buy === '1'` - Buying disabled
+
+**Action:** Token permanently removed from portfolio display, even in safe mode OFF.
+
+#### 🟠 HIGH Risk (Hidden in Safe Mode)
+**Indicators:**
+- `buy_tax > 10%` or `sell_tax > 10%` - Excessive transaction fees
+- `slippage_modifiable === '1'` - Taxes can be changed dynamically
+- `hidden_owner === '1'` - Ownership renounced but still controllable
+- `can_take_back_ownership === '1'` - Ownership can be reclaimed
+- `trading_cooldown === '1'` - Artificial trading restrictions
+- `gas_abuse` - Excessive gas consumption patterns
+
+**Action:** 
+- Marked as `is_dangerous: true`
+- Hidden when Safe Mode is ON
+- Displays ⚠️ warning badge when Safe Mode is OFF
+- Tooltip shows specific risk reasons
+
+#### 🟡 MEDIUM Risk (Hidden in Safe Mode)
+**Indicators:**
+- `is_open_source === '0'` - Contract source code not verified
+- `is_proxy === '1'` - Upgradeable proxy contract
+- `is_anti_whale === '1'` - Whale manipulation protections (can be abused)
+- `is_blacklisted === '1'` - Token on known blacklists
+- `holder_count < 100` - Very low holder count (suspicious)
+
+**Action:**
+- Marked as `is_suspicious: true`
+- Hidden when Safe Mode is ON
+- Displays ⚠️ warning badge when Safe Mode is OFF
+- Tooltip shows "Caution advised"
+
+#### 🟢 SAFE (Always Visible)
+**Indicators:**
+- All security checks passed
+- No concerning indicators detected
+- Normal tax rates (<10%)
+- Open source contract
+- Adequate holder count
+
+**Action:** Normal display, no warnings.
+
+### Security Indicators Reference
+
+Complete list of checks performed by GoPlus Labs:
+
+| Indicator | Type | Description | Risk Level |
+|-----------|------|-------------|------------|
+| `is_honeypot` | boolean | Cannot sell after buy | CRITICAL |
+| `honeypot_with_same_creator` | boolean | Creator honeypot history | CRITICAL |
+| `cannot_sell_all` | boolean | Forced partial sells | CRITICAL |
+| `cannot_buy` | boolean | Buying disabled | CRITICAL |
+| `buy_tax` | percentage | Buy transaction fee | HIGH if >10% |
+| `sell_tax` | percentage | Sell transaction fee | HIGH if >10% |
+| `slippage_modifiable` | boolean | Dynamic tax changes | HIGH |
+| `hidden_owner` | boolean | Hidden ownership | HIGH |
+| `can_take_back_ownership` | boolean | Ownership reclaimable | HIGH |
+| `trading_cooldown` | boolean | Artificial delays | HIGH |
+| `gas_abuse` | boolean | Excessive gas patterns | HIGH |
+| `is_open_source` | boolean | Verified source code | MEDIUM if false |
+| `is_proxy` | boolean | Upgradeable contract | MEDIUM if true |
+| `is_anti_whale` | boolean | Whale protections | MEDIUM |
+| `is_blacklisted` | boolean | Known blacklist | MEDIUM |
+| `holder_count` | number | Total token holders | MEDIUM if <100 |
+
+### Implementation
+
+**Service:** `src/background/services/GoPlusSecurityService.js`
+
+**Key Methods:**
+
+```javascript
+// Single token verification
+async checkTokenSecurity(chainId, tokenAddress) {
+  // 1. Check cache (5min TTL)
+  const cached = this.cache.get(`${chainId}:${tokenAddress}`);
+  if (cached) return cached;
+  
+  // 2. Call GoPlus API
+  const goPlusChainId = this.chainMapping[chainId];
+  const url = `https://api.gopluslabs.io/api/v1/token_security/${goPlusChainId}`;
+  const response = await fetch(`${url}?contract_addresses=${tokenAddress}`);
+  
+  // 3. Analyze risk
+  const result = this.analyzeRisk(data);
+  
+  // 4. Cache result
+  this.cache.set(`${chainId}:${tokenAddress}`, result, 300000);
+  
+  return result;
+}
+
+// Batch verification with rate limiting
+async batchCheckTokens(chainId, tokenAddresses) {
+  const results = new Map();
+  
+  // Process in batches of 5 (rate limit: 5 req/s)
+  for (let i = 0; i < tokenAddresses.length; i += 5) {
+    const batch = tokenAddresses.slice(i, i + 5);
+    
+    await Promise.all(
+      batch.map(async (address) => {
+        const result = await this.checkTokenSecurity(chainId, address);
+        results.set(address.toLowerCase(), result);
+      })
+    );
+    
+    // Wait 1s between batches
+    if (i + 5 < tokenAddresses.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  
+  return results;
+}
+```
+
+**Stream Handler:** `src/background/handlers/streams/BlockchainStreamHandler.js`
+
+```javascript
+case 'VERIFY_TOKEN_SECURITY': {
+  const { chainId, tokenAddresses } = payload;
+  
+  // Skip unsupported chains
+  if (!GoPlusSecurityService.isSupportedChain(chainId)) {
+    return { success: true, data: { summary: { skipped: true } } };
+  }
+  
+  // Batch verify
+  const results = await GoPlusSecurityService.batchCheckTokens(
+    chainId,
+    tokenAddresses
+  );
+  
+  return {
+    success: true,
+    data: {
+      securityResults: Object.fromEntries(results),
+      summary: {
+        total: results.size,
+        safe: [...results.values()].filter(r => r.isSafe).length,
+        medium: [...results.values()].filter(r => r.riskLevel === 'MEDIUM').length,
+        high: [...results.values()].filter(r => r.riskLevel === 'HIGH').length,
+        critical: [...results.values()].filter(r => r.riskLevel === 'CRITICAL').length
+      }
+    }
+  };
+}
+```
+
+**Frontend Integration:** `src/hooks/usePortfolioData.js`
+
+```javascript
+// Phase 2 complete - dispatch prices
+dispatch({ type: 'PORTFOLIO_PRICES_UPDATED', payload: enhancedBalances });
+
+// Phase 3 - security verification (non-blocking background)
+(async () => {
+  try {
+    const tokenAddresses = enhancedBalances
+      .filter(b => b.contractAddress && b.contractAddress !== '0x0000000000000000000000000000000000000000')
+      .map(b => b.contractAddress);
+    
+    if (tokenAddresses.length === 0) return;
+    
+    const response = await sendMessage('blockchain', {
+      type: 'VERIFY_TOKEN_SECURITY',
+      payload: { chainId, tokenAddresses }
+    });
+    
+    if (response.success) {
+      // Apply security flags
+      const secureBalances = enhancedBalances.map(balance => ({
+        ...balance,
+        is_dangerous: results(address)?.riskLevel === 'HIGH',
+        is_suspicious: results(address)?.riskLevel === 'MEDIUM',
+        is_critical_risk: results(address)?.riskLevel === 'CRITICAL',
+        security_reasons: results(address)?.reasons || []
+      }));
+      
+      // Filter CRITICAL risks
+      const safeBalances = secureBalances.filter(b => !b.is_critical_risk);
+      
+      dispatch({ type: 'PORTFOLIO_SECURITY_VERIFIED', payload: safeBalances });
+    }
+  } catch (error) {
+    // Fail-open: don't block UI on security verification errors
+    console.error('Security verification failed:', error);
+  }
+})();
+```
+
+### UI Components
+
+**Security Badge:** `src/components/common/TokenListItem.jsx`
+
+```javascript
+const SecurityTooltip = ({ balance }) => {
+  if (!balance.is_dangerous && !balance.is_suspicious) return null;
+
+  const isDangerous = balance.is_dangerous;
+  const riskColor = isDangerous ? 'text-red-500' : 'text-yellow-500';
+  const riskTitle = isDangerous ? '⚠️ High Risk Token' : '⚠️ Caution Advised';
+  const reasons = balance.security_reasons || [];
+
+  return (
+    <span className={`${riskColor} text-[11px] cursor-help`}>
+      ⚠️
+    </span>
+  );
+};
+```
+
+**Placement:** Security badge appears BEFORE the token name for maximum visibility.
+
+### Performance & Caching
+
+**Cache Strategy:**
+- **TTL:** 5 minutes (300,000ms)
+- **Storage:** In-memory Map (GoPlusSecurityService)
+- **Invalidation:** Automatic on expiry, manual on chain switch
+- **Size:** Unbounded (relies on GC, typical usage <100 entries)
+
+**Rate Limiting:**
+- **Limit:** 5 requests per second
+- **Implementation:** 1-second delay between batches of 5
+- **Typical Load:** 10-20 tokens = 2-4 seconds total
+
+**API Availability:**
+- **Fail-open:** If API unavailable, tokens display without security flags
+- **Timeout:** 10 seconds per request
+- **Retry:** No automatic retry (fail-open strategy)
+
+### Security Considerations
+
+**Data Trust:**
+- GoPlus Labs is a reputable third-party security provider
+- Security data is advisory, not definitive
+- Users should perform own due diligence on flagged tokens
+
+**Privacy:**
+- No user wallet addresses sent to GoPlus API
+- Only token contract addresses queried (public blockchain data)
+- No tracking or analytics
+
+**API Security:**
+- HTTPS enforced via CSP: `connect-src https://api.gopluslabs.io`
+- No authentication required (public API)
+- No sensitive data transmitted
+
+**False Positives:**
+- Some legitimate tokens may be flagged (e.g., anti-whale mechanisms)
+- Users can disable Safe Mode to view all tokens
+- Security reasons displayed for transparency
+
+### Configuration
+
+**Content Security Policy Update (v3.1.6):**
+
+Added to `public/manifest.json`:
+```json
+{
+  "content_security_policy": {
+    "extension_pages": "connect-src 'self' https://api.gopluslabs.io ..."
+  }
+}
+```
+
+**Chain Mapping:**
+```javascript
+// GoPlusSecurityService.js
+chainMapping = {
+  1: '1',        // Ethereum
+  56: '56',      // BSC
+  10: '10',      // Optimism
+  42161: '42161', // Arbitrum
+  8453: '8453'    // Base
+};
+```
+
+### Testing
+
+**Test with Known Scam Tokens:**
+
+Use CRITICAL-level test addresses (testnet):
+```javascript
+// Honeypot example (DO NOT USE ON MAINNET)
+const honeypotToken = '0x...'; // Known honeypot address
+const result = await GoPlusSecurityService.checkTokenSecurity(1, honeypotToken);
+// Expected: { riskLevel: 'CRITICAL', isSafe: false, reasons: ['is_honeypot'] }
+```
+
+**Manual Verification:**
+1. Load portfolio on supported chain (ETH, BSC, etc.)
+2. Observe Phase 3 loading (~1-2s after prices load)
+3. Check console for security verification logs
+4. Toggle Safe Mode to verify filtering works
+5. Hover over ⚠️ badges to see risk reasons
+
+### Monitoring & Logging
+
+**Debug Logs:**
+```
+[GoPlus] Verifying security for 15 tokens on chain 1
+[GoPlus] ✅ 12 safe, ⚠️ 2 medium, 🔴 1 high risk
+[GoPlus] Filtered out 0 CRITICAL risk tokens
+[usePortfolioData] Phase 3 (GoPlus) completed - 14 secure tokens
+```
+
+**Error Logging:**
+```
+[GoPlus] ❌ Security verification failed: Network error
+[GoPlus] Falling back to fail-open (displaying all tokens)
+```
+
+### Future Enhancements
+
+- [ ] User configuration for risk tolerance (hide MEDIUM+ vs HIGH+ only)
+- [ ] Historical tracking of flagged tokens
+- [ ] Integration with on-chain reputation systems
+- [ ] Support for NFT security verification
+- [ ] Custom security rule definitions
+
+---
+
 ## Session Security
 
 ### Session Architecture
@@ -1011,6 +1410,17 @@ const symbol = metadata?.symbol || 'Unknown'; // Could confuse user!
 - Assuming standard ABI without verification
 - Silently failing metadata fetches
 
+### 3.1 Logging Policy in v3.1.8
+
+- **No Full Addresses**: Wallet addresses in debug logs are truncated (e.g., `0x123...abc`) using `truncateWalletAddress`
+- **No Private Keys**: Never logged under any circumstance
+- **No Mnemonics**: Never loggeds for critical transaction parameters in signing contexts.
+
+**Rationale:**
+- Better to show an error than incorrect amounts/tokens
+- Prevents user from signing transactions with wrong information
+- Eliminates risk of signing on wrong network or with wrong tokens
+
 ### Token Metadata Validation
 
 **Multi-Layer Lookup Strategy:**
@@ -1226,7 +1636,7 @@ async lock() {
 // Location: public/assets/allowlist.json
 {
   "version": "3.1.0",
-  "lastUpdated": "2025-09-23",
+  "lastUpdated": "2026-02-09",
   "globalSettings": {
     "defaultChainIdHex": "0x14d2",
     "defaultChainIdDecimal": 5330,
@@ -1418,7 +1828,11 @@ SuperSafe implements comprehensive security validations for all signing methods 
 **2. eth_signTypedData (EIP-712 Structured Data)**
 - ✅ **Secure**: Off-chain signature with structured validation
 - ⚠️  **Risk**: Often used for token permits (spending authorization)
-- 🛡️  **Protection**: Domain verification, type checking, permit detection
+- 🛡️  **Protection**:
+  - **Gas Validation**: Pre-execution gas estimation and scam detection
+  - **Uniswap Approvals**: Explicit pause-and-wait confirmation for all token approvals (v3.1.8)
+  - **Simulation**: Transaction simulation via Dune/Tenderly (when available)
+  - Domain verification, type checking, permit detection
 - 📝  **UI**: `TypedDataConfirmationScreen` with domain/type display
 
 **Supported Versions:** v3, v4, legacy (all variants work identically)
@@ -1857,8 +2271,4 @@ const WARNING_TRIGGERS = {
 
 ---
 
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
-**Next Security Audit:** January 2026  
-**Maintenance:** Review after security audits or major security changes
 

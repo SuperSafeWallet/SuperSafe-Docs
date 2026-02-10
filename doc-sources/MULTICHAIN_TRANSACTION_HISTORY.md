@@ -1,10 +1,10 @@
 # SuperSafe Wallet - Multichain Transaction History System
 
 **Created:** October 29, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 1.0.0+  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -51,6 +51,7 @@ Defines what type of explorer each network uses and its capabilities:
   - `addresses/{address}/transactions` - Transaction history
   - `addresses/{address}/token-transfers` - Token transfers
 - Features:
+  - **🆕 `disableQueryParams` Flag**: Handle specialized Blockscout instances (e.g., Conduit/SuperSeed) that reject standard filtering parameters (`limit`, `page`).
   - Integrated rate limiting
   - Robust error handling
   - Automatic retry logic
@@ -394,7 +395,3 @@ Checks if transaction history is supported for a chainId.
 - [Backend](./BACKEND.md) - Backend services and handlers
 
 ---
-
-**Document Status:** ✅ Current as of November 15, 2025  
-**Code Version:** v3.0.0+  
-**Maintenance:** Review after adding new networks or explorer adapters

@@ -1,9 +1,10 @@
-## Unified Configuration System
+# Unified Configuration System
 
 **Created:** November 19, 2025  
-**Last Updated:** December 8, 2025  
-**Version:** 3.1.2  
-**Status:** ✅ PRODUCTION READY
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
+**Status:** ✅ PRODUCTION READY  
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -169,7 +170,7 @@ FEATURE_FLAGS = {
 
 #### dapps.config.js (8.7 KB)
 
-**Purpose:** Known dApps directory with contract addresses
+**Purpose:** Known dApps directory with contract addresses and injection strategies.
 
 **Exports:**
 - `KNOWN_DAPPS` - Recognized dApps (Uniswap, Aave, OpenSea, etc.)
@@ -179,6 +180,7 @@ FEATURE_FLAGS = {
 **Use Cases:**
 - Enhanced dApp connection UI
 - Contract address verification
+- **Handshake Strategy (EIP-6963 vs Legacy)**: Controls provider injection behavior via `handshake` field in `allowlist.json`.
 - Transaction decoding
 - Security warnings
 
@@ -896,7 +898,4 @@ const result = await BlockchainAdapter.someOperation()
 
 ---
 
-**Document Status:** ✅ Current as of November 19, 2025  
-**Code Version:** v3.0.3  
-**Maintenance:** Review after adding new networks or API integrations
 

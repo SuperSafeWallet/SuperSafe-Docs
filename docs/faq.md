@@ -31,15 +31,19 @@ SuperSafe Wallet offers several unique advantages:
 
 **Security**:
 - **Enterprise-grade encryption**: AES-256-GCM with PBKDF2
+- **External Security Audit**: Offensive Pulse professional audit (December 2025)
 - **AllowList system**: Whitelist-based dApp security
 - **Memory-first security**: Sensitive data in memory only
-- **Security score**: 96/100
+- **Security score**: 99/100 (A+)
+- **Punycode Protection**: IDN homograph attack prevention
+- **GoPlus Integration**: Scam token detection and verification
 
 **Features**:
-- **Gasless swaps**: No gas fees for token swaps
+- **Uniswap Integration**: Native DEX swaps on 4 networks
+- **Gasless swaps**: No gas fees for Bebop swaps
 - **MEV protection**: Protection against Maximal Extractable Value
 - **Multi-chain ready**: 8 active networks
-- **Partner fees**: 1% configurable partner fee
+- **Partner fees**: 0.4% partner fee (Bebop/Relay), 0.2% + 0.2% Uniswap Labs (Uniswap)
 - **Buy Crypto**: Purchase crypto with fiat (card, bank, digital wallets)
 - **Gas Validation**: Real-time scam detection and transaction protection
 
@@ -50,7 +54,7 @@ Yes, SuperSafe Wallet is **completely free** to download and use. There are no s
 **Costs**:
 - **Extension**: Free to download and use
 - **Transactions**: Standard network gas fees (except for swaps)
-- **Swaps**: Gasless swaps with 1% partner fee
+- **Swaps**: Gasless swaps with 0.4% partner fee (Bebop)
 - **Support**: Free community and official support
 
 ### Which browsers are supported?
@@ -283,13 +287,20 @@ SuperSafe Wallet provides **gasless swaps** through Bebop's JAM protocol:
 
 ### What are partner fees?
 
-**Partner fees** are a 1% configurable fee that goes to SuperSafe:
+**Partner fees** support SuperSafe development and vary by swap provider:
 
-**Fee Structure**:
-- **Partner Fee**: 1% of swap amount
-- **Bebop Fee**: 0.5% of swap amount
-- **Total Fee**: 1.5% of swap amount
-- **Fee Token**: Usually ETH or native token
+**Fee Structure by Provider**:
+
+**Bebop & Relay:**
+- **SuperSafe Partner Fee**: 0.4% of swap amount
+- **Provider Fee**: Varies by provider
+- **Fee Token**: Usually stablecoins or native token
+
+**Uniswap:**
+- **SuperSafe Fee**: 0.2% of swap amount
+- **Uniswap Labs Fee**: 0.2% of swap amount
+- **Total SuperSafe+Uniswap**: 0.4% of swap amount
+- **Fee Token**: Paid in output token
 
 **Fee Benefits**:
 - **Development**: Supports SuperSafe development
@@ -514,3 +525,6 @@ SuperSafe Wallet supports popular Web3 frameworks:
 ---
 
 **Still have questions?** Check out our [Troubleshooting Guide](./troubleshooting.md) or [contact support](mailto:support@supersafe.cool)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

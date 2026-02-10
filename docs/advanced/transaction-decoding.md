@@ -372,3 +372,6 @@ if (amount >= MAX_UINT256 * BigInt('99') / BigInt('100') ||
 **Last Updated:** November 15, 2025  
 **Version:** 3.0.0+
 
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

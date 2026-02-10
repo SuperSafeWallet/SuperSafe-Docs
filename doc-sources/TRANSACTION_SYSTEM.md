@@ -1,10 +1,10 @@
 # SuperSafe Wallet - Transaction System
 
 **Created:** October 26, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -739,11 +739,5 @@ src/background/
 - Partial decode with warnings better than no decode
 - Clear error messages guide user to resolution
 
----
-
-**Document Status:** ✅ Complete and Current  
-**Last Updated:** November 15, 2025  
-**Version:** 3.0.0+  
-**Last Code Update:** November 15, 2025  
-**Maintenance:** Review after transaction decoder changes or new protocol integrations
+---  
 

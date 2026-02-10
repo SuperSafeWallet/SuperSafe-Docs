@@ -1,10 +1,10 @@
 # SuperSafe Wallet - Swap System
 
 **Created:** October 13, 2025  
-**Last Updated:** November 15, 2025  
-**Version:** 5.0.0+ (Unified Panel Architecture)  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
 **Status:** ✅ CURRENT  
-**Last Code Update:** November 15, 2025
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -18,6 +18,7 @@
 6. [Partner Fee System](#partner-fee-system)
 7. [Gas Validation System](#gas-validation-system) 🆕
 8. [Multi-Chain Support](#multi-chain-support)
+9. [Uniswap Provider (v4-first)](#uniswap-provider-v4-first)
 
 ---
 
@@ -27,9 +28,9 @@ SuperSafe Wallet integrates **Bebop's JAM (Just Another Market) protocol** for g
 
 ### Key Features
 
-- **✅ Gasless Swaps**: Only pay for token approval (Permit2)
-- **✅ MEV Protection**: Protected from frontrunning and sandwich attacks
-- **✅ Multi-Chain**: Currently supports **6 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum)
+- **✅ Uniswap Integrated**: UniswapX and Classic routing with curated token lists (v3.1.8) 🆕
+- **✅ Universal Safety Alerts**: Standardized price deviation warnings across all providers (v3.1.8) 🆕
+- **✅ Multi-Chain**: Currently supports **7 active networks** (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum, Monad)
 - **✅ Partner Fees**: Configurable revenue sharing
 - **✅ Best Prices**: Aggregated liquidity sources
 
@@ -37,8 +38,6 @@ SuperSafe Wallet integrates **Bebop's JAM (Just Another Market) protocol** for g
 
 ## Unified Panel Architecture
 
-**Version:** 2.0.0  
-**Refactored:** November 13, 2025
 
 ### Design Philosophy
 
@@ -216,7 +215,29 @@ To add a new swap provider (e.g., Uniswap):
 
 **That's it!** No changes to existing panels required.
 
+#### 4. UniswapSwapPanel.jsx (~1,450 lines) 🆕 (v3.1.8)
+
+**Responsibility:** UniswapX and Classic swap implementation
+
+**Key Features:**
+- **Curated Top 100 Token List**: Smart preselection with balance-first sorting.
+- **Improved Token Search**: High-performance backend integration for token discovery.
+- **UniswapX Support**: Gas-optimized Dutch auction routing.
+- **Scientific Notation Fix**: Robust handling for large-amount transactions.
+- **Universal Price Deviation Alerts**: Standardized semaphore safety system.
+
+#### 5. UniswapApprovalConfirmation.jsx 🆕 (v3.1.8)
+
+**Responsibility:** Secure token approval flow
+
+**Key Features:**
+- **Explicit Consent**: Pause-and-wait flow for all token approvals
+- **Risk Visualization**: unlimited approval warnings
+- **Detailed Data**: Spender address, amount, and token info
+- **Educational Context**: Explains what "Approve" means to users
+
 ### File Organization
+
 
 ```
 src/components/
@@ -227,6 +248,8 @@ src/components/
 └── swap/                              # Provider panels
     ├── BebopSwapPanel.jsx            # Bebop implementation
     ├── RelaySwapPanel.jsx            # Relay implementation
+    ├── UniswapSwapPanel.jsx          # Uniswap implementation
+    ├── UniswapApprovalConfirmation.jsx # Approval modal
     │
     └── shared/                        # Shared utilities
         ├── CompactNetworkSelector.jsx
@@ -285,7 +308,6 @@ describe('Swap Container', () => {
 
 ### Future Enhancements
 
-- [ ] Add Uniswap provider panel
 - [ ] Add 1inch aggregator panel
 - [ ] Implement provider comparison mode
 - [ ] Add swap history per provider
@@ -537,7 +559,7 @@ Fee is taken from buy token (ETH in this case)
 
 ## Gas Validation System
 
-**Version:** 1.0.0  
+**Version:** 3.1.8  
 **Implemented:** November 17, 2025
 
 ### Overview
@@ -1136,6 +1158,46 @@ Support for complex swap routes:
 
 **Implementation:** Backend parses Relay steps and identifies multi-hop swaps automatically. UI displays warning banner and detailed route visualization.
 
+---
+
+## Uniswap Provider (v4-first)
+
+**Status:** Experimental (UI + routing guardrails)  
+**Scope:** Single-chain swaps, Uniswap v4 preferred, v3 fallback allowed by routing API
+
+### Architecture
+- **Provider entry:** `SwapProviderSelector` adds `uniswap` tab (v4-first, v3 fallback).
+- **Panel:** `UniswapSwapPanel.jsx` – single-chain UI, slippage reuse, hook allowlist warnings, native ETH friendly.
+- **Service:** `uniswapService.js` – v4-first quote call to routing API, hook allowlist enforcement, blocks when routing API or universal router are not configured.
+- **Config:** `uniswap.config.js` – per-network PoolManager, Universal Router, Permit2, hook allowlist, routingApiBase placeholder.
+- **Hook:** `useUniswapQuote` – thin wrapper over service with loading/error state.
+
+### Safety Controls
+- **Hook allowlist:** Blocks routes with non-allowlisted hooks (`HOOK_BLOCKED`).
+- **No silent fallbacks:** Quotes fail fast when `routingApiBase` or router address are placeholders.
+- **Native ETH support:** Route summary surfaces native-ETH usage; avoids forced wrap/unwrap at UI level.
+- **Execution gating:** Swap button disabled until routing API + universal router are configured and audited.
+
+### Supported Networks (v4-first)
+- Ethereum, Arbitrum, Optimism, Base (Polygon entry present but auto-disabled if the chain is not active in `NETWORKS`).
+- Uses PoolManager address from v4 singleton whitepaper (`0x000000000004444c5dc75cb358380d2e3de08a90`).
+
+### Configuration Steps (must be completed before production)
+**⚠️ DEPLOYMENT BLOCKER:** The Uniswap provider will not execute swaps until these configurations are set.
+
+1. Set `routingApiBase` per network in `uniswap.config.js` (replace `YOUR_UNISWAP_ROUTING_API_BASE`).
+2. Set Universal Router address per network (replace `YOUR_UNIVERSAL_ROUTER_ADDRESS`).
+3. Extend `hooksAllowlist` only with audited hook addresses; keep zero-address for no-hook pools.
+4. (Optional) Expand allowlist/token policies if routing API exposes additional hooks.
+
+### Testing
+- **Unit:** `tests/uniswapService.test.js` (node:test) covers unsupported network, missing routing config, hook blocking, allowlisted routes.
+- **Script:** `npm run test:uniswap`.
+
+### Outstanding Work
+- Wire execution path to TransactionController once routing API and universal router addresses are configured.
+- Add real routing API integration tests when endpoints are available.
+
 ### Future Enhancements
 
 - [x] Gas estimation display - Implemented
@@ -1147,25 +1209,4 @@ Support for complex swap routes:
 
 ---
 
-**Document Status:** ✅ Current as of November 17, 2025  
-**Code Version:** v5.0.0+ (Unified Panel Architecture)  
-**Last Code Update:** November 17, 2025  
-**Major Changes:** 
-- **🆕 Gas Validation System (v1.0.0)**: Comprehensive gas validation and scam detection (November 17, 2025)
-  - Real-time gas price monitoring via Moralis RPC
-  - Balance validation for native token swaps
-  - Anomaly detection (scam contracts)
-  - 5-level progressive alert system
-  - Button-integrated UI (no separate components)
-  - See [GAS_VALIDATION_SYSTEM.md](./GAS_VALIDATION_SYSTEM.md)
-- **🆕 Unified Panel Architecture**: Refactored monolithic Swap.jsx (2,206 lines) into clean architecture
-  - `Swap.jsx` reduced to 115 lines (container/orchestrator only)
-  - `BebopSwapPanel.jsx` extracted (~1,400 lines, self-contained)
-  - `RelaySwapPanel.jsx` remains independent (~1,288 lines)
-- **Benefits**: 95% file size reduction, improved maintainability, independent testing
-- **Backward Compatible**: No breaking changes, same props interface
-- Relay origin network fixed to active network (v2.0.0)
-- Enhanced documentation with architectural diagrams and testing strategies
-- **Updated Network Support**: Bebop now supports 6 active networks (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum)
-- **Relay.link Support**: All 8 active networks supported except Shardeum (no cross-chain support)
 

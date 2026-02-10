@@ -292,3 +292,6 @@ To check which framework was detected:
 **Code Version:** v3.0.0+  
 **Maintenance:** Review after adding new framework support
 
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

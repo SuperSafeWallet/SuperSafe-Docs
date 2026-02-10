@@ -4,29 +4,79 @@ sidebar_position: 4
 
 # 🔄 Swap Integration
 
-SuperSafe Wallet integrates **Bebop's JAM (Just Another Market) protocol** and **Relay.link** for gasless, MEV-protected token swaps and cross-chain swaps across multiple EVM networks.
+SuperSafe Wallet integrates **three major swap providers**: **Uniswap** (native DEX), **Bebop's JAM protocol** (gasless swaps), and **Relay.link** (cross-chain swaps) for comprehensive token swapping across multiple EVM networks.
 
 ## Swap Overview
 
 ### Key Features
 
+- **✅ Uniswap Integration**: Native DEX swaps on 4 networks (Ethereum, Optimism, Base, Arbitrum)
 - **✅ Gasless Swaps**: Only pay for token approval (Permit2) via Bebop
-- **✅ MEV Protection**: Protected from frontrunning and sandwich attacks
-- **✅ Multi-Chain**: Currently supports **6 active networks** for Bebop (SuperSeed, Ethereum, Optimism, Base, BNB Chain, Arbitrum)
-- **✅ Cross-Chain Swaps**: Relay.link supports swaps across 85+ blockchains
-- **✅ Partner Fees**: Configurable revenue sharing (1% default)
+- **✅ MEV Protection**: Protected from frontrunning via Bebop
+- **✅ Multi-Chain**: Bebop supports 6 active networks; Relay supports cross-chain swaps across 85+ blockchains  
+- **✅ Partner Fees**: 0.4% (Bebop/Relay), 0.2% + 0.2% Uniswap Labs (Uniswap)
 - **✅ Best Prices**: Aggregated liquidity sources
+
+---
+
+## Swap Provider Comparison
+
+| Feature | Uniswap | Bebop | Relay.link |
+|---------|---------|-------|------------|
+| **Networks** | 4 (Ethereum, Optimism, Base, Arbitrum) | 6 EVM chains | 85+ chains |
+| **Cross-Chain** | ❌ No | ❌ No | ✅ Yes |
+| **Gasless** | ❌ No | ✅ Yes (Permit2) | ❌ No |
+| **MEV Protection** | ⚠️ Partial | ✅ Yes | ⚠️ Partial |
+| **Approval** | Per-token ERC20 | One-time Permit2 | Per-token ERC20 |
+| **Partner Fees** | UniswapX fee parameter | JAM order signature | AppFees API parameter |
+
+---
+
+## Uniswap Integration
+
+**Added:** January 2026  
+**Networks Supported:** Ethereum (1), Optimism (10), Base (8453), Arbitrum (42161)
+
+### Overview
+
+SuperSafe integrates the official **Uniswap Universal Router** and **UniswapX Dutch Order Protocol** for native DEX swaps on supported networks.
+
+### Key Features
+
+- **Native DEX**: Direct access to Uniswap liquidity pools
+- **UniswapX Dutch Orders**: Improved pricing through competitive filling
+- **Quote API**: Real-time pricing via Uniswap Routing API  
+- **Token Lists**: Curated token lists per network
+- **Logo Resolution**: Token logos from Uniswap CDN
+
+### Uniswap Swap Flow
+
+```
+User → UniswapSwapPanel → UniswapAdapter → Background → Uniswap Proxy → Uniswap API
+```
+
+**Backend Proxy:** All Uniswap API calls routed through secure backend proxy to protect API keys.
+
+### Active Network Support
+
+| Network | Chain ID | Uniswap Support | UniswapX | Status |
+|---------|----------|-----------------|----------|--------|
+| **Ethereum** | 1 | ✅ V3 + V2 | ✅ Enabled | ✅ Active |
+| **Optimism** | 10 | ✅ V3 | ✅ Enabled | ✅ Active |
+| **Base** | 8453 | ✅ V3 | ✅ Enabled | ✅ Active |
+| **Arbitrum** | 42161 | ✅ V3 | ✅ Enabled | ✅ Active |
 
 ---
 
 ## Unified Panel Architecture
 
 **Version:** 2.0.0  
-**Refactored:** November 13, 2025
+**Refactored:** November 13, 2025  
+**Uniswap Added:** January 2026
 
 ### Design Philosophy
 
-SuperSafe Wallet implements a **unified panel architecture** for swap providers, ensuring consistency, maintainability, and scalability across all swap implementations.
+SuperSafe implements a **unified panel architecture** for swap providers,ensuring consistency
 
 ### Before (v1.0.0 - Monolithic)
 
@@ -221,7 +271,7 @@ As of November 4, 2025, SuperSafe Wallet now integrates **Relay.link** as an alt
 ### Key Features
 
 - **✅ Cross-Chain Swaps**: Swap tokens between different networks in one transaction
-- **✅ AppFees Support**: Configurable partner fees (1% default) collected in stablecoins
+- **✅ AppFees Support**: 0.4% partner fees collected in stablecoins
 - **✅ Meta-Aggregation**: Best prices across multiple DEXs and bridges
 - **✅ 85+ Chains**: Wide blockchain support including all SuperSafe networks
 - **✅ Instant Bridging**: Fast cross-chain transfers via relayer network
@@ -337,7 +387,7 @@ Relay.link swap panel implements a **restricted origin network model** where the
 | **Gasless** | ✅ Yes (Permit2) | ⚠️ Gas required |
 | **MEV Protection** | ✅ Yes | ⚠️ Partial |
 | **Approval** | One-time Permit2 | Per-token ERC20 |
-| **Partner Fees** | JAM order signature | AppFees API parameter |
+| **Partner Fees** | 0.4% in JAM | 0.4% via AppFees | 0.2% + 0.2% Uniswap |
 | **Quote Expiry** | 30 seconds | 30 seconds |
 
 ---
@@ -403,7 +453,7 @@ sequenceDiagram
 ```javascript
 const FEE_CONFIG = {
   // Fee in basis points (100 bps = 1%)
-  feeBps: 100,  // 1% partner fee
+  feeBps: 40,  // 0.4% partner fee for Bebop/Relay
   
   // Partner information
   partnerInfo: {
@@ -428,12 +478,20 @@ export function getFeeConfiguration() {
 ### Fee Calculation Example
 
 ```
-User swaps 100 USDC for ETH
+User swaps 100 USDC for ETH via Bebop
 Quote returns: 0.05 ETH
 
-With 1% partner fee:
-- User receives: 0.0495 ETH (99%)
-- Partner receives: 0.0005 ETH (1%)
+With 0.4% partner fee:
+- User receives: 0.0498 ETH (99.6%)
+- SuperSafe receives: 0.0002 ETH (0.4%)
+
+User swaps 100 USDC for ETH via Uniswap
+Quote returns: 0.05 ETH
+
+With 0.2% + 0.2% fees:
+- User receives: 0.0498 ETH (99.6%)
+- SuperSafe receives: 0.0001 ETH (0.2%)
+- Uniswap Labs receives: 0.0001 ETH (0.2%)
 
 Fee is taken from buy token (ETH in this case)
 ```
@@ -577,11 +635,10 @@ For comprehensive gas validation documentation, see **[Gas Validation System](/d
 
 ---
 
-**Document Status:** ✅ Current as of December 18, 2025  
-**Code Version:** v3.1.4 (Unified Panel Architecture)  
-**Last Code Update:** December 18, 2025  
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8  
 **Major Changes:** 
+- **🆕 Uniswap Integration**: Native DEX swaps on 4 networks (January 2026)
 - **🆕 Gas Validation System**: Real-time scam detection and protection
 - **🆕 Unified Panel Architecture**: Refactored monolithic Swap.jsx (2,206 lines) into clean architecture
 - **🆕 Relay.link Integration**: Cross-chain swaps across 85+ blockchains
-- **Updated Network Support**: Bebop supports 6 active networks, Relay supports 6 active networks

@@ -1,8 +1,12 @@
 # SuperSafe Extension Integration Guide
 
-> **Version:** 2.0.0  
-> **Last Updated:** 2025-12-04  
-> **Target:** SuperSafe Wallet Chrome Extension
+**Created:** December 4, 2025  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
+**Status:** ✅ CURRENT  
+**Last Code Update:** February 9, 2026
+
+**Target:** SuperSafe Wallet Chrome Extension
 
 ## Overview
 
@@ -1691,14 +1695,4 @@ Update your extension's permissions after migration:
 
 ---
 
-## Changelog
-
-### v2.0.0 (2025-12-04)
-- Added installation token system
-- Added API proxy for Moralis, CoinGecko, and RPC
-- Added proper rate limiting (429) with headers
-- Removed need for API keys in extension bundle
-
-### v1.0.0 (Initial)
-- Direct API calls with embedded keys
 

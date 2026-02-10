@@ -396,3 +396,6 @@ Now that you can send and receive:
 ---
 
 **Ready to manage tokens?** Continue to [Token Management](./token-management.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

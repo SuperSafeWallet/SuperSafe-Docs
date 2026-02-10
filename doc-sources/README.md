@@ -1,9 +1,10 @@
 # SuperSafe Wallet - Documentation Index
 
-**Version:** 3.1.4  
-**Last Updated:** December 18, 2025  
-**Status:** ✅ Current  
-**Last Code Update:** December 18, 2025
+**Created:** October 13, 2025  
+**Last Updated:** February 9, 2026  
+**Version:** 3.1.8  
+**Status:** ✅ CURRENT  
+**Last Code Update:** February 9, 2026
 
 ---
 
@@ -308,6 +309,8 @@ Welcome to the SuperSafe Wallet documentation. This comprehensive guide covers a
 | BNB Chain | 56 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain |
 | Arbitrum One | 42161 | ✅ Bebop (JAM+RFQ) | ✅ Cross-chain |
 | Shardeum | 8118 | ❌ Not supported | ❌ Not supported |
+| Monad | 10143 | ✅ Bebop (JAM) | ❌ Not supported |
+
 
 ### Swap System
 
@@ -485,12 +488,13 @@ Documentation: 21+ comprehensive documents (~27,000+ lines)
 Supported Networks: 8 active networks
 Security Score: 96/100
 Architecture Pattern: MetaMask-style Service Worker
-Swap Providers: Bebop (6 networks) + Relay.link (6 networks)
-Swap Security: Gas validation + scam detection
+Swap Providers: Bebop (6 networks) + Uniswap (4 networks) + Relay.link (6 networks)
+Swap Security: Gas validation + scam detection + Price Deviation Alerts
 Fiat On-Ramp: Tradesilvania (3 active + 2 pending networks) - v3.1.4
 Fiat Documentation: Consolidated comprehensive guide
 UI/UX: Responsive design (popup + fullpage)
 Window Policy: One window enforcement
+Backend Health: Real-time monitoring service (v3.1.8)
 ```
 
 ---
@@ -551,17 +555,19 @@ npm run build
 
 This documentation is maintained to reflect the current codebase state.
 
-**Last Major Update:** December 18, 2025  
-**Code Version:** v3.1.4  
-**Last Code Update:** December 18, 2025 (Tradesilvania Documentation Consolidation)  
-**Next Review:** February 2026
+**Last Major Update:** February 9, 2026  
+**Code Version:** v3.1.8  
+**Last Code Update:** February 9, 2026 (WalletConnect Lazy Init & Documentation Audit)  
+**Next Review:** March 2026
 
 **Recent Updates:**
-- December 18, 2025: Tradesilvania Documentation Consolidation (v3.1.4) 🆕
-- December 15, 2025: Tradesilvania Fiat On-Ramp Integration (v3.2.0)
+- **February 9, 2026:** WalletConnect Lazy Init & Documentation Audit (v3.1.8) 🆕
+- January 24, 2026: Backend Health Monitoring & Uniswap Optimization (v3.1.8)
+- January 16, 2026: EIP-6963 Hybrid Coexistence & Unified Badge System (v3.1.7) 🆕
+- January 11, 2026: GoPlus Labs Security Integration (v3.1.6)
+- December 18, 2025: Tradesilvania Documentation Consolidation (v3.1.4)
 - December 10, 2025: One Window Policy + Responsive Design (v3.1.3)
 - December 8, 2025: Full Proxy Migration (v3.1.2)
-- November 17, 2025: Gas Validation System (v3.0.0+)
 
 **Update Process:**
 1. Code changes trigger documentation review
@@ -605,7 +611,6 @@ Previous versions of documentation are available in [`./olds/`](./olds/) directo
 ---
 
 **Document Index Status:** ✅ Complete and Current  
-**Total Documents:** 21+ comprehensive guides  
-**Coverage:** Architecture, Security, Development, Integration, Operations, Logging, Transactions, Signing, Swaps, Network Switching, Gas Validation, One Window Policy, Responsive Design, Fiat On-Ramp (Consolidated)  
-**Maintenance:** Active and up-to-date (last review: December 18, 2025)
+**Total Documents:** 24+ comprehensive guides  
+**Coverage:** Architecture, Security, Development, Integration, Operations, Logging, Transactions, Signing, Swaps, Network Switching, Gas Validation, One Window Policy, Responsive Design, Fiat On-Ramp, Backend Health Monitoring  
 

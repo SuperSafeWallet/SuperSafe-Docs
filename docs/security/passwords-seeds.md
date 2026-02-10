@@ -345,3 +345,6 @@ Now that you understand password and seed security:
 ---
 
 **Ready to learn about encryption?** Continue to [Key Encryption](./key-encryption.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8

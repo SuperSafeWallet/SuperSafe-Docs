@@ -395,3 +395,6 @@ Now that you can configure security:
 ---
 
 **Ready to report vulnerabilities?** Continue to [Vulnerability Reporting](./vulnerability-reporting.md)!
+
+**Document Status:** ✅ Current as of February 10, 2026  
+**Code Version:** v3.1.8
