@@ -25,7 +25,7 @@ SuperSafe Wallet integrates **three major swap providers**: **Uniswap** (native 
 |---------|---------|-------|------------|
 | **Networks** | 4 (Ethereum, Optimism, Base, Arbitrum) | 6 EVM chains | 85+ chains |
 | **Cross-Chain** | ❌ No | ❌ No | ✅ Yes |
-| **Gasless** | ❌ No | ✅ Yes (Permit2) | ❌ No |
+| **Gasless** | ⚠️ UniswapX only | ✅ Yes (Permit2) | ❌ No |
 | **MEV Protection** | ⚠️ Partial | ✅ Yes | ⚠️ Partial |
 | **Approval** | Per-token ERC20 | One-time Permit2 | Per-token ERC20 |
 | **Partner Fees** | UniswapX fee parameter | JAM order signature | AppFees API parameter |
@@ -76,7 +76,7 @@ User → UniswapSwapPanel → UniswapAdapter → Background → Uniswap Proxy �
 
 ### Design Philosophy
 
-SuperSafe implements a **unified panel architecture** for swap providers,ensuring consistency
+SuperSafe implements a **unified panel architecture** for swap providers, ensuring consistency, maintainability, and scalability across all swap implementations.
 
 ### Before (v1.0.0 - Monolithic)
 
@@ -96,22 +96,23 @@ Swap.jsx (2,206 lines)
 - ❌ Difficult to add new providers
 - ❌ Code duplication between providers
 
-### After (v2.0.0 - Unified Panels)
+### After (v3.1.8 - Unified Panels)
 
 ```
 Swap.jsx (~115 lines)                    # Container/Orchestrator
-  ├─ SwapProviderSelector                # Tab selector
+  ├─ SwapProviderSelector                # Tab selector (Uniswap | Relay | Bebop)
   ├─ SlippageControl (shared)            # Slippage configuration
   └─ Conditional Rendering:
-      ├─ BebopSwapPanel.jsx (~1,400 lines)
-      └─ RelaySwapPanel.jsx (~1,288 lines)
+      ├─ UniswapSwapPanel.jsx (~1,450 lines)
+      ├─ RelaySwapPanel.jsx (~1,288 lines)
+      └─ BebopSwapPanel.jsx (~1,400 lines)
 ```
 
 **Benefits:**
 - ✅ **Maintainability**: Each panel is self-contained (~1,300 lines each)
 - ✅ **Testability**: Independent unit testing per provider
 - ✅ **Scalability**: Add providers without touching existing code
-- ✅ **Consistency**: Both panels follow same architectural pattern
+- ✅ **Consistency**: All panels follow the same architectural pattern
 - ✅ **Separation of Concerns**: Clear responsibilities
 
 ### Component Structure
@@ -128,7 +129,7 @@ const Swap = ({
   walletTokensWithBalance,
   nativeTokenBalance 
 }) => {
-  const [swapProvider, setSwapProvider] = useState('bebop');
+  const [swapProvider, setSwapProvider] = useState('uniswap');
   const [slippage, setSlippage] = useState(0.5);
   
   return (
@@ -136,7 +137,9 @@ const Swap = ({
       <SwapProviderSelector selected={swapProvider} onChange={setSwapProvider} />
       <SlippageControl slippage={slippage} onChange={setSlippage} />
       
-      {swapProvider === 'relay' ? (
+      {swapProvider === 'uniswap' ? (
+        <UniswapSwapPanel {...props} slippage={slippage} />
+      ) : swapProvider === 'relay' ? (
         <RelaySwapPanel {...props} slippage={slippage} />
       ) : (
         <BebopSwapPanel {...props} slippage={slippage} />
@@ -150,9 +153,38 @@ const Swap = ({
 - Single responsibility: provider selection and routing
 - No swap business logic
 - Minimal state (provider + slippage)
+- Uniswap is the default provider
 - Clean, readable, maintainable
 
-#### 2. BebopSwapPanel.jsx (~1,400 lines)
+#### 2. UniswapSwapPanel.jsx (~1,450 lines)
+
+**Responsibility:** Complete Uniswap swap implementation (UniswapX + Classic routing)
+
+**Key Features:**
+- Curated top-100 token list with balance-first sorting
+- High-performance backend token search
+- UniswapX Dutch auction routing (gas-optimized)
+- v4-first routing with v3 fallback
+- Scientific notation fix for large amounts
+- Universal price deviation alerts
+
+**Architecture Compliance:**
+- ✅ NO ethers imports
+- ✅ Uses `UniswapAdapter` only
+- ✅ Thin client pattern
+- ✅ All crypto in background
+
+#### 3. UniswapApprovalConfirmation.jsx
+
+**Responsibility:** Secure token approval flow for Uniswap swaps
+
+**Key Features:**
+- Explicit pause-and-wait consent for all token approvals
+- Unlimited approval risk visualization
+- Spender address, amount, and token details displayed
+- Educational context explaining what "Approve" means
+
+#### 4. BebopSwapPanel.jsx (~1,400 lines)
 
 **Responsibility:** Complete Bebop swap implementation
 
@@ -175,7 +207,7 @@ const Swap = ({
 - ✅ Thin client pattern
 - ✅ All crypto in background
 
-#### 3. RelaySwapPanel.jsx (~1,288 lines)
+#### 5. RelaySwapPanel.jsx (~1,288 lines)
 
 **Responsibility:** Complete Relay.link swap implementation
 
@@ -199,7 +231,7 @@ const Swap = ({
 
 ### Shared Components (`src/components/swap/`)
 
-These components are used by both panels:
+These components are shared across panels:
 
 | Component | Purpose | Used By |
 |-----------|---------|---------|
@@ -207,7 +239,8 @@ These components are used by both panels:
 | `RouteVisualization.jsx` | Visual route display | Relay (multi-hop) |
 | `BridgeTimeDisplay.jsx` | Bridge time estimation | Relay (cross-chain) |
 | `GasEstimateDisplay.jsx` | Gas cost display | Relay (all swaps) |
-| `LoadingDots.jsx` | Loading animation | Both (separate versions) |
+| `UniswapApprovalConfirmation.jsx` | Approval consent modal | Uniswap |
+| `LoadingDots.jsx` | Loading animation | All panels |
 
 ### Performance Metrics
 
@@ -387,7 +420,7 @@ Relay.link swap panel implements a **restricted origin network model** where the
 | **Gasless** | ✅ Yes (Permit2) | ⚠️ Gas required |
 | **MEV Protection** | ✅ Yes | ⚠️ Partial |
 | **Approval** | One-time Permit2 | Per-token ERC20 |
-| **Partner Fees** | 0.4% in JAM | 0.4% via AppFees | 0.2% + 0.2% Uniswap |
+| **Partner Fees** | 0.4% in JAM | 0.4% via AppFees |
 | **Quote Expiry** | 30 seconds | 30 seconds |
 
 ---
@@ -579,23 +612,13 @@ export function validateSwapNetwork(networkKey) {
 
 ## Adding New Providers
 
-To add a new swap provider (e.g., Uniswap):
+To add a new swap provider:
 
-1. Create `src/components/swap/UniswapSwapPanel.jsx` (~1,300 lines)
-2. Follow same structure as `BebopSwapPanel.jsx` or `RelaySwapPanel.jsx`
-3. Create `UniswapAdapter.js` in `src/utils/`
+1. Create `src/components/swap/NewProviderSwapPanel.jsx` (~1,300 lines)
+2. Follow the same structure as `UniswapSwapPanel.jsx`, `BebopSwapPanel.jsx`, or `RelaySwapPanel.jsx`
+3. Create `NewProviderAdapter.js` in `src/utils/`
 4. Add provider to `SwapProviderSelector.jsx`
-5. Add conditional rendering in `Swap.jsx`:
-
-```javascript
-{swapProvider === 'uniswap' ? (
-  <UniswapSwapPanel {...props} />
-) : swapProvider === 'relay' ? (
-  <RelaySwapPanel {...props} />
-) : (
-  <BebopSwapPanel {...props} />
-)}
-```
+5. Add conditional rendering in `Swap.jsx`
 
 **That's it!** No changes to existing panels required.
 
@@ -603,7 +626,7 @@ To add a new swap provider (e.g., Uniswap):
 
 ## Future Enhancements
 
-- [ ] Add Uniswap provider panel
+- [x] Uniswap integration (UniswapX + Classic routing) — ✅ v3.1.8
 - [ ] Add 1inch aggregator panel
 - [ ] Implement provider comparison mode
 - [ ] Add swap history per provider
@@ -635,10 +658,10 @@ For comprehensive gas validation documentation, see **[Gas Validation System](/d
 
 ---
 
-**Document Status:** ✅ Current as of February 10, 2026  
+**Document Status:** ✅ Current as of February 12, 2026  
 **Code Version:** v3.1.8  
 **Major Changes:** 
-- **🆕 Uniswap Integration**: Native DEX swaps on 4 networks (January 2026)
+- **🆕 Uniswap Integration**: Primary swap provider with UniswapX + Classic routing on 4 networks
 - **🆕 Gas Validation System**: Real-time scam detection and protection
-- **🆕 Unified Panel Architecture**: Refactored monolithic Swap.jsx (2,206 lines) into clean architecture
+- **🆕 Unified Panel Architecture**: 3-provider architecture (Uniswap, Relay, Bebop)
 - **🆕 Relay.link Integration**: Cross-chain swaps across 85+ blockchains

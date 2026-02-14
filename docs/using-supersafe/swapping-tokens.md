@@ -4,76 +4,213 @@ sidebar_position: 5
 
 # 🔄 Swapping Tokens
 
-Master the art of token swapping with SuperSafe's integrated Bebop swap system, featuring gasless swaps and MEV protection.
+Swap tokens seamlessly with SuperSafe's multi-provider swap system — featuring **Uniswap**, **Relay.link**, and **Bebop** for the best prices, cross-chain support, and MEV protection.
 
 ## Overview
 
-SuperSafe Wallet integrates **Bebop's JAM (Just Another Market) protocol** for gasless, MEV-protected token swaps across multiple EVM networks. This advanced swap system provides the best prices, protection from frontrunning attacks, and seamless user experience.
+SuperSafe Wallet integrates **three professional swap providers**, each optimized for different use cases. A unified tab interface lets you switch between providers in one click, while shared features like slippage control and gas validation protect every swap.
 
-## Key Features
+| Provider | Best For | Key Advantage |
+|----------|----------|---------------|
+| **🦄 Uniswap** | Single-chain swaps | UniswapX gas optimization + curated token lists |
+| **🔗 Relay.link** | Cross-chain swaps | Bridge + swap in one transaction across 85+ chains |
+| **🐝 Bebop** | Same-chain swaps | Gasless swaps via Permit2 with MEV protection |
 
-### 🚀 **Gasless Swaps**
-- **Permit2 Integration**: Only pay for token approval
-- **No Gas Fees**: Swaps are completely gasless
-- **Cost Savings**: Significant savings on transaction costs
-- **Better UX**: Simplified swap experience
+---
 
-### 🛡️ **MEV Protection**
-- **Frontrunning Protection**: Protected from sandwich attacks
-- **Best Price Execution**: Always get the best available price
-- **Slippage Protection**: Advanced slippage management
-- **Secure Routing**: Secure swap routing
+## Swap Providers
 
-### 🌐 **Multi-Chain Support**
-- **SuperSeed**: JAM protocol support
-- **Optimism**: JAM + RFQ protocol support
-- **Planned Networks**: Ethereum, Base, BSC (coming soon)
-- **Cross-Chain**: Future cross-chain swap support
+### 🦄 Uniswap (Primary)
 
-### 💰 **Partner Fee System**
-- **0.4% Partner Fee**: Bebop/Relay (0.2% + 0.2% for Uniswap)
-- **Transparent Fees**: Clear fee breakdown
-- **Value Sharing**: Share in protocol value
-- **Sustainable Model**: Long-term sustainability
+SuperSafe's featured swap provider, powered by the **Uniswap Routing API** with UniswapX and Classic (v3/v4) routing.
 
-### ⛽ **Gas Validation System** (NEW!)
-- **Scam Detection**: Blocks transactions with gas > 50% of swap value
-- **Balance Validation**: Ensures sufficient native tokens for gas
-- **Real-time Monitoring**: Fetches current network gas prices
-- **Button-Integrated Alerts**: Visual feedback on swap button
+#### Key Features
+- **UniswapX**: Gas-optimized Dutch auction routing for better prices
+- **v4-first Routing**: Automatically selects the best route (v4 preferred, v3 fallback)
+- **Curated Token List**: Top 100 tokens pre-loaded with smart balance-first sorting
+- **Improved Token Search**: High-performance backend search for discovering any token
+- **Approval Confirmation**: Explicit consent flow for all token approvals with risk visualization
+- **Price Deviation Alerts**: Standardized safety warnings for unfavorable quotes
 
-:::tip Protection Levels
-If a swap is blocked, check the button text for details:
-- "Insufficient ETH for Gas" = You need more native tokens
-- "Gas Fee Too High - Possible Scam" = Transaction may be malicious
+#### Supported Networks
 
-See [Gas Validation System](/docs/advanced/gas-validation) for details.
+| Network | Chain ID | Status |
+|---------|----------|--------|
+| **Ethereum** | 1 | ✅ Active |
+| **Arbitrum One** | 42161 | ✅ Active |
+| **Optimism** | 10 | ✅ Active |
+| **Base** | 8453 | ✅ Active |
+
+#### How Uniswap Swaps Work
+1. **Select tokens** — Choose from the curated top-100 list or search for any token
+2. **Enter amount** — Type the amount to swap or use quick buttons (Max, 50%, 25%)
+3. **Review quote** — See price impact, route details, and fee breakdown
+4. **Approve token** (first time only) — Confirm the approval with clear risk information
+5. **Execute swap** — Sign and submit via UniswapX or Classic routing
+6. **Track status** — Real-time status updates until confirmation
+
+#### Fee Structure
+- **SuperSafe Fee**: 0.2%
+- **Uniswap Labs Fee**: 0.2%
+- **Total**: 0.4%
+
+:::tip Approval Confirmation
+When approving a token for the first time, SuperSafe shows a detailed confirmation screen explaining what "Approve" means, the spender address, and any unlimited approval warnings. This protects you from unknowingly granting excessive permissions.
 :::
 
-## Supported Networks
+---
 
-### Active Swap Networks (6)
+### 🔗 Relay.link (Cross-Chain)
+
+The go-to provider for **cross-chain swaps and bridging** — swap tokens between different networks in a single transaction.
+
+#### Key Features
+- **Cross-Chain Swaps**: Swap tokens across different networks in one step
+- **85+ Blockchains**: Wide network support including all SuperSafe networks
+- **Meta-Aggregation**: Best prices from multiple DEXs and bridges combined
+- **Route Visualization**: See the step-by-step execution path (bridge, swap, approval)
+- **Bridge Time Estimation**: Dynamic completion time based on network congestion
+- **Gas Estimation**: Real-time gas cost display per step and total
+
+#### Supported Networks
+
+| Network | Chain ID | Cross-Chain | Status |
+|---------|----------|-------------|--------|
+| **SuperSeed** | 5330 | ✅ Enabled | ✅ Active |
+| **Ethereum** | 1 | ✅ Enabled | ✅ Active |
+| **Optimism** | 10 | ✅ Enabled | ✅ Active |
+| **Base** | 8453 | ✅ Enabled | ✅ Active |
+| **BNB Chain** | 56 | ✅ Enabled | ✅ Active |
+| **Arbitrum One** | 42161 | ✅ Enabled | ✅ Active |
+
+#### How Relay Swaps Work
+1. **Select origin token** — Uses your active network (switch network via the header to change)
+2. **Select destination** — Choose the destination network and token
+3. **Enter amount** — Specify how much to swap
+4. **Review route** — See the multi-step route visualization (bridge + swap hops)
+5. **Execute swap** — Approve and submit the cross-chain transaction
+6. **Track bridging** — Follow real-time status with estimated completion time
+
+#### Fee Structure
+- **SuperSafe Partner Fee**: 0.4%
+- **Total**: 0.4%
+
+:::note Network Selection
+The origin (Pay) network is always your currently active network. To swap from a different network, switch your active network first via the header. This ensures balances are always accurate and transactions can be properly signed.
+:::
+
+---
+
+### 🐝 Bebop (Gasless)
+
+The original SuperSafe swap provider — **completely gasless swaps** via the Bebop JAM (Just Another Market) protocol with built-in MEV protection.
+
+#### Key Features
+- **Gasless Swaps**: Zero gas fees via Permit2 — you only pay for the one-time token approval
+- **MEV Protection**: Private mempool protects from sandwich attacks and frontrunning
+- **EIP-712 Signing**: Orders are signed, not sent as transactions — no gas consumed
+- **Best Price**: Aggregated liquidity from multiple professional market makers
+- **Single Approval**: One-time Permit2 approval covers all future swaps for that token
+
+#### Supported Networks
 
 | Network | Chain ID | Protocol | Status |
 |---------|----------|----------|--------|
-| **SuperSeed** | 5330 | Bebop JAM | ✅ Active |
-| **Ethereum** | 1 | Bebop JAM + RFQ | ✅ Active |
-| **Optimism** | 10 | Bebop JAM + RFQ | ✅ Active |
-| **Base** | 8453 | Bebop JAM + RFQ | ✅ Active |
-| **BNB Chain** | 56 | Bebop JAM + RFQ | ✅ Active |
-| **Arbitrum One** | 42161 | Bebop JAM + RFQ | ✅ Active |
+| **SuperSeed** | 5330 | JAM | ✅ Active |
+| **Ethereum** | 1 | JAM + RFQ | ✅ Active |
+| **Optimism** | 10 | JAM + RFQ | ✅ Active |
+| **Base** | 8453 | JAM + RFQ | ✅ Active |
+| **BNB Chain** | 56 | JAM + RFQ | ✅ Active |
+| **Arbitrum One** | 42161 | JAM + RFQ | ✅ Active |
 
-:::note
-Monad and Shardeum are active networks but do not currently support Bebop swaps.
+#### How Bebop Swaps Work
+1. **Select tokens** — Choose from and to tokens
+2. **Enter amount** — Specify the amount to swap
+3. **Review quote** — See price impact, route, and fee breakdown
+4. **Approve token** (first time only) — One-time Permit2 approval (gas required)
+5. **Sign order** — Sign the EIP-712 typed data (no gas!)
+6. **Order executes** — Bebop settles the order on-chain
+
+#### Fee Structure
+- **SuperSafe Partner Fee**: 0.4%
+- **Total**: 0.4%
+
+:::tip Why Gasless?
+Bebop uses Permit2 + EIP-712 signing, which means your swap doesn't require an on-chain transaction from you. The market maker settles the trade, so you pay zero gas for the swap itself. You only pay gas once per token for the initial Permit2 approval.
 :::
+
+---
+
+## Provider Comparison
+
+| Feature | 🦄 Uniswap | 🔗 Relay | 🐝 Bebop |
+|---------|-----------|---------|---------|
+| **Cross-Chain** | ❌ No | ✅ Yes | ❌ No |
+| **Gasless Swaps** | ⚠️ UniswapX only | ❌ Gas required | ✅ Yes (Permit2) |
+| **MEV Protection** | ✅ UniswapX | ⚠️ Partial | ✅ Full |
+| **Networks** | 4 chains | 6 chains (85+ via Relay) | 6 chains |
+| **Token Discovery** | ✅ Curated + search | ✅ Wide support | ✅ Market maker pairs |
+| **Approval Type** | Standard ERC20 | Standard ERC20 | One-time Permit2 |
+| **Total Fee** | 0.4% | 0.4% | 0.4% |
+
+---
+
+## Shared Features
+
+### Slippage Configuration
+
+All providers share the same slippage control:
+
+```
+Slippage Settings:
+├── 0.1% - Very Low (May fail in volatile markets)
+├── 0.5% - Recommended (Default)
+├── 1.0% - Medium
+├── 2.0% - High
+└── Custom - User defined
+```
+
+### ⛽ Gas Validation System
+
+SuperSafe protects every swap with real-time gas validation:
+
+- **Scam Detection**: Blocks transactions with gas > 50% of swap value
+- **Balance Validation**: Ensures sufficient native tokens for gas
+- **Real-time Monitoring**: Fetches current network gas prices
+- **Button-Integrated Alerts**: Visual feedback directly on the swap button
+
+| Alert Level | Condition | Button Action |
+|-------------|-----------|---------------|
+| **BLOCKING** | Insufficient gas balance | ❌ Disabled |
+| **BLOCKING** | Gas > 50% of swap value | ❌ Disabled |
+| **CRITICAL** | Gas anomalous or > 20% | ✅ Enabled (logged) |
+| **WARNING** | Gas > 5% or high congestion | ✅ Enabled (logged) |
+| **NONE** | All clear | ✅ Enabled |
+
+See [Gas Validation System](/docs/advanced/gas-validation) for full details.
+
+### 🛡️ Price Deviation Alerts
+
+All swap providers include standardized price deviation warnings:
+
+- **> 5% deviation**: High alert — "Unfavorable quote" warning
+- **> 2% deviation**: Moderate alert — caution indicator
+- **< 2% deviation**: Normal — no alerts
+
+---
 
 ## Swap Interface
 
-### Main Swap Screen
+### Provider Tabs
+
+Switch between providers using the tab selector at the top of the swap screen:
 
 ```
 ┌─────────────────────────────────────┐
-│ 🔄 Token Swap                       │
+│  [🦄 Uniswap] [🔗 Relay] [🐝 Bebop]│ ← Provider Tabs
+│ ┌─────────────────────────────────┐ │
+│ │ Slippage: 0.5% [⚙️]            │ │ ← Shared Setting
+│ └─────────────────────────────────┘ │
 │ ┌─────────────────────────────────┐ │
 │ │ From Token:                     │ │
 │ │ [ETH ▼] [1.0] [Max] [50%] [25%]│ │ ← Input Token
@@ -85,13 +222,8 @@ Monad and Shardeum are active networks but do not currently support Bebop swaps.
 │ │ Balance: 0 USDC                 │ │
 │ └─────────────────────────────────┘ │
 │ ┌─────────────────────────────────┐ │
-│ │ Slippage: 0.5% [⚙️]            │ │ ← Slippage Settings
-│ │ Route: Bebop JAM               │ │
-│ └─────────────────────────────────┘ │
-│ ┌─────────────────────────────────┐ │
 │ │ 💰 Price Impact: 0.1%          │ │ ← Quote Details
-│ │ ⛽ Gas: 0.002 ETH (Approval)   │ │
-│ │ 🔄 Route: Bebop JAM            │ │
+│ │ ⛽ Gas: Varies by provider      │ │
 │ │ 💸 Partner Fee: 0.4%           │ │
 │ └─────────────────────────────────┘ │
 │ [🔄 Swap Tokens]                   │ ← Action Button
@@ -99,290 +231,58 @@ Monad and Shardeum are active networks but do not currently support Bebop swaps.
 ```
 
 ### Token Selection
+- **Click Token Dropdown**: Opens the token selector
+- **Search**: Type to search for any token
+- **Balance Display**: Shows your balance for each token
+- **Quick Buttons**: Max, 50%, 25% for quick amount entry
 
-#### From Token (Sell)
-1. **Click Token Dropdown**: Select token to sell
-2. **Choose Amount**: Enter amount or use quick buttons
-3. **Balance Check**: Verify sufficient balance
-4. **Token Info**: View token details and balance
+---
 
-#### To Token (Buy)
-1. **Click Token Dropdown**: Select token to buy
-2. **View Quote**: See estimated amount
-3. **Token Info**: View token details
-4. **Price Impact**: Check price impact
+## Fee Summary
 
-### Amount Selection
+All swap providers apply a **0.4% total fee**:
 
-#### Manual Entry
-- **Precise Amount**: Enter exact amount
-- **Decimal Support**: Full decimal precision
-- **Validation**: Real-time validation
-- **Balance Check**: Ensure sufficient balance
-
-#### Quick Buttons
-- **Max**: Use entire balance (minus gas)
-- **50%**: Use half of balance
-- **25%**: Use quarter of balance
-- **Custom**: Enter specific amount
-
-## Swap Process
-
-### Step 1: Get Quote
-
-#### Quote Request
-1. **Select Tokens**: Choose from and to tokens
-2. **Enter Amount**: Specify amount to swap
-3. **Set Slippage**: Configure slippage tolerance
-4. **Get Quote**: Request quote from Bebop
-
-#### Quote Information
 ```
-Quote Details:
-├── Input Amount: 1.0 ETH
-├── Output Amount: 1,200 USDC
-├── Price Impact: 0.1%
-├── Route: Bebop JAM
-├── Gas Required: 0.002 ETH (Approval)
-├── Partner Fee: 0.4% (4.8 USDC)
-└── Total Output: 1,188 USDC
+Fee Structure by Provider:
+├── 🦄 Uniswap:   0.2% SuperSafe + 0.2% Uniswap Labs = 0.4%
+├── 🔗 Relay:     0.4% SuperSafe Partner Fee           = 0.4%
+└── 🐝 Bebop:     0.4% SuperSafe Partner Fee           = 0.4%
 ```
 
-### Step 2: Review Quote
+All fees are transparently displayed in the quote details before you confirm any swap.
 
-#### Quote Review
-- **Price Check**: Verify quote is reasonable
-- **Slippage Check**: Ensure slippage is acceptable
-- **Route Check**: Review swap route
-- **Fee Check**: Understand all fees
-
-#### Quote Validation
-- **Price Impact**: Check for high price impact
-- **Liquidity**: Ensure sufficient liquidity
-- **Route Quality**: Verify best route
-- **Fee Breakdown**: Understand all costs
-
-### Step 3: Approve Tokens
-
-#### Token Approval
-1. **Check Allowance**: Verify current allowance
-2. **Approve Token**: Approve token for swap
-3. **Gas Payment**: Pay gas for approval
-4. **Wait Confirmation**: Wait for approval confirmation
-
-#### Approval Details
-- **Token**: Token being approved
-- **Spender**: Bebop contract address
-- **Amount**: Amount to approve
-- **Gas Cost**: Gas required for approval
-
-### Step 4: Execute Swap
-
-#### Swap Execution
-1. **Sign Order**: Sign EIP-712 order
-2. **Submit Order**: Submit to Bebop
-3. **Wait Execution**: Wait for swap execution
-4. **Confirm Success**: Verify swap completion
-
-#### Order Details
-- **Order Hash**: Unique order identifier
-- **Execution Time**: Time to execute
-- **Final Amount**: Actual amount received
-- **Transaction Hash**: Blockchain transaction
-
-## Advanced Settings
-
-### Slippage Configuration
-
-#### Slippage Options
-```
-Slippage Settings:
-├── 0.1% - Very Low (May fail)
-├── 0.5% - Low (Recommended)
-├── 1.0% - Medium
-├── 2.0% - High
-└── Custom - User defined
-```
-
-#### Slippage Impact
-- **Low Slippage**: Better price, may fail
-- **High Slippage**: More likely to succeed, worse price
-- **Dynamic Slippage**: Adjust based on market conditions
-- **Custom Slippage**: Set specific tolerance
-
-### Route Selection
-
-#### Available Routes
-- **Bebop JAM**: Primary route (gasless)
-- **Bebop RFQ**: Alternative route (Optimism)
-- **Direct**: Direct token swap
-- **Multi-hop**: Complex routing
-
-#### Route Optimization
-- **Best Price**: Choose route with best price
-- **Lowest Slippage**: Minimize slippage
-- **Fastest Execution**: Quickest completion
-- **Gas Optimization**: Minimize gas costs
-
-### Fee Configuration
-
-#### Fee Breakdown
-```
-Fee Structure:
-├── Network Fee: 0 ETH (Gasless)
-├── SuperSafe Partner Fee (Bebop/Relay): 0.4%
-├── SuperSafe Fee (Uniswap): 0.2%
-├── Uniswap Labs Fee (Uniswap): 0.2%
-└── Total Fee: 0.4%
-```
-
-####Fee Management
-- **Partner Fee**: 0.4% supports SuperSafe development
-- **Fee Receiver**: SuperSafe fee address
-- **Transparent**: All fees clearly displayed
-- **Value Sharing**: Share in protocol value
-
-## Swap Status Tracking
-
-### Status Types
-
-#### Pending
-- **Quote Generated**: Quote created successfully
-- **Approval Pending**: Waiting for token approval
-- **Order Pending**: Order submitted, waiting execution
-- **Execution Pending**: Order executing
-
-#### Executed
-- **Swap Complete**: Swap executed successfully
-- **Tokens Received**: Tokens in your wallet
-- **Transaction Confirmed**: Blockchain confirmation
-- **Success**: Swap completed successfully
-
-#### Failed
-- **Approval Failed**: Token approval failed
-- **Order Failed**: Order execution failed
-- **Slippage Exceeded**: Price moved beyond tolerance
-- **Insufficient Liquidity**: Not enough liquidity
-
-### Status Monitoring
-
-#### Real-time Updates
-- **Status Changes**: Live status updates
-- **Progress Indicators**: Visual progress tracking
-- **Time Estimates**: Estimated completion time
-- **Error Messages**: Clear error descriptions
-
-#### Notification System
-- **Success Notifications**: Swap completion alerts
-- **Failure Alerts**: Error and failure notifications
-- **Status Updates**: Regular status updates
-- **Email Notifications**: Optional email alerts
-
-## Security Features
-
-### MEV Protection
-
-#### Frontrunning Protection
-- **Private Mempool**: Orders not visible to MEV bots
-- **Secure Routing**: Protected swap routing
-- **Price Protection**: Protection from sandwich attacks
-- **Slippage Protection**: Advanced slippage management
-
-#### Best Price Execution
-- **Price Aggregation**: Best price from multiple sources
-- **Liquidity Optimization**: Optimal liquidity utilization
-- **Route Optimization**: Best route selection
-- **Real-time Pricing**: Live price updates
-
-### Smart Contract Security
-
-#### Audited Contracts
-- **Bebop Contracts**: Audited by security firms
-- **Permit2**: Standard, audited contract
-- **Settlement Contracts**: Secure settlement
-- **Regular Audits**: Ongoing security audits
-
-#### Risk Management
-- **Liquidity Checks**: Verify sufficient liquidity
-- **Price Validation**: Validate quote prices
-- **Slippage Limits**: Enforce slippage limits
-- **Error Handling**: Comprehensive error handling
+---
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### Swap Failed
-- **Insufficient Balance**: Check token balance
-- **Approval Failed**: Retry token approval
-- **Slippage Exceeded**: Increase slippage tolerance
-- **Network Issues**: Check network connection
+| Issue | Likely Cause | Solution |
+|-------|-------------|----------|
+| Swap button disabled | Insufficient gas balance | Add native tokens (ETH, BNB, etc.) |
+| "Gas Fee Too High" warning | Possible scam contract | Verify the token contract before proceeding |
+| High price impact | Large amount or low liquidity | Reduce amount or wait for more liquidity |
+| Approval failed | Insufficient gas | Ensure enough native tokens for the approval transaction |
+| Slippage exceeded | Market moved during swap | Increase slippage tolerance and retry |
+| Cross-chain swap slow | Bridge congestion | Check the estimated bridge time in Relay panel |
 
-#### High Price Impact
-- **Large Amount**: Reduce swap amount
-- **Low Liquidity**: Wait for better liquidity
-- **Market Conditions**: Check market conditions
-- **Alternative Routes**: Try different routes
+### Choosing the Right Provider
 
-#### Approval Issues
-- **Insufficient Gas**: Ensure enough ETH for gas
-- **Network Congestion**: Wait for less congestion
-- **Contract Issues**: Check token contract
-- **Retry Approval**: Try approval again
+- **Standard swaps (ETH ↔ USDC, etc.)**: Use **Uniswap** for best routing and token coverage
+- **Cross-chain transfers**: Use **Relay.link** to swap + bridge in one step
+- **Gas-free swaps**: Use **Bebop** for zero-gas swaps on supported networks
 
-### Error Messages
-
-#### Common Errors
-- **"Insufficient Balance"**: Not enough tokens
-- **"Slippage Exceeded"**: Price moved too much
-- **"Approval Failed"**: Token approval failed
-- **"Insufficient Liquidity"**: Not enough liquidity
-
-#### Error Resolution
-- **Check Balance**: Verify token balance
-- **Increase Slippage**: Try higher slippage
-- **Retry Approval**: Try approval again
-- **Wait and Retry**: Wait and try again
+---
 
 ## Best Practices
 
-### Before Swapping
-- **Check Prices**: Compare with other sources
-- **Verify Tokens**: Ensure correct tokens
-- **Set Slippage**: Use appropriate slippage
-- **Check Liquidity**: Ensure sufficient liquidity
+- **Compare providers** — Check quotes across providers for best price
+- **Start with small amounts** — Test new token pairs with small swaps first
+- **Watch slippage** — Use 0.5% for stable pairs, higher for volatile tokens
+- **Check gas alerts** — If the swap button shows a warning, investigate before proceeding
+- **Verify tokens** — Always confirm the token contract address, especially for new tokens
 
-### During Swap
-- **Monitor Status**: Watch swap progress
-- **Don't Close**: Keep extension open
-- **Be Patient**: Allow time for execution
-- **Check Network**: Ensure stable connection
-
-### After Swap
-- **Verify Amount**: Check received amount
-- **Update Records**: Update your records
-- **Check Balance**: Verify new balance
-- **Save Details**: Keep transaction details
-
-## Advanced Features
-
-### Limit Orders (Coming Soon)
-- **Set Price**: Set specific price target
-- **Time Limits**: Set order expiration
-- **Partial Fills**: Allow partial execution
-- **Order Management**: Manage active orders
-
-### DCA (Dollar Cost Averaging)
-- **Recurring Swaps**: Set up recurring swaps
-- **Time Intervals**: Choose swap frequency
-- **Amount Settings**: Set swap amounts
-- **Automation**: Fully automated swapping
-
-### Portfolio Rebalancing
-- **Target Allocation**: Set target portfolio allocation
-- **Automatic Rebalancing**: Automatic portfolio rebalancing
-- **Threshold Settings**: Set rebalancing thresholds
-- **Multi-token**: Rebalance multiple tokens
+---
 
 ## Next Steps
 
@@ -396,5 +296,5 @@ Now that you can swap tokens:
 
 **Ready to switch networks?** Continue to [Network Switching](./network-switching.md)!
 
-**Document Status:** ✅ Current as of February 10, 2026  
+**Document Status:** ✅ Current as of February 12, 2026  
 **Code Version:** v3.1.8
