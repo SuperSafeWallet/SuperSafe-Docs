@@ -40,10 +40,11 @@ SuperSafe Wallet offers several unique advantages:
 
 **Features**:
 - **Uniswap Integration**: Native DEX swaps on 4 networks
+- **Khalani / HyperStream Integration**: Cross-chain intent routes with lifecycle tracking
 - **Gasless swaps**: No gas fees for Bebop swaps
 - **MEV protection**: Protection against Maximal Extractable Value
 - **Multi-chain ready**: 8 active networks
-- **Partner fees**: 0.4% partner fee (Bebop/Relay), 0.2% + 0.2% Uniswap Labs (Uniswap)
+- **Partner fees**: 0.4% partner fee (Bebop/Relay), shared SuperSafe fee configuration for Khalani when available, 0.2% + 0.2% Uniswap Labs (Uniswap)
 - **Buy Crypto**: Purchase crypto with fiat (card, bank, digital wallets)
 - **Gas Validation**: Real-time scam detection and transaction protection
 

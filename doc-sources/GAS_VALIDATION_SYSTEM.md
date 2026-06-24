@@ -150,7 +150,7 @@ sequenceDiagram
     participant BC as Blockchain
 
     U->>UI: Enter swap amount
-    UI->>UI: Get quote from Bebop/Relay
+    UI->>UI: Get quote from Bebop/Relay/Khalani
     
     Note over UI: Quote includes gas estimate
     
@@ -930,4 +930,3 @@ return {
 ```
 
 To customize messages, edit these strings in `calculateAlertLevel()` function.
-

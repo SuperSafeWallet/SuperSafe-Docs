@@ -35,7 +35,7 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Swap tokens without paying gas fees via Bebop JAM protocol with MEV protection. Cross-chain swaps
-        across 85+ blockchains via Relay.link. Unified panel architecture v2.0.0 with best price execution.
+        across 85+ blockchains via Relay.link, plus Khalani / HyperStream intent routes with order tracking.
       </>
     ),
   },

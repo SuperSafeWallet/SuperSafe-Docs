@@ -49,13 +49,15 @@ SuperSafe Wallet v3.1.8 represents a **production-ready release** with professio
 - **Smart Native Connection**: Seamless dApp integration
 - **Network Switching**: Easy network switching with pre-switch coordination
 - **Cross-Chain Support**: Relay.link integration for cross-chain swaps across 85+ blockchains
+- **Intent Routing**: Khalani / HyperStream integration for cross-chain intent routes
 
 #### 🔄 Swap Integration
 - **Gasless Swaps**: No gas fees for users
 - **MEV Protection**: Protection against Maximal Extractable Value
 - **Bebop Integration**: JAM protocol integration
+- **Khalani / HyperStream Integration**: Cross-chain intent routing with order lifecycle tracking
 - **Multi-Chain Swaps**: Swaps across multiple networks
-- **Partner Fees**: 0.4% partner fee (Bebop/Relay), 0.2% + 0.2% Uniswap Labs (Uniswap)
+- **Partner Fees**: 0.4% partner fee (Bebop/Relay), shared SuperSafe fee configuration for Khalani when available, 0.2% + 0.2% Uniswap Labs (Uniswap)
 
 #### 👨‍💻 Developer Experience
 - **EIP-1193 Compliance**: Standard Ethereum provider

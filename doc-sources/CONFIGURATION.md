@@ -83,7 +83,7 @@ Configuration Layer 2: SENSITIVE (Backend-Only)
 │                                                  │
 │  Sensitive data:                                │
 │  - RPC URLs with API keys                       │
-│  - Moralis/Bebop/Relay credentials              │
+│  - Moralis/Bebop/Relay/Khalani credentials      │
 │  - WalletConnect project ID                     │
 │  - Explorer API keys                            │
 └─────────────────────────────────────────────────┘
@@ -897,5 +897,4 @@ const result = await BlockchainAdapter.someOperation()
 - [DEVELOPMENT.md](./DEVELOPMENT.md) - Development workflow
 
 ---
-
 

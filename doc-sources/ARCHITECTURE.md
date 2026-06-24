@@ -445,26 +445,38 @@ const {
 } = useWalletProvider();
 ```
 
-### Swap Architecture (v2.0.0 - Refactored Nov 2025)
+### Swap Architecture (v3.1.8 + Khalani / HyperStream)
 
 **Design Philosophy:** Unified panel architecture for provider-agnostic swap interface.
 
 **Structure:**
 ```
 Swap.jsx (~115 lines)              # Container/Orchestrator
-  ├─ SwapProviderSelector          # Tab selector (Bebop | Relay)
+  ├─ SwapProviderSelector          # Tab selector (Uniswap | Relay | Khalani | Bebop)
   ├─ SlippageControl               # Shared slippage configuration
   └─ Conditional Rendering:
-      ├─ BebopSwapPanel.jsx (~1,400 lines)   # Bebop JAM protocol
-      └─ RelaySwapPanel.jsx (~1,288 lines)   # Relay.link cross-chain
+      ├─ UniswapSwapPanel.jsx      # UniswapX + Classic routing
+      ├─ RelaySwapPanel.jsx        # Relay.link cross-chain
+      ├─ KhalaniSwapPanel.jsx      # HyperStream intent routing
+      └─ BebopSwapPanel.jsx        # Bebop JAM protocol
 ```
 
 **Key Benefits:**
-1. ✅ **Consistency**: Both panels follow same architectural pattern
+1. ✅ **Consistency**: All provider panels follow the same architectural pattern
 2. ✅ **Maintainability**: Each panel is self-contained and independently testable
-3. ✅ **Scalability**: Easy to add new providers (Uniswap, 1inch, etc.)
+3. ✅ **Scalability**: Easy to add new providers without rewriting existing panels
 4. ✅ **Separation of Concerns**: `Swap.jsx` only handles routing, not implementation
 5. ✅ **Reduced Complexity**: From 2,206 lines monolith to 115-line orchestrator
+
+**UniswapSwapPanel:**
+- Same-chain UniswapX and Classic routing
+- Curated token lists and approval confirmation
+- Uses Uniswap adapter/proxy for API calls
+
+**KhalaniSwapPanel:**
+- Cross-chain intent routes through HyperStream
+- Quote expiry, route sorting, and order lifecycle tracking
+- Uses `KhalaniAdapter` and `KhalaniStreamHandler` for background-only execution
 
 **BebopSwapPanel (~1,400 lines):**
 - Gasless MEV-protected swaps via Bebop JAM protocol
@@ -1467,11 +1479,13 @@ src/
 ├── components/                       # UI components
 │   ├── Dashboard.jsx                 # Portfolio view
 │   ├── Swap.jsx                      # Swap container/orchestrator (~115 lines)
-│   ├── SwapProviderSelector.jsx      # Bebop/Relay provider selector
+│   ├── SwapProviderSelector.jsx      # Uniswap/Relay/Khalani/Bebop provider selector
 │   ├── Settings.jsx                  # Settings panel
 │   ├── Ecosystem.jsx                 # Ecosystem explorer
 │   │
 │   ├── swap/                         # Swap-specific components
+│   │   ├── UniswapSwapPanel.jsx      # Uniswap swap implementation
+│   │   ├── KhalaniSwapPanel.jsx      # HyperStream intent implementation
 │   │   ├── BebopSwapPanel.jsx        # Bebop swap implementation (~1,400 lines)
 │   │   ├── RelaySwapPanel.jsx        # Relay swap implementation (~1,288 lines)
 │   │   ├── CompactNetworkSelector.jsx # Compact network selector for cross-chain
@@ -1812,7 +1826,7 @@ Backend Configuration (Sensitive)
 
 **Networks** (`networks.config.js` - 26 KB)
 - 8 networks with complete metadata
-- Bebop/Relay integration settings
+- Bebop/Relay/Khalani integration settings
 - 40+ utility functions
 - ERC-20 ABI definitions
 
@@ -1820,6 +1834,7 @@ Backend Configuration (Sensitive)
 - Moralis (multi-key rotation)
 - Bebop (partner fees)
 - Relay.link (cross-chain)
+- Khalani / HyperStream (cross-chain intents)
 - WalletConnect (Web3 modal)
 - Explorers & Price feeds
 
@@ -2384,4 +2399,3 @@ console.log('Body classes:', document.body.classList);
 - [API_REFERENCE.md](./API_REFERENCE.md) - Complete API documentation
 
 ---
-
